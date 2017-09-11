@@ -2,9 +2,11 @@
 
 import cartopy.feature as cfeature
 import cartopy.crs as ccrs
-from cartopy.mpl.gridliner imoport LONGITUDE_FORMATTER, LATITUDE_FORMATTER
+from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 import geopandas as gp
 import xarray as xr
+import numpy as np
+import matplotlib.pyplot as plt
 from matplotlib.collections import PatchCollection
 from matplotlib.patches import Polygon
 import shapely
@@ -53,10 +55,11 @@ def gen_patches(data_array, geodf, simplify_level=500):
     return patches
 
 
-def spatial(data_array, geodf, simplify_level=500, projection=ccrs.Mercator()):
+def spatial(data_array, geodf, simplify_level=500, proj=ccrs.Mercator()):
     '''Make a spatial plot'''
-    patches = gen_patches(data_array, geodf, simplify_level)
-    fig, ax = plt.subplots(nrows=1, ncols=1, subplot_kw={'Projection': projection})
+    geodf_crs = geodf.to_crs(crs=proj.proj4_params)
+    patches = gen_patches(data_array, geodf_crs, simplify_level)
+    fig, ax = plt.subplots(nrows=1, ncols=1, subplot_kw=dict(projection=proj))
     ax.add_collection(patches)
     add_map_features(ax)
     ax.autoscale_view()
