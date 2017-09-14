@@ -64,3 +64,43 @@ def spatial(data_array, geodf, simplify_level=500, proj=ccrs.Mercator()):
     add_map_features(ax)
     ax.autoscale_view()
     return fig, ax
+
+
+def hovmuller(data_array, xdim, ydim, how=None, cmap='viridis'):
+    # Check if dimensions are valid
+    time_groups = ['year', 'month', 'day', 'hour',
+                   'minute', 'second', 'dayofyear',
+                   'week', 'dayofweek', 'weekday', 'quarter']
+    x_da_dim = xdim in list(data_array.dims)
+    x_tg_dim = 'time.{}'.format(xdim) in time_groups
+    if x_da_dim:
+        continue
+    elif x_tg_dim:
+        xdim = 'time.{}'.format(xdim)
+        if not how:
+            raise Exception("Must specify aggregation "
+                            "method for x dimension")
+    else:
+        raise Exception("x dimension not valid")
+
+    y_da_dim = ydim in list(data_array.dims)
+    y_tg_dim = 'time.{}'.format(ydim) in time_groups
+    if y_da_dim:
+        continue
+    elif y_tg_dim:
+        ydim = 'time.{}'.format(ydim)
+        if not how:
+            raise Exception("Must specify aggregation "
+                            "method for y dimension")
+    else:
+        raise Exception("y dimension not valid")
+
+    # Do the group statements
+    how_dict = {'mean'   : lambda x: x.mean(),
+                'max'    : lambda x: x.max(),
+                'min'    : lambda x: x.min(),
+                'median' : lambda x: x.median(),
+                'std'    : lambda x: x.std()}
+    if how and (x_tg_dim or y_tg_dim):
+        continue
+
