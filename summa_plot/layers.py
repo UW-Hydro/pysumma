@@ -16,6 +16,7 @@ def layers(ds, var, cmap='viridis'):
     vals = np.empty((max_layers, len(ds.time)))
     vals[:] = np.nan
 
+    # Look for the right dimension
     layer_refs = ['Snow', 'Soil', 'Toto']
     for ref in layer_refs:
         test_coord = 'mid{}AndTime'.format(ref)
@@ -26,6 +27,7 @@ def layers(ds, var, cmap='viridis'):
     else:
         raise ValueError("Dataset provided doesn't appear to have layers!")
 
+    # Unpack values for depth and desired variable
     for i in range(len(ds['time'].values)):
         start_ifc = int(ifcStartIdx[i]) - 1
         start_mid = int(midStartIdx[i]) - 1
@@ -37,10 +39,12 @@ def layers(ds, var, cmap='viridis'):
     colors = plt.get_cmap(cmap)
     norm = mpl.colors.Normalize(np.nanmin(vals), np.nanmax(vals))
     prev = depths[0]
+
+    # Center bars on time
     times = ds['time'].values
     times = times - 0.5*(times[1] - times[0])
     width = (times[1]-times[0])/np.timedelta64(1, 'D')
-    #plt.bar(times, prev, color=colors(vals[0]))
+    # Plot at each depth
     for d, v in zip(depths[1:], vals):
         plt.bar(times, prev-d, width=width, color=colors(norm(v)), bottom=d, edgecolor='none')
         prev = d

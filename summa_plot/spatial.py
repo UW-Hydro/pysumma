@@ -68,15 +68,14 @@ def spatial(data_array, geodf, simplify_level=500, proj=ccrs.Mercator()):
     return fig, ax
 
 
-def hovmuller(data_array, xdim, ydim, how=None, cmap='viridis'):
+def hovmuller(data_array, xdim, ydim, how='mean', cmap='viridis'):
     '''Make a Hovmuller plot'''
     # Check if dimensions are valid
-    fig, ax = plt.subplots(nrows=1, ncols=1)
     time_groups = ['year', 'month', 'day', 'hour',
                    'minute', 'second', 'dayofyear',
                    'week', 'dayofweek', 'weekday', 'quarter']
     x_da_dim = xdim in list(data_array.dims)
-    x_tg_dim = 'time.{}'.format(xdim) in time_groups
+    x_tg_dim = xdim in time_groups.keys()
     if x_tg_dim:
         xdim = 'time.{}'.format(xdim)
         if not how:
@@ -86,7 +85,7 @@ def hovmuller(data_array, xdim, ydim, how=None, cmap='viridis'):
         raise Exception("x dimension not valid")
 
     y_da_dim = ydim in list(data_array.dims)
-    y_tg_dim = 'time.{}'.format(ydim) in time_groups
+    y_tg_dim = ydim in time_groups.keys()
     if y_tg_dim:
         ydim = 'time.{}'.format(ydim)
         if not how:
@@ -95,34 +94,28 @@ def hovmuller(data_array, xdim, ydim, how=None, cmap='viridis'):
     elif not y_da_dim:
         raise Exception("y dimension not valid")
 
-    # Do the group statements
-    how_dict = {'mean': lambda x: x.mean(),
-                'max': lambda x: x.max(),
-                'min': lambda x: x.min(),
-                'median': lambda x: x.median(),
-                'std': lambda x: x.std()}
-    if how and how not in how_dict.keys():
+    # Make sure the aggregation method is valid
+    aggregation_methods = {'mean': lambda x: x.mean(),
+                           'max': lambda x: x.max(),
+                           'min': lambda x: x.min(),
+                           'median': lambda x: x.median(),
+                           'std': lambda x: x.std()}
+    if how not in aggregation_methods.keys():
         raise Exception("Invalid time aggregation method given")
 
-    # Three cases now:
-    #   1. Both x and y axes have time grouped dimensions
-    #   2. One of x or y have a time grouped dimension
-    #   3. Neither axis use time grouped dimensions
-    #
-    # TODO: Check that the dimenstions of the data array match
-    #       for each of these cases
-    if how and x_tg_dim and y_tg_dim:
-        grouped = how_dict[how](data_array.groupby(
-            [lambda x: x[x_tg_dim], lambda x: x[y_tg_dim]])).unstack()
-    elif how and x_tg_dim:
-        grouped = how_dict[how](data_array.groupby(lambda x: x[x_tg_dim]))
-    elif how and y_tg_dim:
-        grouped = how_dict[how](data_array.groupby(lambda x: x[y_tg_dim]))
-    else:
-        pass
-
-    x = np.asarray(grouped.axes[1])
-    y = np.asarray(grouped.axes[0])
-    ax.axes.pcolormesh(x, y, grouped.values, cmap=cmap)
+    # Do the group statements
+    aggregate = aggregation_methods[how]
+    grouped1 = data_array.groupby(ydim)
+    grouped2 = grouped1.apply(lambda x: aggregate(x.groupby(xdim)))
+    x = grouped2[(list(grouped2.dims)[1])]
+    y = grouped2[(list(grouped2.dims)[0])]
+    z = np.ma.masked_invalid(grouped2.values)
+    fig, ax = plt.subplots(nrows=1, ncols=1)
+    ax.axes.pcolormesh(x, y, z, cmap=cmap)
     ax.axes.axis([x.min(), x.max(), y.min(), y.max()])
+
+    # TODO: Format axes and labels
+    daysofweek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday',
+                  'Thursday', 'Friday', 'Saturday']
+    seasons = ['DJF', 'MAM', 'JJA', 'SON']
     return fig, ax
