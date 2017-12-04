@@ -41,8 +41,9 @@ def gen_patches(data_array, geodf, simplify_level=0, robust=False):
     '''Simplify polygons and generate a PatchCollection for faster plotting'''
     vals = []
     patches = []
+    geoms = geodf.geometry[data_array['hru'].values]
 
-    for val, shp in zip(data_array.values, geodf.geometry):
+    for val, shp in zip(data_array.values, geoms):
         if isinstance(shp, shapely.geometry.MultiPolygon):
             for sub in shp:
                 if not simplify_level:
@@ -63,7 +64,10 @@ def gen_patches(data_array, geodf, simplify_level=0, robust=False):
     patches = PatchCollection(patches, linewidth=0., edgecolor=None, alpha=1.0)
     patches.set_array(vals)
     if robust:
-        patches.set_clim(np.percentile(vals, [5,95]))
+        if type(robust) is list:
+            patches.set_clim(np.percentile(data_array.values, robust))
+        else:
+            patches.set_clim(np.percentile(data_array.values, [2,98]))
     return patches
 
 
@@ -82,7 +86,10 @@ def spatial(data_array, geodf, simplify_level=500, proj=ccrs.Mercator(),
 
     # Colorbar plotting
     if robust:
-        minval, maxval = np.percentile(data_array.values, [5, 95])
+        if type(robust) is list:
+            minval, maxval = np.percentile(data_array.values, robust)
+        else:
+            minval, maxval = np.percentile(data_array.values, [2, 98])
     else:
         minval, maxval = np.min(data_array.values), np.max(data_array.values)
     sm = plt.cm.ScalarMappable(norm=plt.Normalize(vmin=minval, vmax=maxval))
