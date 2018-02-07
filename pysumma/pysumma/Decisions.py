@@ -75,7 +75,7 @@ class DecisionOption:
                 else:
                     return option_list
 
-    def wrt_value(self, new_value):
+    def write_value(self, new_value):
         line_no, line = self.get_line_no(self.name)
         lines = self.open_read()
         lines[line_no] = line.replace(self.value, new_value, 1)
@@ -92,7 +92,7 @@ class DecisionOption:
     @value.setter
     def value(self, new_value):
         if new_value in self.options:
-            self.wrt_value(new_value)
+            self.write_value(new_value)
         else:
             raise ValueError ('Your input value {} is not one of the valid options {}'.format(new_value, self.options))
 
@@ -108,7 +108,7 @@ class simul_datetime(DecisionOption):
 
     @value.setter
     def value(self, new_date_time):
-        self.wrt_value(new_date_time)
+        self.write_value(new_date_time)
 
 # class file_manager():
 #     def __init__(self, path, filename):

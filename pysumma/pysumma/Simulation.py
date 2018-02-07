@@ -59,7 +59,7 @@ class file_manager_option:
         words = [w.strip() for w in words if w.strip() != "" and w.strip() != "!"]
         return words[0]
 
-    def wrt_value(self, new_value):
+    def write_value(self, new_value):
         line_no, line = self.get_line_no(self.name)
         lines = self.open_read()
         lines[line_no] = line.replace(self.value, new_value, 1)
@@ -76,7 +76,7 @@ class file_manager_option:
 
     @value.setter
     def value(self, new_value):
-        self.wrt_value(new_value)
+        self.write_value(new_value)
 
     @property
     def filepath(self):
@@ -88,7 +88,7 @@ class file_manager_option:
     @filepath.setter
     def filepath(self, new_value):
         value = new_value + self.filename
-        self.wrt_value(value)
+        self.write_value(value)
 
     @property
     def filename(self):
@@ -97,5 +97,5 @@ class file_manager_option:
     @filename.setter
     def filename(self, new_value):
         value = self.filepath + new_value
-        self.wrt_value(value)
+        self.write_value(value)
 
