@@ -5,35 +5,35 @@ class Decisions:
         self.filepath = filepath
         self.simulStart = simul_datetime('simulStart', self.filepath)
         self.simulFinsh = simul_datetime('simulFinsh', self.filepath)
-        self.soilCatTbl = option('soilCatTbl', self.filepath)
-        self.vegeParTbl = option('vegeParTbl', self.filepath)
-        self.soilStress = option('soilStress', self.filepath)
-        self.stomResist = option('stomResist', self.filepath)
-        self.num_method = option('num_method', self.filepath)
-        self.fDerivMeth = option('fDerivMeth', self.filepath)
-        self.LAI_method = option('LAI_method', self.filepath)
-        self.f_Richards = option('f_Richards', self.filepath)
-        self.groundwatr = option('groundwatr', self.filepath)
-        self.hc_profile = option('hc_profile', self.filepath)
-        self.bcUpprTdyn = option('bcUpprTdyn', self.filepath)
-        self.bcLowrTdyn = option('bcLowrTdyn', self.filepath)
-        self.bcUpprSoiH = option('bcUpprSoiH', self.filepath)
-        self.bcLowrSoiH = option('bcLowrSoiH', self.filepath)
-        self.veg_traits = option('veg_traits', self.filepath)
-        self.canopyEmis = option('canopyEmis', self.filepath)
-        self.snowIncept = option('snowIncept', self.filepath)
-        self.windPrfile = option('windPrfile', self.filepath)
-        self.astability = option('astability', self.filepath)
-        self.canopySrad = option('canopySrad', self.filepath)
-        self.alb_method = option('alb_method', self.filepath)
-        self.compaction = option('compaction', self.filepath)
-        self.snowLayers = option('snowLayers', self.filepath)
-        self.thCondSnow = option('thCondSnow', self.filepath)
-        self.thCondSoil = option('thCondSoil', self.filepath)
-        self.spatial_gw = option('spatial_gw', self.filepath)
-        self.subRouting = option('subRouting', self.filepath)
+        self.soilCatTbl = DecisionOption('soilCatTbl', self.filepath)
+        self.vegeParTbl = DecisionOption('vegeParTbl', self.filepath)
+        self.soilStress = DecisionOption('soilStress', self.filepath)
+        self.stomResist = DecisionOption('stomResist', self.filepath)
+        self.num_method = DecisionOption('num_method', self.filepath)
+        self.fDerivMeth = DecisionOption('fDerivMeth', self.filepath)
+        self.LAI_method = DecisionOption('LAI_method', self.filepath)
+        self.f_Richards = DecisionOption('f_Richards', self.filepath)
+        self.groundwatr = DecisionOption('groundwatr', self.filepath)
+        self.hc_profile = DecisionOption('hc_profile', self.filepath)
+        self.bcUpprTdyn = DecisionOption('bcUpprTdyn', self.filepath)
+        self.bcLowrTdyn = DecisionOption('bcLowrTdyn', self.filepath)
+        self.bcUpprSoiH = DecisionOption('bcUpprSoiH', self.filepath)
+        self.bcLowrSoiH = DecisionOption('bcLowrSoiH', self.filepath)
+        self.veg_traits = DecisionOption('veg_traits', self.filepath)
+        self.canopyEmis = DecisionOption('canopyEmis', self.filepath)
+        self.snowIncept = DecisionOption('snowIncept', self.filepath)
+        self.windPrfile = DecisionOption('windPrfile', self.filepath)
+        self.astability = DecisionOption('astability', self.filepath)
+        self.canopySrad = DecisionOption('canopySrad', self.filepath)
+        self.alb_method = DecisionOption('alb_method', self.filepath)
+        self.compaction = DecisionOption('compaction', self.filepath)
+        self.snowLayers = DecisionOption('snowLayers', self.filepath)
+        self.thCondSnow = DecisionOption('thCondSnow', self.filepath)
+        self.thCondSoil = DecisionOption('thCondSoil', self.filepath)
+        self.spatial_gw = DecisionOption('spatial_gw', self.filepath)
+        self.subRouting = DecisionOption('subRouting', self.filepath)
 
-class option:
+class DecisionOption:
     def __init__(self, name, filepath):
         self.filepath = filepath
         self.open_read()
@@ -96,7 +96,7 @@ class option:
         else:
             raise ValueError ('Your input value {} is not one of the valid options {}'.format(new_value, self.options))
 
-class simul_datetime(option):
+class simul_datetime(DecisionOption):
     def get_default_date_time(self):
         line_no, line = self.get_line_no(self.name)
         date_time = line.split("'")[1]
