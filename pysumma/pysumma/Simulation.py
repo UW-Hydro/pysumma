@@ -2,32 +2,34 @@
 from .Decisions import Decisions       # This is for testing in this python code.
 import subprocess
 import os
+
 class Simulation:
     executable = ''
     run_suffix = '_'
     def __init__(self, filepath):
         self.filepath = os.path.abspath(filepath)
-        self.setting_path = file_manager_option('setting_path', self.filepath)
-        self.input_path = file_manager_option('input_path', self.filepath)
-        self.output_path = file_manager_option('output_path', self.filepath)
-        self.decision_path = file_manager_option('decision', self.filepath)
-        self.meta_time = file_manager_option('meta_time', self.filepath)
-        self.meta_attr = file_manager_option('meta_attr', self.filepath)
-        self.meta_type = file_manager_option('meta_type', self.filepath)
-        self.meta_force = file_manager_option('meta_force', self.filepath)
-        self.meta_localpar = file_manager_option('meta_localpar', self.filepath)
-        self.OUTPUT_CONTROL = file_manager_option('OUTPUT_CONTROL', self.filepath)
-        self.meta_index = file_manager_option('meta_index', self.filepath)
-        self.meta_basinpar = file_manager_option('meta_basinpar', self.filepath)
-        self.meta_basinvar = file_manager_option('meta_basinvar', self.filepath)
-        self.local_attr = file_manager_option('local_attr', self.filepath)
-        self.local_par = file_manager_option('local_par', self.filepath)
-        self.basin_par = file_manager_option('basin_par', self.filepath)
-        self.forcing_list = file_manager_option('forcing_list', self.filepath)
-        self.initial_cond = file_manager_option('initial_cond', self.filepath)
-        self.para_trial = file_manager_option('para_trial', self.filepath)
-        self.output_prefix = file_manager_option('output_prefix', self.filepath)
+        self.setting_path = FileManagerOption('setting_path', self.filepath)
+        self.input_path = FileManagerOption('input_path', self.filepath)
+        self.output_path = FileManagerOption('output_path', self.filepath)
+        self.decision_path = FileManagerOption('decision', self.filepath)
+        self.meta_time = FileManagerOption('meta_time', self.filepath)
+        self.meta_attr = FileManagerOption('meta_attr', self.filepath)
+        self.meta_type = FileManagerOption('meta_type', self.filepath)
+        self.meta_force = FileManagerOption('meta_force', self.filepath)
+        self.meta_localpar = FileManagerOption('meta_localpar', self.filepath)
+        self.OUTPUT_CONTROL = FileManagerOption('OUTPUT_CONTROL', self.filepath)
+        self.meta_index = FileManagerOption('meta_index', self.filepath)
+        self.meta_basinpar = FileManagerOption('meta_basinpar', self.filepath)
+        self.meta_basinvar = FileManagerOption('meta_basinvar', self.filepath)
+        self.local_attr = FileManagerOption('local_attr', self.filepath)
+        self.local_par = FileManagerOption('local_par', self.filepath)
+        self.basin_par = FileManagerOption('basin_par', self.filepath)
+        self.forcing_list = FileManagerOption('forcing_list', self.filepath)
+        self.initial_cond = FileManagerOption('initial_cond', self.filepath)
+        self.para_trial = FileManagerOption('para_trial', self.filepath)
+        self.output_prefix = FileManagerOption('output_prefix', self.filepath)
         self.decision_obj = Decisions(self.setting_path.value + self.decision_path.value)
+
     def execute(self):
         if self.executable == '':
             raise ValueError('No executable defined. Set as "executable" attribute of Simulation')
@@ -35,7 +37,7 @@ class Simulation:
             cmd = "{} -p never -s {}       -m {}".format(self.executable, self.run_suffix, self.filepath)
             subprocess.run(cmd, shell=True)
 
-class file_manager_option:
+class FileManagerOption:
     def __init__(self, name, filepath):
         self.name = name
         self.file_manager_filepath = filepath
