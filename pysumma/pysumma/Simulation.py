@@ -41,35 +41,32 @@ class FileManagerOption:
     def __init__(self, name, filepath):
         self.name = name
         self.file_manager_filepath = filepath
+        self.text = self.open_read()
 
     def open_read(self):
         with open(self.file_manager_filepath, 'rt') as f:
-            self.text = f.readlines()
-        return self.text
+            return f.readlines()
 
     def get_line_no(self, name):
-        text = self.open_read()
-        for line_no, line in enumerate(text):
-            filepath_filename = line.split("'")
+        for line_no, line_contents in enumerate(self.text):
+            filepath_filename = line_contents.split("'")
             name1 = filepath_filename[2].split(" ")[-1].strip()
             if name1 == name:
-                return line_no, line
+                return line_no, line_contents
 
     def get_value(self):
-        line_no, line = self.get_line_no(self.name)
-        words = line.split("'")
+        self.line_no, self.line_contents = self.get_line_no(self.name)
+        words = self.line_contents.split("'")
         words = [w.strip() for w in words if w.strip() != "" and w.strip() != "!"]
         return words[0]
 
     def write_value(self, new_value):
-        line_no, line = self.get_line_no(self.name)
-        lines = self.open_read()
-        lines[line_no] = line.replace(self.value, new_value, 1)
-        self.edit_save(lines)
+        self.text[self.line_no] = self.line_contents.replace(self.value, new_value, 1)
+        self.edit_save()
 
-    def edit_save(self, new_lines):
+    def edit_save(self):
         with open(self.file_manager_filepath, 'wt') as f:
-            f.writelines(new_lines)
+            f.writelines(self.text)
 
     @property
     def value(self):

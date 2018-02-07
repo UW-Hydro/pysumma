@@ -1,7 +1,5 @@
 class Decisions:
     def __init__(self, filepath):
-        # self.path = path
-        # self.filename = filename
         self.filepath = filepath
         self.simulStart = SimulDatetime('simulStart', self.filepath)
         self.simulFinsh = SimulDatetime('simulFinsh', self.filepath)
@@ -36,29 +34,27 @@ class Decisions:
 class DecisionOption:
     def __init__(self, name, filepath):
         self.filepath = filepath
-        self.open_read()
+        self.text = self.open_read()
         self.name = name
+        self.line_no, self.line_contents = self.get_line_no(self.name)
         self.get_description()
         self.options = self.get_options()
 
     def open_read(self):
         with open(self.filepath, 'rt') as f:
-            self.text = f.readlines()
-        return self.text
+            return f.readlines()
 
     def get_line_no(self, text_startwith):
-        text = self.open_read()
-        for line_no, line in enumerate(text):
-            if line.split()[0].startswith(text_startwith):
-                return line_no, line
+        for line_no, line_contents in enumerate(self.text):
+            if line_contents.split()[0].startswith(text_startwith):
+                return line_no, line_contents
 
     def get_default_value(self):
-        line_no, line = self.get_line_no(self.name)
-        return line.split()[1].strip()
+        self.line_no, self.line_contents = self.get_line_no(self.name)
+        return self.line_contents.split()[1].strip()
 
     def get_description(self):
-        line_no, line = self.get_line_no(self.name)
-        num_and_descrip = line.split('!')[-1]
+        num_and_descrip = self.line_contents.split('!')[-1]
         self.description = num_and_descrip.split(')')[-1].strip()
         number = num_and_descrip.find('(')
         self.option_number = num_and_descrip[number+1:number+3]
@@ -66,9 +62,9 @@ class DecisionOption:
     def get_options(self):
         start_line = 43
         option_list = []
-        for num, line in enumerate(self.text[start_line:]):
+        for num, line_contents in enumerate(self.text[start_line:]):
             line_num = num + start_line
-            if line.startswith('! ({})'.format(self.option_number)):
+            if line_contents.startswith('! ({})'.format(self.option_number)):
                 while self.text[line_num+1].find("---") < 0 and self.text[line_num+1].find("****") < 0:
                     line_num += 1
                     option_list.append(self.text[line_num].split('!')[1].strip())
@@ -76,14 +72,12 @@ class DecisionOption:
                     return option_list
 
     def write_value(self, new_value):
-        line_no, line = self.get_line_no(self.name)
-        lines = self.open_read()
-        lines[line_no] = line.replace(self.value, new_value, 1)
-        self.edit_save(lines)
+        self.text[self.line_no] = self.line_contents.replace(self.value, new_value, 1)
+        self.edit_save()
 
-    def edit_save(self, new_lines):
+    def edit_save(self):
         with open(self.filepath, 'wt') as f:
-            f.writelines(new_lines)
+            f.writelines(self.text)
 
     @property
     def value(self):
@@ -98,8 +92,7 @@ class DecisionOption:
 
 class SimulDatetime(DecisionOption):
     def get_default_date_time(self):
-        line_no, line = self.get_line_no(self.name)
-        date_time = line.split("'")[1]
+        date_time = self.line_contents.split("'")[1]
         return date_time
 
     @property
@@ -109,16 +102,3 @@ class SimulDatetime(DecisionOption):
     @value.setter
     def value(self, new_date_time):
         self.write_value(new_date_time)
-
-# class file_manager():
-#     def __init__(self, path, filename):
-#         self.path = path
-#         self.filename = filename
-#         self.filepath = self.path + self.filename
-#         decision_filename = self.open_read()[4].replace("'","/").split("/")[3]
-#         return decision_filename
-#
-#     def open_read(self):
-#         with open(self.filepath, 'rt') as f:
-#             self.text = f.readlines()
-#         return self.text
