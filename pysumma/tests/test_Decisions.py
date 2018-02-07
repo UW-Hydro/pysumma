@@ -1,15 +1,16 @@
-from pysumma.Decisions import Decisions # This is for testing in cmd window.
-#from ..pysumma.Decisions import Decisions # This is for testing in this python code.
+# from pysumma.Decisions import Decisions # This is for testing in cmd window.
+from ..pysumma.Decisions import Decisions # This is for testing in this python code.
 import unittest
+import os.path
 from shutil import copyfile
 
 class test_decisions_class(unittest.TestCase):
 
+    my_path = os.path.abspath(os.path.dirname(__file__))
     filename = 'Decision.txt'
-    path = '/home/hydro/Downloads/pysumma_alpha/pysumma/tests/'
-    filepath = path + filename
+    filepath = os.path.join(my_path, filename)
     filename2 = 'tmp_{}'.format(filename)
-    filepath2 = path + filename2
+    filepath2 = os.path.join(my_path, filename2)
     copyfile(filepath, filepath2)
     Decisions_obj = Decisions(filepath2)
 
