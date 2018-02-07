@@ -3,8 +3,8 @@ class Decisions:
         # self.path = path
         # self.filename = filename
         self.filepath = filepath
-        self.simulStart = simul_datetime('simulStart', self.filepath)
-        self.simulFinsh = simul_datetime('simulFinsh', self.filepath)
+        self.simulStart = SimulDatetime('simulStart', self.filepath)
+        self.simulFinsh = SimulDatetime('simulFinsh', self.filepath)
         self.soilCatTbl = DecisionOption('soilCatTbl', self.filepath)
         self.vegeParTbl = DecisionOption('vegeParTbl', self.filepath)
         self.soilStress = DecisionOption('soilStress', self.filepath)
@@ -96,7 +96,7 @@ class DecisionOption:
         else:
             raise ValueError ('Your input value {} is not one of the valid options {}'.format(new_value, self.options))
 
-class simul_datetime(DecisionOption):
+class SimulDatetime(DecisionOption):
     def get_default_date_time(self):
         line_no, line = self.get_line_no(self.name)
         date_time = line.split("'")[1]
