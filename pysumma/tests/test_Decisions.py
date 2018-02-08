@@ -1,8 +1,7 @@
-# from pysumma.Decisions import Decisions # This is for testing in cmd window.
-from ..pysumma.Decisions import Decisions # This is for testing in this python code.
-import unittest
 import os.path
+import unittest
 from shutil import copyfile
+from pysumma.Decisions import Decisions
 
 class test_decisions_class(unittest.TestCase):
 
@@ -13,7 +12,6 @@ class test_decisions_class(unittest.TestCase):
     filepath2 = os.path.join(my_path, filename2)
     copyfile(filepath, filepath2)
     Decisions_obj = Decisions(filepath2)
-
 
     def get_value(self, name):
         file_obj = open(self.filepath2, 'r')
