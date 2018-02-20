@@ -1,4 +1,5 @@
-from pysumma.Option import *
+from pysumma.Option import Option
+
 
 class Decisions:
     def __init__(self, filepath):
@@ -37,9 +38,20 @@ class Decisions:
 class PDecisionOption(Option):
     def __init__(self, name, filepath):
         super().__init__(name, filepath)
-        self.line_no, self.line_contents = self.get_line_no(0)
+        self.line_no, self.line_contents = self.get_line_no_line_contents()
         self.get_description()
         self.options = self.get_options()
+        #self.value = self.get_default_value()
+
+    # "Overrides" get_line_no_and_contents in Option
+    # Puts in the position in the line that will always be the same for any Decision Option
+    def get_line_no_line_contents(self):
+        return self.get_line_info(0)
+
+    # "Overrides" get_value_of_option in Option
+    # Puts in the position in the line that will always be the same for any Decision Option
+    def get_default_value(self):
+        return self.get_value(1)
 
     # TODO: NOT UPDATED
     def get_description(self):
@@ -61,18 +73,16 @@ class PDecisionOption(Option):
                 else:
                     return option_list
 
-    # @property
-    # def value(self):
-    #     return self.get_value(1)
-    #
-    #
-    # # TODO: NOT UPDATED
-    # @value.setter
-    # def value(self, new_value):
-    #     if new_value in self.options:
-    #         self.write_value(new_value)
-    #     else:
-    #         raise ValueError ('Your input value {} is not one of the valid options {}'.format(new_value, self.options))
+    @property
+    def value(self):
+        return self.get_default_value()
+
+    @value.setter
+    def value(self, new_value):
+        if new_value in self.options:
+            self.write_value(self.value, new_value)
+        else:
+            raise ValueError('Your input value {} is not one of the valid options {}'.format(new_value, self.options))
 
 
 class SimulDatetime(PDecisionOption):
@@ -86,4 +96,4 @@ class SimulDatetime(PDecisionOption):
 
     @value.setter
     def value(self, new_date_time):
-        self.write_value(new_date_time)
+        self.write_value(self.value, new_date_time)

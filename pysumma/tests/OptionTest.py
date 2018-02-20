@@ -12,5 +12,5 @@ PDecision_Option = PDecisionOption("soilCatTbl", "tmp_Decision.txt")
 
 assert(Decision_Option.line_contents == PDecision_Option.line_contents)
 assert(Decision_Option.line_no == PDecision_Option.line_no)
-assert(Decision_Option.get_default_value() == PDecision_Option.get_value(1))
+assert(Decision_Option.get_default_value() == PDecision_Option.get_value())
 
