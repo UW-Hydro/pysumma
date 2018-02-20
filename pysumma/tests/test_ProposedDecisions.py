@@ -31,14 +31,11 @@ class test_decisions_class(unittest.TestCase):
         self.assertEqual('soil-category dateset', soil_cat_dataset.description)
 
     def test_SetSoilCategoryDataset(self):
-        print("IN setsoilcategorydataset")
         soil_cat_dataset = self.Decisions_obj.soilCatTbl
         old = soil_cat_dataset.value
         self.assertEqual(old, self.get_value(soil_cat_dataset.name))
         soil_cat_dataset.value = 'ROSETTA'
-        print(soil_cat_dataset.value)
         new = soil_cat_dataset.value
-        print(soil_cat_dataset.value)
         self.assertEqual(new, 'ROSETTA')
 
     def test_GetGroundwaterParameterization(self):
