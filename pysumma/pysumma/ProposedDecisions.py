@@ -41,7 +41,7 @@ class PDecisionOption(Option):
         self.line_no, self.line_contents = self.get_line_no_line_contents()
         self.get_description()
         self.options = self.get_options()
-        #self.value = self.get_default_value()
+        self._value = self.get_default_value()
 
     # "Overrides" get_line_no_and_contents in Option
     # Puts in the position in the line that will always be the same for any Decision Option
@@ -75,12 +75,13 @@ class PDecisionOption(Option):
 
     @property
     def value(self):
-        return self.get_default_value()
+        return self._value
 
     @value.setter
     def value(self, new_value):
         if new_value in self.options:
-            self.write_value(self.value, new_value)
+            self.write_value(self._value, new_value)
+            self._value = new_value
         else:
             raise ValueError('Your input value {} is not one of the valid options {}'.format(new_value, self.options))
 
@@ -96,4 +97,4 @@ class SimulDatetime(PDecisionOption):
 
     @value.setter
     def value(self, new_date_time):
-        self.write_value(self.value, new_date_time)
+        self.write_value(self._value, new_date_time)

@@ -24,6 +24,7 @@ class Option:
     def edit_save(self):
         with open(self.filepath, 'wt') as f:
             f.writelines(self.text)
+
     
     # Delimits each line on delimiter
     # Picks out the element in <position> in the split-list
