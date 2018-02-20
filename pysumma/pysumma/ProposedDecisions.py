@@ -53,14 +53,12 @@ class PDecisionOption(Option):
     def get_default_value(self):
         return self.get_value(1)
 
-    # TODO: NOT UPDATED
     def get_description(self):
         num_and_descrip = self.line_contents.split('!')[-1]
         self.description = num_and_descrip.split(')')[-1].strip()
         number = num_and_descrip.find('(')
         self.option_number = num_and_descrip[number+1:number+3]
 
-    # TODO: NOT UPDATED
     def get_options(self):
         start_line = 43
         option_list = []
