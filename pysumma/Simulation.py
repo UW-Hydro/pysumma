@@ -5,7 +5,6 @@ import os
 import xarray as xr
 
 class Simulation:
-    executable = ''
     def __init__(self, filepath):
         self.filepath = os.path.abspath(filepath)
         self.setting_path = FileManagerOption('setting_path', self.filepath)
@@ -30,11 +29,11 @@ class Simulation:
         self.output_prefix = FileManagerOption('output_prefix', self.filepath)
         self.decision_obj = Decisions(self.setting_path.value + self.decision_path.value)
 
-    def execute(self,     run_suffix):
-        self.run_suffix = run_suffix
-        if self.executable == '':
-            raise ValueError('No executable defined. Set as "executable" attribute of Simulation')
-        else:
+    def execute(self, run_suffix, run_option):
+
+        if run_option == 'local':
+            executable = ''
+            self.run_suffix = run_suffix
             cmd = "{} -p never -s {}       -m {}".format(self.executable, self.run_suffix, self.filepath)
             subprocess.run(cmd, shell=True)
             out_file_path = 	self.output_path.filepath + \
@@ -43,6 +42,23 @@ class Simulation:
 						self.decision_obj.simulFinsh.value[0:4] + '_' + \
 						self.run_suffix + '_1.nc'
             return xr.open_dataset(out_file_path)
+
+        elif run_option == "docker" :
+            dir = self.setting_path.filepath.split('/')[:-2]
+            mount_dir = '/'+dir[1]+'/'+dir[2]+'/'+dir[3]
+            self.disk_mapping = mount_dir + ':' + mount_dir
+            self.executable = 'bartnijssen/summa:latest'
+            self.run_suffix = run_suffix
+            cmd = "docker run -v {} {} -p never -s {} -m {}".format(self.disk_mapping, self.executable, self.run_suffix, self.filepath)
+            subprocess.run(cmd, shell=True)
+            out_file_path = self.output_path.filepath + \
+						self.output_prefix.value+'_' + \
+						self.decision_obj.simulStart.value[0:4] + '-' + \
+						self.decision_obj.simulFinsh.value[0:4] + '_' + \
+						self.run_suffix + '_1.nc'
+            return xr.open_dataset(out_file_path)
+        else:
+            raise ValueError('No executable defined. Set as "executable" attribute of Simulation or check run_option')
 
 class FileManagerOption:
     def __init__(self, name, filepath):
