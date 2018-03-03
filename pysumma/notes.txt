@@ -1,6 +1,0 @@
-What I need to do next:
-    Talk to Choi about what to do with the FileManager object
-        - Should we look at Windows file URLS as well as Linux ones?
-    Work on getting a script to generate the fileManager.txt test file
-        - Needs to get the correct file paths based on the machine
-    Make sure the test_simulation file is finished
