@@ -1,11 +1,11 @@
-from pysumma.ProposedDecisions import * # This is for testing in cmd window.
-# from ..pysumma.Decisions import Decisions # This is for testing in this python code.
+from pysumma.Decisions import Decisions # This is for testing in cmd window.
+#from ..pysumma.Decisions import Decisions # This is for testing in this python code.
 import unittest
 import os.path
 from shutil import copyfile
 
-
 class test_decisions_class(unittest.TestCase):
+
     my_path = os.path.abspath(os.path.dirname(__file__))
     filename = 'Decision.txt'
     filepath = os.path.join(my_path, filename)
@@ -13,6 +13,7 @@ class test_decisions_class(unittest.TestCase):
     filepath2 = os.path.join(my_path, filename2)
     copyfile(filepath, filepath2)
     Decisions_obj = Decisions(filepath2)
+
 
     def get_value(self, name):
         file_obj = open(self.filepath2, 'r')
@@ -71,7 +72,6 @@ class test_decisions_class(unittest.TestCase):
         validate_value2 = 'STAS1'
         with self.assertRaises(ValueError):
             self.Decisions_obj.soilCatTbl.value = validate_value2
-
 
 if __name__ == '__main__':
     unittest.main()
