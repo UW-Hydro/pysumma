@@ -37,21 +37,11 @@ class Decisions:
 
 class PDecisionOption(Option):
     def __init__(self, name, filepath):
-        super().__init__(name, filepath)
-        self.line_no, self.line_contents = self.get_line_no_line_contents()
+        super().__init__(name, filepath, key_position=0, value_position=1, delimiter=None)
+        self.line_no, self.line_contents = self.get_line_info()
         self.get_description()
         self.options = self.get_options()
-        self._value = self.get_default_value()
-
-    # "Overrides" get_line_no_and_contents in Option
-    # Puts in the position in the line that will always be the same for any Decision Option
-    def get_line_no_line_contents(self):
-        return self.get_line_info(0)
-
-    # "Overrides" get_value_of_option in Option
-    # Puts in the position in the line that will always be the same for any Decision Option
-    def get_default_value(self):
-        return self.get_value(1)
+        self._value = self.get_value()
 
     def get_description(self):
         num_and_descrip = self.line_contents.split('!')[-1]
@@ -73,13 +63,12 @@ class PDecisionOption(Option):
 
     @property
     def value(self):
-        return self._value
+        return self.get_value()
 
     @value.setter
     def value(self, new_value):
         if new_value in self.options:
             self.write_value(self._value, new_value)
-            self._value = new_value
         else:
             raise ValueError('Your input value {} is not one of the valid options {}'.format(new_value, self.options))
 

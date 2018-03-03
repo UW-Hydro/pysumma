@@ -6,7 +6,6 @@ from shutil import copyfile
 
 
 class test_decisions_class(unittest.TestCase):
-
     my_path = os.path.abspath(os.path.dirname(__file__))
     filename = 'Decision.txt'
     filepath = os.path.join(my_path, filename)
