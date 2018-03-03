@@ -1,7 +1,7 @@
 from unittest import TestCase
 from shutil import copyfile
 import os
-from pysumma.ProposedSimulation import Simulation
+from pysumma.Simulation import Simulation
 
 
 class test_simulation(TestCase):
