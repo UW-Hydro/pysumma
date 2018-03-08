@@ -1,7 +1,3 @@
-'SUMMA FILE_MANAGER_V1.0'                                       ! fman_ver
-'C:\Users\Edward\Dropbox\pysumma\pysumma\tests/'                                   ! setting_path
-'C:\Users\Edward\Dropbox\pysumma\pysumma\tests/'                                     ! input_path
-'C:\Users\Edward\Dropbox\pysumma\pysumma\tests/'                                    ! output_path
 'Decision.txt'                                                                                    ! decision
 'meta/summa_zTimeMeta.txt'                                                                        ! meta_time
 'meta/summa_zLocalAttributeMeta.txt'                                                              ! meta_attr
