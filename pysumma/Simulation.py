@@ -44,10 +44,7 @@ class Simulation:
 						self.run_suffix + '_1.nc'
             return xr.open_dataset(out_file_path)
 
-        elif run_option == "docker" :
-#            dir = self.setting_path.filepath.split('/')[:-2]
-#            mount_dir = '/'+dir[1]+'/'+dir[2]+'/'+dir[3]
-#            self.disk_mapping = mount_dir + ':' + mount_dir
+        elif run_option == "docker_develop" :
             self.executable = 'bartnijssen/summa:develop'
             self.run_suffix = run_suffix
             cmd = "docker run -v {}:{}".format(self.file_dir, self.file_dir)+ \
@@ -60,6 +57,23 @@ class Simulation:
 						self.output_prefix.value+'_output_' + \
 						self.run_suffix + '_timestep.nc'
             return xr.open_dataset(out_file_path)
+
+        elif run_option == "docker_latest":
+            self.executable = 'bartnijssen/summa:latest'
+            self.run_suffix = run_suffix
+            cmd = "docker run -v {}:{}".format(self.file_dir, self.file_dir) + \
+                  " -v {}:{}".format(self.setting_path.filepath, self.setting_path.filepath) + \
+                  " -v {}:{}".format(self.input_path.filepath, self.input_path.filepath) + \
+                  " -v {}:{}".format(self.output_path.filepath, self.output_path.filepath) + \
+                  " {} -p never -s {} -m {}".format(self.executable, self.run_suffix, self.filepath)
+            subprocess.run(cmd, shell=True)
+            out_file_path = self.output_path.filepath + \
+                            self.output_prefix.value + '_' + \
+                            self.decision_obj.simulStart.value[0:4] + '-' + \
+                            self.decision_obj.simulFinsh.value[0:4] + '_' + \
+                            self.run_suffix + '_1.nc'
+            return xr.open_dataset(out_file_path)
+
         else:
             raise ValueError('No executable defined. Set as "executable" attribute of Simulation or check run_option')
 
