@@ -68,7 +68,6 @@ class FileManagerOption(Option):
     # filepath is the path up to the filename, not including it
     @property
     def filepath(self):
-        print("value: " + self.value)
         if not self.value.endswith('/'):
             return "/".join(self.value.split('/')[:-1]) + "/"
         else:
