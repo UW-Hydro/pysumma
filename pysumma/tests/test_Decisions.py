@@ -1,4 +1,4 @@
-from pysumma.Decisions import * # This is for testing in cmd window.
+from pysumma.Decisions import Decisions # This is for testing in cmd window.
 # from ..pysumma.Decisions import Decisions # This is for testing in this python code.
 import unittest
 import os.path
