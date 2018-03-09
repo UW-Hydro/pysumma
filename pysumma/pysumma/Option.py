@@ -17,9 +17,9 @@ class Option:
     def edit_save(self):
         with open(self.option_filepath, 'wt') as f:
             f.writelines(self.text)
+            f.close()
 
-    
-    # Delimits each line on delimiter
+    # Delimits each line on <delimiter>
     # Picks out the element in <position> in the split-list
     # Returns <line number, line contents> when line_content[position] == name
     def get_line_info(self):
@@ -28,6 +28,7 @@ class Option:
                 return line_no, line_contents
 
     def write_value(self, old_value, new_value):
+        self.text = self.open_read() # Read before you write to get the most recent file version
         self.text[self.line_no] = self.line_contents.replace(old_value, new_value, 1)
         self.edit_save()
 
@@ -35,7 +36,5 @@ class Option:
     # Returns the split-line list at <position> (String)
     def get_value(self):
         self.line_no, self.line_contents = self.get_line_info()
-
         words = self.line_contents.split(self.delimiter)
-
         return words[self.value_position].strip("'")
