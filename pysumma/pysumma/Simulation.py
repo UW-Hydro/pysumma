@@ -55,7 +55,6 @@ class FileManagerOption(Option):
         value = filepath + filename
     '''
 
-    # TODO: Do we actually need a value and a filepath? What if we just added a trailing '/' to the value automatically?
     @property
     def value(self):
         return self.get_value()
@@ -64,7 +63,6 @@ class FileManagerOption(Option):
     def value(self, new_value):
         self.write_value(old_value=self.value, new_value=new_value)
 
-    # TODO: What does this do? it just puts a '/' at the end of the value?
     # filepath is the path up to the filename, not including it
     @property
     def filepath(self):
@@ -73,6 +71,7 @@ class FileManagerOption(Option):
         else:
             return self.value
 
+    # Replace the filepath in the value in fileManager.txt
     @filepath.setter
     def filepath(self, new_filepath):
         value = new_filepath + self.filename
@@ -82,10 +81,7 @@ class FileManagerOption(Option):
     # Returns the file name of the FileManagerOption
     @property
     def filename(self):
-        if self.value.endswith('/'):
-            return self.value.split('/')[-2]
-        else:
-            return self.value.split('/')[-1]
+        return self.value.split('/')[-1]
 
     @filename.setter
     def filename(self, new_filename):
