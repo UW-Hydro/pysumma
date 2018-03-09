@@ -7,7 +7,6 @@ from pysumma.Simulation import Simulation
 class TestSimulation(TestCase):
     # Create a new fileManager.txt file with the correct file paths for the system it's run on
     my_path = os.path.abspath(os.path.dirname(__file__))
-    print("Path: " + my_path)
     whitespace = 50
     with open("fileManager.txt", "w") as file:
         file.write("'SUMMA FILE_MANAGER_V1.0'")
@@ -41,102 +40,49 @@ class TestSimulation(TestCase):
 
     def filepath_from_value(self, setting_name):
         value = self.read_value_from_file(setting_name)
-        if value.endswith('/'):
-            return value
+        if not value.endswith('/'):
+            return "/".join(value.split('/')[:-1]) + "/"
         else:
-            return '/'.join(value.split('/')[:-1])
+            return value
 
     def filename_from_value(self, setting_name):
         value = self.read_value_from_file(setting_name)
         return value.split('/')[-1]
 
-    def value_filepath_filename_lineno_test(self, fileManagerObject, setting_name):
-        assert fileManagerObject.name == setting_name, "FM Object name is: " + fileManagerObject.name
-        assert fileManagerObject.value == self.read_value_from_file(setting_name)
-        assert fileManagerObject.filepath == self.filepath_from_value(setting_name)
-        assert fileManagerObject.filename == self.filename_from_value(setting_name)
+    def read_text_from_file(self, setting_name):
+        with open(self.read_value_from_file(setting_name)) as file:
+            return ''.join(file.readlines())
+
+    def value_filepath_filename_test(self, fileManagerObject, setting_name):
+        assert fileManagerObject.name == setting_name, "FM Object name is: " + fileManagerObject.name + "; actual is: " + setting_name
+        assert fileManagerObject.value == self.read_value_from_file(setting_name), "FM Object " + fileManagerObject.name + " value is: " + fileManagerObject.value + ", actual is: " + self.read_value_from_file(setting_name)
+        assert fileManagerObject.filepath == self.filepath_from_value(setting_name), "FM Object " + fileManagerObject.name + " filepath is: " + fileManagerObject.filepath + ", actual is: " + self.filepath_from_value(setting_name)
+        assert fileManagerObject.filename == self.filename_from_value(setting_name), "FM Object " + fileManagerObject.name + " filename is: " + fileManagerObject.filename + ", actual is: " + self.filename_from_value(setting_name)
+
+    # Tests the value, filepath, and filename for all fileManager objects
+    def test_value_filepath_filename(self):
+        self.value_filepath_filename_test(self.Simulation_obj.setting_path, 'setting_path')
+        self.value_filepath_filename_test(self.Simulation_obj.input_path, 'input_path')
+        self.value_filepath_filename_test(self.Simulation_obj.output_path, 'output_path')
+        self.value_filepath_filename_test(self.Simulation_obj.decision_path, 'decision')
+        self.value_filepath_filename_test(self.Simulation_obj.meta_time, 'meta_time')
+        self.value_filepath_filename_test(self.Simulation_obj.meta_attr, 'meta_attr')
+        self.value_filepath_filename_test(self.Simulation_obj.meta_type, 'meta_type')
+        self.value_filepath_filename_test(self.Simulation_obj.meta_force, 'meta_force')
+        self.value_filepath_filename_test(self.Simulation_obj.meta_localpar, 'meta_localpar')
+        self.value_filepath_filename_test(self.Simulation_obj.OUTPUT_CONTROL, 'OUTPUT_CONTROL')
+        self.value_filepath_filename_test(self.Simulation_obj.meta_index, 'meta_index')
+        self.value_filepath_filename_test(self.Simulation_obj.meta_basinpar, 'meta_basinpar')
+        self.value_filepath_filename_test(self.Simulation_obj.meta_basinvar, 'meta_basinvar')
+        self.value_filepath_filename_test(self.Simulation_obj.local_attr, 'local_attr')
+        self.value_filepath_filename_test(self.Simulation_obj.local_par, 'local_par')
+        self.value_filepath_filename_test(self.Simulation_obj.basin_par, 'basin_par')
+        self.value_filepath_filename_test(self.Simulation_obj.forcing_list, 'forcing_list')
+        self.value_filepath_filename_test(self.Simulation_obj.initial_cond, 'initial_cond')
+        self.value_filepath_filename_test(self.Simulation_obj.para_trial, 'para_trial')
+        self.value_filepath_filename_test(self.Simulation_obj.output_prefix, 'output_prefix')
+
+    # Tests text contents for each fileManagerOption
+    def test_file_text(self):
         return
 
-    def test_funct(self):
-        print(self.filepath_from_value('setting_path'))
-'''
-    def test_setting_path(self):
-        # Testing the FileManagerOption name
-        assert self.Simulation_obj.setting_path.name == 'setting_path', \
-                "setting_path name in Simulation_obj: " + self.Simulation_obj.setting_path.name
-
-        # Testing the path value
-        assert self.Simulation_obj.setting_path.value == self.read_value_from_file('setting_path'), \
-                "setting_path value in Simulation_obj: " + self.Simulation_obj.setting_path.value
-
-        # Changing the value
-        self.Simulation_obj.setting_path.value = self.filepath2 + '/sample'
-
-        # Testing the changed value
-        assert self.Simulation_obj.setting_path.value == self.filepath2 + '/sample', \
-                "setting_path changed value in Simulation_obj: " + self.Simulation_obj.setting_path.value
-
-        # Changing the value back
-        print("Value before change back: " + self.Simulation_obj.setting_path.value)
-        self.Simulation_obj.setting_path.value = self.filepath2
-        print("Value after change back: " + self.Simulation_obj.setting_path.value)
-
-        # Testing filepath
-        assert self.Simulation_obj.setting_path.filepath == self.filepath2 + '/', \
-                "setting_path filepath in Simulation_obj: " + self.Simulation_obj.setting_path.filepath
-
-        # Testing filename
-        assert self.Simulation_obj.setting_path.filename == '/', \
-                "setting_path filename in Simulation_obj: " + self.Simulation_obj.setting_path.filename
-
-    def test_input_path(self):
-        # Testing the FileManagerOption name
-        assert self.Simulation_obj.input_path.name == 'input_path', \
-            "input_path name in Simulation_obj: " + self.Simulation_obj.input_path.name
-
-        # Testing the path value
-        assert self.Simulation_obj.input_path.value == self.read_value_from_file('input_path'), \
-            "input_path value in Simulation_obj: " + self.Simulation_obj.input_path.value
-
-        # Changing the value
-        self.Simulation_obj.input_path.value = self.filepath2 + '/sample'
-
-        # Testing the changed value
-        assert self.Simulation_obj.input_path.value == self.filepath2 + '/sample', \
-            "input_path changed value in Simulation_obj: " + self.Simulation_obj.input_path.value
-
-        # Changing the value back
-        print("Value before change back: " + self.Simulation_obj.input_path.value)
-        print("Filepath before change back: " + self.Simulation_obj.input_path.filepath)
-        print("Filename before change back: " + self.Simulation_obj.input_path.filename)
-
-        self.Simulation_obj.input_path.value = self.filepath2
-        print("Value after change back: " + self.Simulation_obj.input_path.value)
-        print("Filepath after change back: " + self.Simulation_obj.input_path.filepath)
-        print("Filename after change back: " + self.Simulation_obj.input_path.filename)
-
-        # Testing filepath
-        assert self.Simulation_obj.input_path.filepath == self.filepath2 + '/', \
-            "input_path filepath in Simulation_obj: " + self.Simulation_obj.input_path.filepath
-
-        # Testing filename
-        assert self.Simulation_obj.input_path.filename == '/', \
-            "setting_path filename in Simulation_obj: " + self.Simulation_obj.input_path.filename
-    def test_output_path(self):
-        return
-
-    def test_decision(self):
-        return
-
-    def test_meta_time(self):
-        return
-
-    def test_meta_attr(self):
-        return
-
-    def test_meta_force(self):
-        return
-
-    def test_meta_localpar(self):
-        return
-'''
