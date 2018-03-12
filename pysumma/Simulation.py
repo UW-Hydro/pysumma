@@ -3,12 +3,11 @@ from pysumma.Option import Option
 from .Decisions import Decisions       # This is for testing in this python code.
 import subprocess
 import os
+import xarray as xr
 
 
 class Simulation:
     executable = ''
-    run_suffix = '_'
-
     def __init__(self, filepath):
         self.filepath = filepath
         self.setting_path = FileManagerOption('setting_path', self.filepath)
@@ -33,12 +32,19 @@ class Simulation:
         self.output_prefix = FileManagerOption('output_prefix', self.filepath)
         self.decision_obj = Decisions(self.setting_path.value + self.decision_path.value)
 
-    def execute(self):
+    def execute(self,     run_suffix):
+        self.run_suffix = run_suffix
         if self.executable == '':
             raise ValueError('No executable defined. Set as "executable" attribute of Simulation')
         else:
             cmd = "{} -p never -s {}       -m {}".format(self.executable, self.run_suffix, self.filepath)
             subprocess.run(cmd, shell=True)
+            out_file_path = 	self.output_path.filepath + \
+						self.output_prefix.value+'_' + \
+						self.decision_obj.simulStart.value[0:4] + '-' + \
+						self.decision_obj.simulFinsh.value[0:4] + '_' + \
+						self.run_suffix + '_1.nc'
+            return xr.open_dataset(out_file_path)
 
 
 class FileManagerOption(Option):
