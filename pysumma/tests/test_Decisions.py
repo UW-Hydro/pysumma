@@ -1,7 +1,7 @@
 import os.path
 import unittest
 from shutil import copyfile
-from pysumma.Decisions import Decisions
+from Decisions import Decisions
 
 
 class test_decisions_class(unittest.TestCase):
