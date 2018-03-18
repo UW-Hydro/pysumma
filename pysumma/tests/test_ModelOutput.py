@@ -20,11 +20,17 @@ class TestModelOutput(unittest.TestCase):
                     return line.split("|")[1].strip()
 
     def value_test(self, name, ModelOutputManagerObject):
-        assert ModelOutputManagerObject.name == name, "MO Object name is: " + ModelOutputManagerObject.name + ' not ' + name
+        # Check to see if the name and value match between the file and the object
+        assert ModelOutputManagerObject.name == name, "MO Object name is: " + ModelOutputManagerObject.name + ' but in the file is ' + name
         assert ModelOutputManagerObject.value == self.read_value_from_file(name), "MO Object value is: '" + \
                                                                                   ModelOutputManagerObject.value +\
                                                                                   "', but '" + self.read_value_from_file(name) \
                                                                                   + "' was in the file."
+        # Change the value in the object
+        ModelOutputManager.value = '2'
+
+        # Check to see if the value is reflected in the file
+        assert ModelOutputManagerObject.value == self.read_value_from_file(name), "MO Object " + ModelOutputManagerObject.name + " value is: '" + ModelOutputManagerObject.value + "', but '" + self.read_value_from_file(name) + "' was in the file."
 
     def test_ModelOutputParameters(self):
         self.value_test('nSnow', self.mo.nSnow)
