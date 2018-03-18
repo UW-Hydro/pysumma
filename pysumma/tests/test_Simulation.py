@@ -1,10 +1,10 @@
-from unittest import TestCase
+import unittest
 from shutil import copyfile
 import os
 from Simulation import Simulation
 
 
-class TestSimulation(TestCase):
+class TestSimulation(unittest.TestCase):
     # Create a new fileManager.txt file with the correct file paths for the system it's run on
     my_path = os.path.abspath(os.path.dirname(__file__))
     whitespace = 50
@@ -26,7 +26,6 @@ class TestSimulation(TestCase):
 
     # Setting up test environment and creating Simulation object
     filepath2 = my_path + '/tmp_fileManager.txt'
-    print("filepath2: " + filepath2)
     Simulation_obj = Simulation(filepath2)
 
     def read_value_from_file(self, setting_name):
