@@ -40,10 +40,10 @@ class Simulation:
             cmd = "{} -p never -s {}       -m {}".format(self.executable, self.run_suffix, self.filepath)
             subprocess.run(cmd, shell=True)
             out_file_path = 	self.output_path.filepath + \
-						self.output_prefix.value+'_' + \
-						self.decision_obj.simulStart.value[0:4] + '-' + \
-						self.decision_obj.simulFinsh.value[0:4] + '_' + \
-						self.run_suffix + '_1.nc'
+                self.output_prefix.value+'_' + \
+                self.decision_obj.simulStart.value[0:4] + '-' + \
+                self.decision_obj.simulFinsh.value[0:4] + '_' + \
+                self.run_suffix + '_1.nc'
             return xr.open_dataset(out_file_path)
 
 
