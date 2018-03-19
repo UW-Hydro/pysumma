@@ -46,7 +46,7 @@ def gen_patches(data_array, geodf, simplify_level=0, robust=False):
     for val, shp in zip(data_array.values, geoms):
         if isinstance(shp, shapely.geometry.MultiPolygon):
             for sub in shp:
-                if not simplify_level:
+                if simplify_level:
                     patches.append(Polygon(np.asarray(
                         sub.simplify(simplify_level).exterior)))
                 else:
@@ -54,7 +54,7 @@ def gen_patches(data_array, geodf, simplify_level=0, robust=False):
                         sub.exterior)))
                 vals.append(val)
         else:
-            if not simplify_level:
+            if simplify_level:
                 patches.append(
                         Polygon(np.asarray(shp.simplify(simplify_level).exterior)))
             else:
@@ -72,7 +72,7 @@ def gen_patches(data_array, geodf, simplify_level=0, robust=False):
 
 
 def spatial(data_array, geodf, simplify_level=500, proj=ccrs.Mercator(),
-            robust=False):
+            robust=False, colorbar=True):
     '''Make a spatial plot'''
     # Preprocess the data
     geodf_crs = geodf.to_crs(crs=proj.proj4_params)
@@ -92,12 +92,14 @@ def spatial(data_array, geodf, simplify_level=500, proj=ccrs.Mercator(),
             minval, maxval = np.percentile(data_array.values, [2, 98])
     else:
         minval, maxval = np.min(data_array.values), np.max(data_array.values)
-    sm = plt.cm.ScalarMappable(norm=plt.Normalize(vmin=minval, vmax=maxval))
-    sm._A = []
-    cax = fig.add_axes([0.92, 0.2, 0.015, 0.6])
-    cax.tick_params()
-    cb = plt.colorbar(sm, cax=cax)
-    cb.set_label(data_array.name)
+
+    if colorbar:
+        sm = plt.cm.ScalarMappable(norm=plt.Normalize(vmin=minval, vmax=maxval))
+        sm._A = []
+        cax = fig.add_axes([0.92, 0.2, 0.015, 0.6])
+        cax.tick_params()
+        cb = plt.colorbar(sm, cax=cax)
+        cb.set_label(data_array.name)
     return fig, ax
 
 
