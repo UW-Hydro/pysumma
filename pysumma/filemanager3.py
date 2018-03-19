@@ -1,11 +1,11 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from Simulation import Simulation
-#from Decisions import Decisions
+#from pysumma.Simulation import Simulation
+#from pysumma.Decisions import Decisions
 #from Plotting import Plotting
 
-S = Simulation('../../summaTestCases_2.x/settings/wrrPaperTestCases/figure06/summa_fileManager_reynoldsConstantDecayRate.txt')
-print(S)
+#S = Simulation('../../summaTestCases_2.x/settings/wrrPaperTestCases/figure06/summa_fileManager_reynoldsConstantDecayRate.txt')
+#print(S)
 #P = Plotting('../../summaTestCases_2.x/output/wrrPaperTestCases/figure07/vegImpactsTranspire_2006-2007_simpleResistance_docker_latest_1.nc')
 
 class filemanager(object):

@@ -1,5 +1,5 @@
 #from Decisions import Decisions         # This is for testing in cmd window.
-from Decisions import Decisions       # This is for testing in this python code.
+from pysumma.Decisions import Decisions       # This is for testing in this python code.
 import subprocess
 import os
 import xarray as xr
