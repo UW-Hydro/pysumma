@@ -4,6 +4,7 @@ import unittest
 import os
 
 
+
 class TestModelOutput(unittest.TestCase):
     my_path = os.path.abspath(os.path.dirname(__file__)) + '/meta/'
     filename = 'Model_Output.txt'
@@ -12,6 +13,7 @@ class TestModelOutput(unittest.TestCase):
     filepath2 = os.path.join(my_path, filename2)
     copyfile(filepath, filepath2)
     mo = ModelOutput(filepath2)
+    print("filepath2: " + filepath2)
 
     def read_value_from_file(self, setting_name):
         with open(self.filepath2) as ModelOutput_file:
@@ -26,11 +28,17 @@ class TestModelOutput(unittest.TestCase):
                                                                                   ModelOutputManagerObject.value +\
                                                                                   "', but '" + self.read_value_from_file(name) \
                                                                                   + "' was in the file."
-        # Change the value in the object
-        ModelOutputManager.value = '2'
+        ModelOutputManagerObject.value = "2"
 
         # Check to see if the value is reflected in the file
         assert ModelOutputManagerObject.value == self.read_value_from_file(name), "MO Object " + ModelOutputManagerObject.name + " value is: '" + ModelOutputManagerObject.value + "', but '" + self.read_value_from_file(name) + "' was in the file."
+
+        # Change it back
+        ModelOutputManagerObject.value = "1"
+
+        # Check to see if the value is reflected in the file
+        assert ModelOutputManagerObject.value == self.read_value_from_file(name), "MO Object " + ModelOutputManagerObject.name + " value is: '" + ModelOutputManagerObject.value + "', but '" + self.read_value_from_file(name) + "' was in the file."
+
 
     def test_ModelOutputParameters(self):
         self.value_test('nSnow', self.mo.nSnow)
@@ -65,5 +73,7 @@ class TestModelOutput(unittest.TestCase):
         self.value_test('basin__AquiferTranspire', self.mo.basin__AquiferTranspire)
         self.value_test('averageInstantRunoff', self.mo.averageInstantRunoff)
         self.value_test('averageRoutedRunoff', self.mo.averageRoutedRunoff)
+
+
 
 
