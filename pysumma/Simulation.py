@@ -1,5 +1,5 @@
 #from Decisions import Decisions         # This is for testing in cmd window.
-from Decisions import Decisions       # This is for testing in this python code.
+from pysumma.Decisions import Decisions       # This is for testing in this python code.
 import subprocess
 import os
 import xarray as xr
@@ -43,7 +43,7 @@ class Simulation:
 						self.decision_obj.simulStart.value[0:4] + '-' + \
 						self.decision_obj.simulFinsh.value[0:4] + '_' + \
 						self.run_suffix + '_1.nc'
-            return xr.open_dataset(out_file_path)
+            return xr.open_dataset(out_file_path), out_file_path
 
         elif run_option == "docker" :
 #            dir = self.setting_path.filepath.split('/')[:-2]
@@ -60,7 +60,7 @@ class Simulation:
             out_file_path = self.output_path.filepath + \
 						self.output_prefix.value+'_output_' + \
 						self.run_suffix + '_timestep.nc'
-            return xr.open_dataset(out_file_path)
+            return xr.open_dataset(out_file_path), out_file_path
         else:
             raise ValueError('No executable defined. Set as "executable" attribute of Simulation or check run_option')
 
