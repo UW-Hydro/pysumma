@@ -1,4 +1,5 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
+import datetime
 #import pyqtgraph as pg
 
 class userinterface(object):
@@ -56,22 +57,27 @@ class userinterface(object):
 
         self.tabWidget.addTab(self.tab_3, "")
 
-        self.pushButton_2 = QtWidgets.QPushButton(self.tab)
-        self.pushButton_2.setGeometry(QtCore.QRect(950, 680, 75, 23))
-        self.pushButton_2.setObjectName("file_save")
-        self.pushButton_2.clicked.connect(self.edit_filemanager)
-
-        self.pushButton_3 = QtWidgets.QPushButton(self.tab_3)
-        self.pushButton_3.setGeometry(QtCore.QRect(680, 460, 75, 23))
-        self.pushButton_3.setObjectName("pushButton_3")
-        self.pushButton_3.clicked.connect(self.edit_Decision)
+        # self.pushButton_2 = QtWidgets.QPushButton(self.tab)
+        # self.pushButton_2.setGeometry(QtCore.QRect(950, 680, 75, 23))
+        # self.pushButton_2.setObjectName("file_save")
+        # self.pushButton_2.clicked.connect(self.edit_filemanager)
+        #
+        # self.pushButton_3 = QtWidgets.QPushButton(self.tab_3)
+        # self.pushButton_3.setGeometry(QtCore.QRect(680, 460, 75, 23))
+        # self.pushButton_3.setObjectName("pushButton_3")
+        # self.pushButton_3.clicked.connect(self.edit_Decision)
 
         # need to change default date & time from Deicision file
         self.dateTimeEdit = QtWidgets.QDateTimeEdit(self.tab_3)
         self.dateTimeEdit.setGeometry(QtCore.QRect(180, 20, 181, 22))
         self.dateTimeEdit.setObjectName("dateTimeEdit")
-        simulStart = self.S.decision_obj.simulStart.value
-        simulStart1 = QtCore.QDateTime(int(simulStart[0:4]),int(simulStart[5:7]),int(simulStart[8:10]),int(simulStart[11:13]),int(simulStart[14:16]))
+        simulStart_str = self.S.decision_obj.simulStart.value
+        simulStart_dt = datetime.datetime.strptime(simulStart_str, "%Y-%m-%d %H:%M")
+        simulStart1 = QtCore.QDateTime(simulStart_dt.year,
+                                       simulStart_dt.month,
+                                       simulStart_dt.day,
+                                       simulStart_dt.hour,
+                                       simulStart_dt.minute)
         self.dateTimeEdit.setDateTime(simulStart1)
 
 
@@ -79,8 +85,13 @@ class userinterface(object):
         self.dateTimeEdit_2 = QtWidgets.QDateTimeEdit(self.tab_3)
         self.dateTimeEdit_2.setGeometry(QtCore.QRect(180, 50, 181, 22))
         self.dateTimeEdit_2.setObjectName("dateTimeEdit_2")
-        simulFinsh = self.S.decision_obj.simulFinsh.value
-        simulFinsh1 = QtCore.QDateTime(int(simulFinsh[0:4]),int(simulFinsh[5:7]),int(simulFinsh[8:10]),int(simulFinsh[11:13]),int(simulFinsh[14:16]))
+        simulFinsh_str = self.S.decision_obj.simulFinsh.value
+        simulFinsh_dt = datetime.datetime.strptime(simulFinsh_str, "%Y-%m-%d %H:%M")
+        simulFinsh1 = QtCore.QDateTime(simulFinsh_dt.year,
+                                       simulFinsh_dt.month,
+                                       simulFinsh_dt.day,
+                                       simulFinsh_dt.hour,
+                                       simulFinsh_dt.minute)
         self.dateTimeEdit_2.setDateTime(simulFinsh1)
 
 
@@ -88,136 +99,163 @@ class userinterface(object):
         self.comboBox_3.setGeometry(QtCore.QRect(180, 80, 181, 22))
         self.comboBox_3.setObjectName("comboBox_3")
         self.comboBox_3.addItems(self.S.decision_obj.soilCatTbl.options)
+        self.comboBox_3.setCurrentText(self.S.decision_obj.soilCatTbl.value)
 
         self.comboBox_4 = QtWidgets.QComboBox(self.tab_3)
         self.comboBox_4.setGeometry(QtCore.QRect(180, 110, 181, 22))
         self.comboBox_4.setObjectName("comboBox_4")
         self.comboBox_4.addItems(self.S.decision_obj.vegeParTbl.options)
+        self.comboBox_4.setCurrentText(self.S.decision_obj.vegeParTbl.value)
 
         self.comboBox_5 = QtWidgets.QComboBox(self.tab_3)
         self.comboBox_5.setGeometry(QtCore.QRect(180, 140, 181, 22))
         self.comboBox_5.setObjectName("comboBox_5")
         self.comboBox_5.addItems(self.S.decision_obj.soilStress.options)
+        self.comboBox_5.setCurrentText(self.S.decision_obj.soilStress.value)
 
         self.comboBox_6 = QtWidgets.QComboBox(self.tab_3)
         self.comboBox_6.setGeometry(QtCore.QRect(180, 170, 181, 22))
         self.comboBox_6.setObjectName("comboBox_6")
         self.comboBox_6.addItems(self.S.decision_obj.stomResist.options)
+        self.comboBox_6.setCurrentText(self.S.decision_obj.stomResist.value)
 
         self.comboBox_7 = QtWidgets.QComboBox(self.tab_3)
         self.comboBox_7.setGeometry(QtCore.QRect(180, 200, 181, 22))
         self.comboBox_7.setObjectName("comboBox_7")
         self.comboBox_7.addItems(self.S.decision_obj.num_method.options)
+        self.comboBox_7.setCurrentText(self.S.decision_obj.num_method.value)
 
         self.comboBox_8 = QtWidgets.QComboBox(self.tab_3)
         self.comboBox_8.setGeometry(QtCore.QRect(180, 230, 181, 22))
         self.comboBox_8.setObjectName("comboBox_8")
         self.comboBox_8.addItems(self.S.decision_obj.fDerivMeth.options)
+        self.comboBox_8.setCurrentText(self.S.decision_obj.fDerivMeth.value)
 
         self.comboBox_9 = QtWidgets.QComboBox(self.tab_3)
         self.comboBox_9.setGeometry(QtCore.QRect(180, 260, 181, 22))
         self.comboBox_9.setObjectName("comboBox_9")
         self.comboBox_9.addItems(self.S.decision_obj.LAI_method.options)
+        self.comboBox_9.setCurrentText(self.S.decision_obj.LAI_method.value)
 
         self.comboBox_10 = QtWidgets.QComboBox(self.tab_3)
         self.comboBox_10.setGeometry(QtCore.QRect(180, 290, 181, 22))
         self.comboBox_10.setObjectName("comboBox_10")
         self.comboBox_10.addItems(self.S.decision_obj.f_Richards.options)
+        self.comboBox_10.setCurrentText(self.S.decision_obj.f_Richards.value)
 
         self.comboBox_11 = QtWidgets.QComboBox(self.tab_3)
         self.comboBox_11.setGeometry(QtCore.QRect(180, 320, 181, 22))
         self.comboBox_11.setObjectName("comboBox_11")
         self.comboBox_11.addItems(self.S.decision_obj.groundwatr.options)
+        self.comboBox_11.setCurrentText(self.S.decision_obj.groundwatr.value)
 
         self.comboBox_12 = QtWidgets.QComboBox(self.tab_3)
         self.comboBox_12.setGeometry(QtCore.QRect(180, 350, 181, 22))
         self.comboBox_12.setObjectName("comboBox_12")
         self.comboBox_12.addItems(self.S.decision_obj.hc_profile.options)
+        self.comboBox_12.setCurrentText(self.S.decision_obj.hc_profile.value)
 
         self.comboBox_13 = QtWidgets.QComboBox(self.tab_3)
         self.comboBox_13.setGeometry(QtCore.QRect(180, 380, 181, 22))
         self.comboBox_13.setObjectName("comboBox_13")
         self.comboBox_13.addItems(self.S.decision_obj.bcUpprTdyn.options)
+        self.comboBox_13.setCurrentText(self.S.decision_obj.bcUpprTdyn.value)
 
         self.comboBox_14 = QtWidgets.QComboBox(self.tab_3)
         self.comboBox_14.setGeometry(QtCore.QRect(180, 410, 181, 22))
         self.comboBox_14.setObjectName("comboBox_14")
         self.comboBox_14.addItems(self.S.decision_obj.bcLowrTdyn.options)
+        self.comboBox_14.setCurrentText(self.S.decision_obj.bcLowrTdyn.value)
 
         self.comboBox_15 = QtWidgets.QComboBox(self.tab_3)
         self.comboBox_15.setGeometry(QtCore.QRect(180, 440, 181, 22))
         self.comboBox_15.setObjectName("comboBox_15")
         self.comboBox_15.addItems(self.S.decision_obj.bcUpprSoiH.options)
+        self.comboBox_15.setCurrentText(self.S.decision_obj.bcUpprSoiH.value)
 
         self.comboBox_16 = QtWidgets.QComboBox(self.tab_3)
         self.comboBox_16.setGeometry(QtCore.QRect(580, 20, 181, 22))
         self.comboBox_16.setObjectName("comboBox_16")
         self.comboBox_16.addItems(self.S.decision_obj.bcLowrSoiH.options)
+        self.comboBox_16.setCurrentText(self.S.decision_obj.bcLowrSoiH.value)
 
         self.comboBox_17 = QtWidgets.QComboBox(self.tab_3)
         self.comboBox_17.setGeometry(QtCore.QRect(580, 50, 181, 22))
         self.comboBox_17.setObjectName("comboBox_17")
         self.comboBox_17.addItems(self.S.decision_obj.veg_traits.options)
+        self.comboBox_17.setCurrentText(self.S.decision_obj.veg_traits.value)
 
         self.comboBox_18 = QtWidgets.QComboBox(self.tab_3)
         self.comboBox_18.setGeometry(QtCore.QRect(580, 80, 181, 22))
         self.comboBox_18.setObjectName("comboBox_18")
         self.comboBox_18.addItems(self.S.decision_obj.canopyEmis.options)
+        self.comboBox_18.setCurrentText(self.S.decision_obj.canopyEmis.value)
 
         self.comboBox_19 = QtWidgets.QComboBox(self.tab_3)
         self.comboBox_19.setGeometry(QtCore.QRect(580, 110, 181, 22))
         self.comboBox_19.setObjectName("comboBox_19")
         self.comboBox_19.addItems(self.S.decision_obj.snowIncept.options)
+        self.comboBox_19.setCurrentText(self.S.decision_obj.snowIncept.value)
 
         self.comboBox_20 = QtWidgets.QComboBox(self.tab_3)
         self.comboBox_20.setGeometry(QtCore.QRect(580, 140, 181, 22))
         self.comboBox_20.setObjectName("comboBox_20")
         self.comboBox_20.addItems(self.S.decision_obj.windPrfile.options)
+        self.comboBox_20.setCurrentText(self.S.decision_obj.windPrfile.value)
 
         self.comboBox_21 = QtWidgets.QComboBox(self.tab_3)
         self.comboBox_21.setGeometry(QtCore.QRect(580, 170, 181, 22))
         self.comboBox_21.setObjectName("comboBox_21")
         self.comboBox_21.addItems(self.S.decision_obj.astability.options)
+        self.comboBox_21.setCurrentText(self.S.decision_obj.astability.value)
 
         self.comboBox_22 = QtWidgets.QComboBox(self.tab_3)
         self.comboBox_22.setGeometry(QtCore.QRect(580, 200, 181, 22))
         self.comboBox_22.setObjectName("comboBox_22")
         self.comboBox_22.addItems(self.S.decision_obj.canopySrad.options)
+        self.comboBox_22.setCurrentText(self.S.decision_obj.canopySrad.value)
 
         self.comboBox_23 = QtWidgets.QComboBox(self.tab_3)
         self.comboBox_23.setGeometry(QtCore.QRect(580, 230, 181, 22))
         self.comboBox_23.setObjectName("comboBox_23")
         self.comboBox_23.addItems(self.S.decision_obj.alb_method.options)
+        self.comboBox_23.setCurrentText(self.S.decision_obj.alb_method.value)
 
         self.comboBox_24 = QtWidgets.QComboBox(self.tab_3)
         self.comboBox_24.setGeometry(QtCore.QRect(580, 260, 181, 22))
         self.comboBox_24.setObjectName("comboBox_24")
         self.comboBox_24.addItems(self.S.decision_obj.compaction.options)
+        self.comboBox_24.setCurrentText(self.S.decision_obj.compaction.value)
 
         self.comboBox_25 = QtWidgets.QComboBox(self.tab_3)
         self.comboBox_25.setGeometry(QtCore.QRect(580, 290, 181, 22))
         self.comboBox_25.setObjectName("comboBox_25")
         self.comboBox_25.addItems(self.S.decision_obj.snowLayers.options)
+        self.comboBox_25.setCurrentText(self.S.decision_obj.snowLayers.value)
 
         self.comboBox_26 = QtWidgets.QComboBox(self.tab_3)
         self.comboBox_26.setGeometry(QtCore.QRect(580, 320, 181, 22))
         self.comboBox_26.setObjectName("comboBox_26")
         self.comboBox_26.addItems(self.S.decision_obj.thCondSnow.options)
+        self.comboBox_26.setCurrentText(self.S.decision_obj.thCondSnow.value)
 
         self.comboBox_27 = QtWidgets.QComboBox(self.tab_3)
         self.comboBox_27.setGeometry(QtCore.QRect(580, 350, 181, 22))
         self.comboBox_27.setObjectName("comboBox_27")
         self.comboBox_27.addItems(self.S.decision_obj.thCondSoil.options)
+        self.comboBox_27.setCurrentText(self.S.decision_obj.thCondSoil.value)
 
         self.comboBox_43 = QtWidgets.QComboBox(self.tab_3)
         self.comboBox_43.setGeometry(QtCore.QRect(580, 380, 181, 22))
         self.comboBox_43.setObjectName("comboBox_43")
         self.comboBox_43.addItems(self.S.decision_obj.spatial_gw.options)
+        self.comboBox_43.setCurrentText(self.S.decision_obj.spatial_gw.value)
 
         self.comboBox_44 = QtWidgets.QComboBox(self.tab_3)
         self.comboBox_44.setGeometry(QtCore.QRect(580, 410, 181, 22))
         self.comboBox_44.setObjectName("comboBox_44")
         self.comboBox_44.addItems(self.S.decision_obj.subRouting.options)
+        self.comboBox_44.setCurrentText(self.S.decision_obj.subRouting.value)
 
         self.lineEdit = QtWidgets.QLineEdit(self.tab_3)
         self.lineEdit.setGeometry(QtCore.QRect(10, 20, 161, 21))
@@ -335,6 +373,16 @@ class userinterface(object):
         self.lineEdit_47.setGeometry(QtCore.QRect(410, 140, 161, 21))
         self.lineEdit_47.setObjectName("lineEdit_47")
 
+        self.pushButton_2 = QtWidgets.QPushButton(self.tab)
+        self.pushButton_2.setGeometry(QtCore.QRect(950, 680, 75, 23))
+        self.pushButton_2.setObjectName("file_save")
+        self.pushButton_2.clicked.connect(self.edit_filemanager)
+
+        self.pushButton_3 = QtWidgets.QPushButton(self.tab_3)
+        self.pushButton_3.setGeometry(QtCore.QRect(680, 460, 75, 23))
+        self.pushButton_3.setObjectName("pushButton_3")
+        self.pushButton_3.clicked.connect(self.edit_Decision)
+
         self.retranslateUi(Form)
         self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(Form)
@@ -362,13 +410,12 @@ class userinterface(object):
         __sortingEnabled = self.tableWidget.isSortingEnabled()
         self.tableWidget.setSortingEnabled(False)
 
-        self.item1 = self.tableWidget.item(0, 0)
-        self.item1.setText(_translate("Form", self.S.fman_ver.filepath))
-
-        self.item2 = self.tableWidget.item(0, 1)
-        self.item2.setText(_translate("Form", self.S.fman_ver.filename))
-        self.item3 = self.tableWidget.item(0, 2)
-        self.item3.setText(_translate("Form", self.S.fman_ver.name))
+        item = self.tableWidget.item(0, 0)
+        item.setText(_translate("Form", ""))
+        item = self.tableWidget.item(0, 1)
+        item.setText(_translate("Form", self.S.fman_ver.filename))
+        item = self.tableWidget.item(0, 2)
+        item.setText(_translate("Form", self.S.fman_ver.name))
         item = self.tableWidget.item(1, 0)
         item.setText(_translate("Form", self.S.setting_path.filepath))
         item = self.tableWidget.item(1, 1)
@@ -484,7 +531,7 @@ class userinterface(object):
         item = self.tableWidget.item(19, 2)
         item.setText(_translate("Form", self.S.para_trial.name))
         item = self.tableWidget.item(20, 0)
-        item.setText(_translate("Form", self.S.output_prefix.filepath))
+        item.setText(_translate("Form", ""))
         item = self.tableWidget.item(20, 1)
         item.setText(_translate("Form", self.S.output_prefix.filename))
         item = self.tableWidget.item(20, 2)
@@ -527,10 +574,14 @@ class userinterface(object):
     def edit_Decision(self):
 
         start = self.dateTimeEdit.dateTime()
-        self.S.decision_obj.simulStart.value = start.toPyDateTime()
+        start_dt = start.toPyDateTime()
+        start_str = start_dt.strftime("%Y-%m-%d %H:%M")
+        self.S.decision_obj.simulStart.value = start_str
 
         finsh = self.dateTimeEdit_2.dateTime()
-        self.S.decision_obj.simulFinsh.value = finsh.toPyDateTime()
+        finsh_dt = finsh.toPyDateTime()
+        finsh_str = finsh_dt.strftime("%Y-%m-%d %H:%M")
+        self.S.decision_obj.simulFinsh.value = finsh_str
 
         self.S.decision_obj.soilCatTbl.value = self.comboBox_3.currentText()
         self.S.decision_obj.vegeParTbl.value = self.comboBox_4.currentText()
@@ -561,6 +612,45 @@ class userinterface(object):
         self.S.decision_obj.subRouting.value = self.comboBox_44.currentText()
 
     def edit_filemanager(self):
-        self.S.fman_ver.filepath = str(self.tableWidget.item(0, 0))
-        self.S.fman_ver.filename = str(self.tableWidget.item(0, 1))
-        self.S.fman_ver.name = str(self.tableWidget.item(0, 2))
+        self.S.fman_ver.filepath = str(self.tableWidget.item(0, 0).text())
+        self.S.fman_ver.filename = str(self.tableWidget.item(0, 1).text())
+        self.S.setting_path.filepath = str(self.tableWidget.item(1, 0).text())
+        self.S.setting_path.filename = str(self.tableWidget.item(1, 1).text())
+        self.S.input_path.filepath = str(self.tableWidget.item(2, 0).text())
+        self.S.input_path.filename = str(self.tableWidget.item(2, 1).text())
+        self.S.output_path.filepath = str(self.tableWidget.item(3, 0).text())
+        self.S.output_path.filename = str(self.tableWidget.item(3, 1).text())
+        self.S.decision_path.filepath = str(self.tableWidget.item(4, 0).text())
+        self.S.decision_path.filename = str(self.tableWidget.item(4, 1).text())
+        self.S.meta_time.filepath = str(self.tableWidget.item(5, 0).text())
+        self.S.meta_time.filename = str(self.tableWidget.item(5, 1).text())
+        self.S.meta_attr.filepath = str(self.tableWidget.item(6, 0).text())
+        self.S.meta_attr.filename = str(self.tableWidget.item(6, 1).text())
+        self.S.meta_type.filepath = str(self.tableWidget.item(7, 0).text())
+        self.S.meta_type.filename = str(self.tableWidget.item(7, 1).text())
+        self.S.meta_force.filepath = str(self.tableWidget.item(8, 0).text())
+        self.S.meta_force.filename = str(self.tableWidget.item(8, 1).text())
+        self.S.meta_localpar.filepath = str(self.tableWidget.item(9, 0).text())
+        self.S.meta_localpar.filename = str(self.tableWidget.item(9, 1).text())
+        self.S.OUTPUT_CONTROL.filepath = str(self.tableWidget.item(10, 0).text())
+        self.S.OUTPUT_CONTROL.filename = str(self.tableWidget.item(10, 1).text())
+        self.S.meta_index.filepath = str(self.tableWidget.item(11, 0).text())
+        self.S.meta_index.filename = str(self.tableWidget.item(11, 1).text())
+        self.S.meta_basinpar.filepath = str(self.tableWidget.item(12, 0).text())
+        self.S.meta_basinpar.filename = str(self.tableWidget.item(12, 1).text())
+        self.S.meta_basinvar.filepath = str(self.tableWidget.item(13, 0).text())
+        self.S.meta_basinvar.filename = str(self.tableWidget.item(13, 1).text())
+        self.S.local_attr.filepath = str(self.tableWidget.item(14, 0).text())
+        self.S.local_attr.filename = str(self.tableWidget.item(14, 1).text())
+        self.S.local_par.filepath = str(self.tableWidget.item(15, 0).text())
+        self.S.local_par.filename = str(self.tableWidget.item(15, 1).text())
+        self.S.basin_par.filepath = str(self.tableWidget.item(16, 0).text())
+        self.S.basin_par.filename = str(self.tableWidget.item(16, 1).text())
+        self.S.forcing_list.filepath = str(self.tableWidget.item(17, 0).text())
+        self.S.forcing_list.filename = str(self.tableWidget.item(17, 1).text())
+        self.S.initial_cond.filepath = str(self.tableWidget.item(18, 0).text())
+        self.S.initial_cond.filename = str(self.tableWidget.item(18, 1).text())
+        self.S.para_trial.filepath = str(self.tableWidget.item(19, 0).text())
+        self.S.para_trial.filename = str(self.tableWidget.item(19, 1).text())
+        self.S.output_prefix.filepath = str(self.tableWidget.item(20, 0).text())
+        self.S.output_prefix.filename = str(self.tableWidget.item(20, 1).text())
