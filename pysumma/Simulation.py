@@ -30,12 +30,12 @@ class Simulation:
         self.output_prefix = FileManagerOption('output_prefix', self.filepath)
         self.decision_obj = Decisions(self.setting_path.value + self.decision_path.value)
 
-    def execute(self,     run_suffix):
+    def execute(self, run_suffix):
         self.run_suffix = run_suffix
         if self.executable == '':
             raise ValueError('No executable defined. Set as "executable" attribute of Simulation')
         else:
-            cmd = "{} -p never -s {}       -m {}".format(self.executable, self.run_suffix, self.filepath)
+            cmd = "{} -p never -s {} -m {}".format(self.executable, self.run_suffix, self.filepath)
             subprocess.run(cmd, shell=True)
             out_file_path = 	self.output_path.filepath + \
 						self.output_prefix.value+'_' + \
