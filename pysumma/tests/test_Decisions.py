@@ -30,11 +30,16 @@ class test_decisions_class(unittest.TestCase):
 
     def test_SetSoilCategoryDataset(self):
         soil_cat_dataset = self.Decisions_obj.soilCatTbl
-        old = soil_cat_dataset.value
-        self.assertEqual(old, self.get_value(soil_cat_dataset.name))
-        soil_cat_dataset.value = 'ROSETTA'
-        new = soil_cat_dataset.value
-        self.assertEqual(new, 'ROSETTA')
+        new_val = "ROSETTA"
+        soil_cat_dataset.value = new_val
+        new = self.get_value(soil_cat_dataset.name)
+        self.assertEqual(new, new_val)
+
+        new_val = "STAS"
+        soil_cat_dataset.value = new_val
+        self.assertEqual(soil_cat_dataset.value, new_val)
+        new = self.get_value(soil_cat_dataset.name)
+        self.assertEqual(new, new_val)
 
     def test_GetGroundwaterParameterization(self):
         ground_para = self.Decisions_obj.groundwatr
@@ -47,9 +52,15 @@ class test_decisions_class(unittest.TestCase):
         ground_para = self.Decisions_obj.groundwatr
         old = ground_para.value
         self.assertEqual(old, self.get_value(ground_para.name))
-        ground_para.value = 'qTopmodl'
-        new = ground_para.value
-        self.assertEqual(new, 'qTopmodl')
+        new_val = 'qTopmodl'
+        ground_para.value = new_val
+        new = self.get_value(ground_para.name)
+        self.assertEqual(new, new_val)
+
+        new_val = 'bigBuckt'
+        ground_para.value = new_val
+        new = self.get_value(ground_para.name)
+        self.assertEqual(new, new_val)
 
     def test_GetLowerBoundaryThermo(self):
         lowbond_therm = self.Decisions_obj.bcLowrTdyn
@@ -62,14 +73,58 @@ class test_decisions_class(unittest.TestCase):
         lowbond_therm = self.Decisions_obj.bcLowrTdyn
         old = lowbond_therm.value
         self.assertEqual(old, self.get_value(lowbond_therm.name))
-        lowbond_therm.value = 'presTemp'
-        new = lowbond_therm.value
-        self.assertEqual(new, self.get_value(lowbond_therm.name))
+        new_val = 'presTemp'
+        lowbond_therm.value = new_val
+        new = self.get_value(lowbond_therm.name)
+        self.assertEqual(new, new_val)
+
+        new_val = 'zeroFlux'
+        lowbond_therm.value = new_val
+        new = self.get_value(lowbond_therm.name)
+        self.assertEqual(new, new_val)
 
     def test_validate_value(self):
         validate_value2 = 'STAS1'
         with self.assertRaises(ValueError):
             self.Decisions_obj.soilCatTbl.value = validate_value2
+    # 
+    def test_multiple_setting(self):
+
+        soil_cat_dataset = self.Decisions_obj.soilCatTbl
+        # print(soil_cat_dataset.value)
+
+        new_soil_cat_val = 'STAS'
+        # print(new_soil_cat_val)
+
+        soil_cat_dataset.value = new_soil_cat_val
+        # self.assertEqual(new_soil_cat_val, soil_cat_dataset.value)
+
+        new_soil_cat = self.get_value(soil_cat_dataset.name)
+        # print(new_soil_cat)
+
+        self.assertEqual(new_soil_cat, new_soil_cat_val)
+
+        new_soil_cat_val = 'ROSETTA'
+        # print(new_soil_cat_val)
+
+        soil_cat_dataset.value = new_soil_cat_val
+        # print(soil_cat_dataset.value)
+
+        new_soil_cat = self.get_value(soil_cat_dataset.name)
+        # print(new_soil_cat)
+
+        self.assertEqual(new_soil_cat, new_soil_cat_val)
+
+        thConSnow = self.Decisions_obj.thCondSnow
+        old_thr_snow = thConSnow.value
+        self.assertEqual("jrdn1991", old_thr_snow)
+        new_thr_snow_val = "tyen1965"
+        thConSnow.value = new_thr_snow_val
+        new_thr_snow = self.get_value(thConSnow.name)
+        self.assertEqual(new_thr_snow, new_thr_snow_val)
+
+        new_soil_cat = self.get_value(soil_cat_dataset.name)
+        self.assertEqual(new_soil_cat, new_soil_cat_val)
 
 if __name__ == '__main__':
     unittest.main()
