@@ -1,14 +1,14 @@
 import unittest
 from shutil import copyfile
 import os
-from Simulation import Simulation
+from pysumma.Simulation import Simulation
 
 
 class TestSimulation(unittest.TestCase):
     # Create a new fileManager.txt file with the correct file paths for the system it's run on
     my_path = os.path.abspath(os.path.dirname(__file__))
     whitespace = 50
-    with open("tmp_fileManager.txt", "w") as file:
+    with open("pysumma/tests/tmp_fileManager.txt", "w") as file:
         file.write("'SUMMA FILE_MANAGER_V1.0'")
         file.write("! fman_ver\n".rjust(whitespace))
         file.write("'" + my_path + "/'")
@@ -18,7 +18,7 @@ class TestSimulation(unittest.TestCase):
         file.write("'" + my_path + "/'")
         file.write("! output_path\n".rjust(whitespace))
         # Take the template file (never changes) and append it to fileManager.txt
-        with open("fileManager.txt", "r") as template:
+        with open("pysumma/tests/fileManager.txt", "r") as template:
             for line in template:
                 file.write(line)
             template.close()

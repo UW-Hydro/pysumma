@@ -1,4 +1,4 @@
-from Option import Option
+from pysumma.Option import Option
 
 
 class Decisions:
