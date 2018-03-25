@@ -130,20 +130,29 @@ class ModelOutput:
                          'maxvarFlux', 'maxvarDeriv', 'maxvarIndx', 'maxvarBpar', 'maxvarBvar', 'maxvarVarType',
                          'maxvarStat', 'childFLUX_MEAN(:)']
 
-    # Writes <variable> to ModelOutput.txt iff it's a valid choice AND not already in the file
-    def write_variable_to_file(self, variable):
-        if variable not in self.var_choices:
-            print("Not a valid variable.")
-        elif self.check_for_variable(variable):
-            print("Variable already in output file.")
-        else:
-            with open(self.filepath, 'a') as file:
-                file.write(variable + " | ")
-
     # Returns the entire text of the file at self.filepath
     def read_file(self):
         with open(self.filepath, 'rt') as f:
             return f.readlines()
+
+    # Returns a list of every variable in the file
+    def read_variables_from_file(self):
+        self.text = self.read_file()
+        var_list = []
+        for line in self.text:
+            if not line.startswith("!"):
+                var_list.append(line.split("|")[0].strip())
+        return var_list
+
+    # Writes <variable> to ModelOutput.txt iff it's a valid choice AND not already in the file
+    def write_variable_to_file(self, variable):
+        if variable not in self.var_choices:
+            print("Not a valid variable to add!")
+        elif self.check_for_variable(variable) is True:
+            print("Variable already in output file!")
+        else:
+            with open(self.filepath, 'a') as file:
+                file.write(variable + " | \n")
 
     # If <variable> is in the file, return TRUE. Else, return FALSE
     def check_for_variable(self, variable):
@@ -157,10 +166,13 @@ class ModelOutput:
     def remove_variable(self, variable):
         self.text = self.read_file()
         output_text = []
-        for line in self.text:
-            # If <variable> = the first element on the line (before |)
-            if variable.equals(line.split('|')[0].strip()):
-                output_text += line
-        # Write the new text (without the line with <variable>) to <filepath>
-        with open(self.filepath, 'w') as file:
-            file.writelines(output_text)
+        if variable not in self.var_choices:
+            print("Not a valid variable to remove!")
+        else:
+            for line in self.text:
+                # If <variable> = the first element on the line (before |)
+                if variable == line.split('|')[0].strip():
+                    output_text += line
+            # Write the new text (without the line with <variable>) to <filepath>
+            with open(self.filepath, 'w') as file:
+                file.writelines(output_text)
