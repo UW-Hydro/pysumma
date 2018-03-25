@@ -50,10 +50,10 @@ class TestSimulation(unittest.TestCase):
             return ''.join(file.readlines())
 
     def name_value_filepath_filename_test(self, fileManagerObject, setting_name):
-        assert fileManagerObject.name == setting_name, "FM Object name is: " + fileManagerObject.name + "; actual is: " + setting_name
-        assert fileManagerObject.value == self.read_value_from_file(setting_name), "FM Object " + fileManagerObject.name + " value is: " + fileManagerObject.value + ", actual is: " + self.read_value_from_file(setting_name)
-        assert fileManagerObject.filepath == self.get_filepath_from_value(setting_name), "FM Object " + fileManagerObject.name + " filepath is: " + fileManagerObject.filepath + ", actual is: " + self.get_filepath_from_value(setting_name)
-        assert fileManagerObject.filename == self.get_filename_from_value(setting_name), "FM Object " + fileManagerObject.name + " filename is: " + fileManagerObject.filename + ", actual is: " + self.get_filename_from_value(setting_name)
+        self.assertEqual(fileManagerObject.name, setting_name, msg="FM Object name is: " + fileManagerObject.name + "; actual is: " + setting_name)
+        self.assertEqual(fileManagerObject.value, self.read_value_from_file(setting_name), msg="FM Object " + fileManagerObject.name + " value is: " + fileManagerObject.value + ", actual is: " + self.read_value_from_file(setting_name))
+        self.assertEqual(fileManagerObject.filepath, self.get_filepath_from_value(setting_name), msg="FM Object " + fileManagerObject.name + " filepath is: " + fileManagerObject.filepath + ", actual is: " + self.get_filepath_from_value(setting_name))
+        self.assertEqual(fileManagerObject.filename, self.get_filename_from_value(setting_name), msg="FM Object " + fileManagerObject.name + " filename is: " + fileManagerObject.filename + ", actual is: " + self.get_filename_from_value(setting_name))
 
     #  Test the setting_path, input_path, and output_path FM objects (they represent paths, not files)
     def test_path_FM_objects(self):
