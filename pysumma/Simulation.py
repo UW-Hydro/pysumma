@@ -31,6 +31,7 @@ class Simulation:
         self.para_trial = FileManagerOption('para_trial', self.filepath)
         self.output_prefix = FileManagerOption('output_prefix', self.filepath)
         self.decision_obj = Decisions(self.setting_path.value + self.decision_path.value)
+        #TODO: Make a modeloutput object
 
     def execute(self,     run_suffix):
         self.run_suffix = run_suffix
@@ -83,7 +84,6 @@ class FileManagerOption(Option):
         value = new_filepath + self.filename
         self.write_value(old_value=self.value, new_value=value)
 
-    # TODO: Do we want to just use Unix file URLS (dir/dir/file) or also Windows (dir\dir\file)?
     # Returns the file name of the FileManagerOption
     @property
     def filename(self):
