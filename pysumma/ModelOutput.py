@@ -2,6 +2,7 @@ class ModelOutput:
     def __init__(self, filepath):
         self.filepath = filepath
         self.text = self.read_file()
+        # TODO: Get the master list here
         self.var_choices = ['numStats', 'maxFreq', 'ixVal', 'iLength', 'iLook_decision', 'simulStart', 'simulFinsh',
                          'soilCatTbl', 'vegeParTbl', 'soilStress', 'stomResist', 'bbTempFunc', 'bbHumdFunc',
                          'bbElecFunc', 'bbCO2point', 'bbNumerics', 'bbAssimFnc', 'bbCanIntg8', 'num_method',
@@ -145,8 +146,9 @@ class ModelOutput:
         return var_list
 
     # Writes <variable> to ModelOutput.txt iff it's a valid choice AND not already in the file
-    def write_variable_to_file(self, variable):
+    def add_variable(self, variable):
         if variable not in self.var_choices:
+            #TODO: Replace w/ exception
             # print("Not a valid variable to add!")
             return
         elif self.check_for_variable(variable) is True:
