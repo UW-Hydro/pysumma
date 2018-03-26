@@ -35,10 +35,11 @@ class TestModelOutput(unittest.TestCase):
             else:
                 assert self.mo.check_for_variable(var) is False, "var: " + var + " should not be in the file"
 
+    # TODO: make the tests independent (add/delete in one method)
     # Upon adding every possible variable, does ModelOutput reflect the changes?
     def test_3_add_all_valid_variables(self):
         for i in range(0, len(self.mo.var_choices)):
-            self.mo.write_variable_to_file(self.mo.var_choices[i])
+            self.mo.add_variable(self.mo.var_choices[i])
             assert self.mo.var_choices[i] in self.read_vars()
 
      # Upon removing every variable in the
@@ -50,14 +51,15 @@ class TestModelOutput(unittest.TestCase):
 
     # Testing a 'normal' situation-when someone adds just one variable to a file, checks it, then deletes it
     def test_5_pptrate(self):
-        self.mo.write_variable_to_file('pptrate')
+        self.mo.add_variable('pptrate')
         assert self.mo.check_for_variable('pptrate') is True
-        self.mo.write_variable_to_file('pptrate')
+        self.mo.add_variable('penguin')
         assert self.mo.read_variables_from_file() == ['pptrate']
         self.mo.remove_variable('nSoil')
         assert self.mo.read_variables_from_file() == ['pptrate']
         self.mo.remove_variable('pptrate')
         assert self.mo.read_variables_from_file() == []
+        self.assertEqual("a", "a")
     # def test_add_invalid_variables(self):
     #
     # def test_add_duplicate_variables(self):
