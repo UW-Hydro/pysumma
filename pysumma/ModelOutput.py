@@ -147,9 +147,11 @@ class ModelOutput:
     # Writes <variable> to ModelOutput.txt iff it's a valid choice AND not already in the file
     def write_variable_to_file(self, variable):
         if variable not in self.var_choices:
-            print("Not a valid variable to add!")
+            # print("Not a valid variable to add!")
+            return
         elif self.check_for_variable(variable) is True:
-            print("Variable already in output file!")
+            #print("Variable already in output file!")
+            return
         else:
             with open(self.filepath, 'a') as file:
                 file.write(variable + " | \n")
@@ -157,21 +159,22 @@ class ModelOutput:
     # If <variable> is in the file, return TRUE. Else, return FALSE
     def check_for_variable(self, variable):
         self.text = self.read_file()
-        if variable in self.text:
-            return True
-        else:
-            return False
+        for line in self.text:
+            if variable == line.split('|')[0].strip():
+                return True
+        return False
 
     # Removes the line ascribed to <variable>
     def remove_variable(self, variable):
         self.text = self.read_file()
         output_text = []
         if variable not in self.var_choices:
-            print("Not a valid variable to remove!")
+            #print("Not a valid variable to remove!")
+            return
         else:
             for line in self.text:
                 # If <variable> = the first element on the line (before |)
-                if variable == line.split('|')[0].strip():
+                if not variable == line.split('|')[0].strip():
                     output_text += line
             # Write the new text (without the line with <variable>) to <filepath>
             with open(self.filepath, 'w') as file:
