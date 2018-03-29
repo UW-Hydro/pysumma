@@ -1,4 +1,4 @@
-#from Decisions import Decisions         # This is for testing in cmd window.
+from pysumma.Option import Option
 from pysumma.Decisions import Decisions       # This is for testing in this python code.
 import subprocess
 import os
@@ -8,6 +8,7 @@ class Simulation:
     def __init__(self, filepath):
         self.filepath = os.path.abspath(filepath)
         self.file_dir = os.path.dirname(self.filepath)
+       #self.filepath = filepath
         self.file_manager_filepath = filepath
         self.file_contents = self.open_read()
         self.fman_ver = FileManagerOption(self,'fman_ver')
@@ -49,12 +50,9 @@ class Simulation:
 						self.decision_obj.simulStart.value[0:4] + '-' + \
 						self.decision_obj.simulFinsh.value[0:4] + '_' + \
 						self.run_suffix + '_1.nc'
-            return xr.open_dataset(out_file_path)
+            return xr.open_dataset(out_file_path), out_file_path
 
         elif run_option == "docker" :
-#            dir = self.setting_path.filepath.split('/')[:-2]
-#            mount_dir = '/'+dir[1]+'/'+dir[2]+'/'+dir[3]
-#            self.disk_mapping = mount_dir + ':' + mount_dir
             self.executable = 'bartnijssen/summa:develop'
             self.run_suffix = run_suffix
             cmd = "docker run -v {}:{}".format(self.file_dir, self.file_dir)+ \
@@ -66,12 +64,16 @@ class Simulation:
             out_file_path = self.output_path.filepath + \
 						self.output_prefix.value+'_output_' + \
 						self.run_suffix + '_timestep.nc'
-            return xr.open_dataset(out_file_path)
+            return xr.open_dataset(out_file_path), out_file_path
         else:
             raise ValueError('No executable defined. Set as "executable" attribute of Simulation or check run_option')
 
-class FileManagerOption:
-    def __init__(self, parent, name):
+class FileManagerOption(Option):
+    # key_position is the position in line.split() where the key name is
+    # value_position is the position in line.split() where the value is
+    # By default, delimiter=None, but can be set to split each line on different characters
+    def __init__(self, parent, name, file_manager_filepath):
+        super().__init__(name, file_manager_filepath, key_position=2, value_position=0, delimiter=None)
         self.parent = parent
         self.name = name
         self.line_no, self.line_contents = self.get_line_no(self.name)
@@ -84,29 +86,15 @@ class FileManagerOption:
             if name1 == name:
                 return line_no, line_contents
 
-    def get_value(self):
-        self.line_no, self.line_contents = self.get_line_no(self.name)
-        words = self.line_contents.split("'")
-        words = [w.strip() for w in words if w.strip() != "" and w.strip() != "!"]
-        return words[0]
-
-    def write_value(self, new_value):
-        self.parent.file_contents[self.line_no] = self.line_contents.replace(self.value, new_value, 1)
-        self.edit_save()
-
-    def edit_save(self):
-        with open(self.parent.filepath, 'wt') as f:
-            f.writelines(self.parent.file_contents)
-
     @property
     def value(self):
         return self.get_value()
 
-
     @value.setter
     def value(self, new_value):
-        self.write_value(new_value)
+        self.write_value(old_value=self.value, new_value=new_value)
 
+    # filepath is the path up to the filename, not including it
     @property
     def filepath(self):
         if not self.value.endswith('/'):
@@ -114,17 +102,19 @@ class FileManagerOption:
         else:
             return self.value
 
+    # Replace the filepath in the value in fileManager.txt
     @filepath.setter
-    def filepath(self, new_value):
-        value = new_value + self.filename
-        self.write_value(value)
+    def filepath(self, new_filepath):
+        value = new_filepath + self.filename
+        self.write_value(old_value=self.value, new_value=value)
 
+    # TODO: Do we want to just use Unix file URLS (dir/dir/file) or also Windows (dir\dir\file)?
+    # Returns the file name of the FileManagerOption
     @property
     def filename(self):
         return self.value.split('/')[-1]
 
     @filename.setter
-    def filename(self, new_value):
-        value = self.filepath + new_value
-        self.write_value(value)
-
+    def filename(self, new_filename):
+        value = self.filepath + new_filename
+        self.write_value(old_value=self.value, new_value=value)
