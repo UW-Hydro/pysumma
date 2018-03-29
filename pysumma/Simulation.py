@@ -4,34 +4,39 @@ import subprocess
 import os
 import xarray as xr
 
-
 class Simulation:
     def __init__(self, filepath):
         self.filepath = os.path.abspath(filepath)
         self.file_dir = os.path.dirname(self.filepath)
-        self.fman_ver = FileManagerOption('fman_ver', self.filepath)
-        #self.filepath = filepath
-        self.setting_path = FileManagerOption('setting_path', self.filepath)
-        self.input_path = FileManagerOption('input_path', self.filepath)
-        self.output_path = FileManagerOption('output_path', self.filepath)
-        self.decision_path = FileManagerOption('decision', self.filepath)
-        self.meta_time = FileManagerOption('meta_time', self.filepath)
-        self.meta_attr = FileManagerOption('meta_attr', self.filepath)
-        self.meta_type = FileManagerOption('meta_type', self.filepath)
-        self.meta_force = FileManagerOption('meta_force', self.filepath)
-        self.meta_localpar = FileManagerOption('meta_localpar', self.filepath)
-        self.OUTPUT_CONTROL = FileManagerOption('OUTPUT_CONTROL', self.filepath)
-        self.meta_index = FileManagerOption('meta_index', self.filepath)
-        self.meta_basinpar = FileManagerOption('meta_basinpar', self.filepath)
-        self.meta_basinvar = FileManagerOption('meta_basinvar', self.filepath)
-        self.local_attr = FileManagerOption('local_attr', self.filepath)
-        self.local_par = FileManagerOption('local_par', self.filepath)
-        self.basin_par = FileManagerOption('basin_par', self.filepath)
-        self.forcing_list = FileManagerOption('forcing_list', self.filepath)
-        self.initial_cond = FileManagerOption('initial_cond', self.filepath)
-        self.para_trial = FileManagerOption('para_trial', self.filepath)
-        self.output_prefix = FileManagerOption('output_prefix', self.filepath)
+       #self.filepath = filepath
+        self.file_manager_filepath = filepath
+        self.file_contents = self.open_read()
+        self.fman_ver = FileManagerOption(self,'fman_ver')
+        self.setting_path = FileManagerOption(self,'setting_path')
+        self.input_path = FileManagerOption(self,'input_path')
+        self.output_path = FileManagerOption(self,'output_path')
+        self.decision_path = FileManagerOption(self,'decision')
+        self.meta_time = FileManagerOption(self,'meta_time')
+        self.meta_attr = FileManagerOption(self,'meta_attr')
+        self.meta_type = FileManagerOption(self,'meta_type')
+        self.meta_force = FileManagerOption(self,'meta_force')
+        self.meta_localpar = FileManagerOption(self,'meta_localpar')
+        self.OUTPUT_CONTROL = FileManagerOption(self,'OUTPUT_CONTROL')
+        self.meta_index = FileManagerOption(self,'meta_index')
+        self.meta_basinpar = FileManagerOption(self,'meta_basinpar')
+        self.meta_basinvar = FileManagerOption(self,'meta_basinvar')
+        self.local_attr = FileManagerOption(self,'local_attr')
+        self.local_par = FileManagerOption(self,'local_par')
+        self.basin_par = FileManagerOption(self,'basin_par')
+        self.forcing_list = FileManagerOption(self,'forcing_list')
+        self.initial_cond = FileManagerOption(self,'initial_cond')
+        self.para_trial = FileManagerOption(self,'para_trial')
+        self.output_prefix = FileManagerOption(self,'output_prefix')
         self.decision_obj = Decisions(self.setting_path.value + self.decision_path.value)
+
+    def open_read(self):
+        with open(self.file_manager_filepath, 'rt') as f:
+            return f.readlines()
 
     def execute(self, run_suffix, run_option):
 
@@ -63,20 +68,23 @@ class Simulation:
         else:
             raise ValueError('No executable defined. Set as "executable" attribute of Simulation or check run_option')
 
-
 class FileManagerOption(Option):
     # key_position is the position in line.split() where the key name is
     # value_position is the position in line.split() where the value is
     # By default, delimiter=None, but can be set to split each line on different characters
-    def __init__(self, name, file_manager_filepath):
+    def __init__(self, parent, name, file_manager_filepath):
         super().__init__(name, file_manager_filepath, key_position=2, value_position=0, delimiter=None)
+        self.parent = parent
+        self.name = name
+        self.line_no, self.line_contents = self.get_line_no(self.name)
+        # self.text = self.open_read()
 
-    '''
-        value is the thing read from the Simulation file-a filepath with or without a trailing '/'
-        filepath adds a '/' to the value, if needed (does not contain the filename?)
-        filename is the last part of the value-only the filename
-        value = filepath + filename
-    '''
+    def get_line_no(self, name):
+        for line_no, line_contents in enumerate(self.parent.file_contents):
+            filepath_filename = line_contents.split("'")
+            name1 = filepath_filename[2].split(" ")[-1].strip()
+            if name1 == name:
+                return line_no, line_contents
 
     @property
     def value(self):
