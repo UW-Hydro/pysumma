@@ -1,4 +1,5 @@
 import weakref
+from pysumma.Option import Option
 
 class Decisions:
     def __init__(self, filepath):
@@ -38,22 +39,15 @@ class Decisions:
         with open(self.filepath, 'rt') as f:
             return f.readlines()
 
-class DecisionOption:
+class DecisionOption(Option):
     def __init__(self, parent, name):
+        super().__init__(name, filepath, key_position=0, value_position=1, delimiter=None)
         self.parent = parent
         self.name = name
-        self.line_no, self.line_contents = self.get_line_no(self.name)
+        self.line_no, self.line_contents = self.get_line_info()
         self.get_description()
         self.options = self.get_options()
-
-    def get_line_no(self, text_startwith):
-        for line_no, line_contents in enumerate(self.parent.file_contents):
-            if line_contents.split()[0].startswith(text_startwith):
-                return line_no, line_contents
-
-    def get_default_value(self):
-        self.line_no, self.line_contents = self.get_line_no(self.name)
-        return self.line_contents.split()[1].strip()
+        self._value = self.get_value()
 
     def get_description(self):
         num_and_descrip = self.line_contents.split('!')[-1]
@@ -73,24 +67,17 @@ class DecisionOption:
                 else:
                     return option_list
 
-    def write_value(self, new_value):
-        self.parent.file_contents[self.line_no] = self.line_contents.replace(self.value, new_value, 1)
-        self.edit_save()
-
-    def edit_save(self):
-        with open(self.parent.filepath, 'wt') as f:
-            f.writelines(self.parent.file_contents)
-
     @property
     def value(self):
-        return self.get_default_value()
+        return self.get_value()
 
     @value.setter
     def value(self, new_value):
         if new_value in self.options:
-            self.write_value(new_value)
+            self.write_value(self._value, new_value)
         else:
-            raise ValueError ('Your input value {} is not one of the valid options {}'.format(new_value, self.options))
+            raise ValueError('Your input value {} is not one of the valid options {}'.format(new_value, self.options))
+
 
 class SimulDatetime(DecisionOption):
 
@@ -104,4 +91,4 @@ class SimulDatetime(DecisionOption):
 
     @value.setter
     def value(self, new_date_time):
-        self.write_value(new_date_time)
+        self.write_value(self._value, new_date_time)
