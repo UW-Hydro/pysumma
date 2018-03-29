@@ -1,4 +1,3 @@
-#from Decisions import Decisions         # This is for testing in cmd window.
 from pysumma.Option import Option
 from pysumma.Decisions import Decisions       # This is for testing in this python code.
 import subprocess
@@ -7,9 +6,11 @@ import xarray as xr
 
 
 class Simulation:
-    executable = ''
     def __init__(self, filepath):
-        self.filepath = filepath
+        self.filepath = os.path.abspath(filepath)
+        self.file_dir = os.path.dirname(self.filepath)
+        self.fman_ver = FileManagerOption('fman_ver', self.filepath)
+        #self.filepath = filepath
         self.setting_path = FileManagerOption('setting_path', self.filepath)
         self.input_path = FileManagerOption('input_path', self.filepath)
         self.output_path = FileManagerOption('output_path', self.filepath)
@@ -32,19 +33,35 @@ class Simulation:
         self.output_prefix = FileManagerOption('output_prefix', self.filepath)
         self.decision_obj = Decisions(self.setting_path.value + self.decision_path.value)
 
-    def execute(self, run_suffix):
-        self.run_suffix = run_suffix
-        if self.executable == '':
-            raise ValueError('No executable defined. Set as "executable" attribute of Simulation')
-        else:
-            cmd = "{} -p never -s {} -m {}".format(self.executable, self.run_suffix, self.filepath)
+    def execute(self, run_suffix, run_option):
+
+        if run_option == 'local':
+            executable = ''
+            self.run_suffix = run_suffix
+            cmd = "{} -p never -s {}       -m {}".format(self.executable, self.run_suffix, self.filepath)
             subprocess.run(cmd, shell=True)
             out_file_path = 	self.output_path.filepath + \
 						self.output_prefix.value+'_' + \
 						self.decision_obj.simulStart.value[0:4] + '-' + \
 						self.decision_obj.simulFinsh.value[0:4] + '_' + \
 						self.run_suffix + '_1.nc'
-            return xr.open_dataset(out_file_path)
+            return xr.open_dataset(out_file_path), out_file_path
+
+        elif run_option == "docker" :
+            self.executable = 'bartnijssen/summa:develop'
+            self.run_suffix = run_suffix
+            cmd = "docker run -v {}:{}".format(self.file_dir, self.file_dir)+ \
+                            " -v {}:{}".format(self.setting_path.filepath, self.setting_path.filepath)+ \
+                            " -v {}:{}".format(self.input_path.filepath, self.input_path.filepath)+ \
+                            " -v {}:{}".format(self.output_path.filepath, self.output_path.filepath)+ \
+                            " {} -p never -s {} -m {}".format(self.executable, self.run_suffix, self.filepath)
+            subprocess.run(cmd, shell=True)
+            out_file_path = self.output_path.filepath + \
+						self.output_prefix.value+'_output_' + \
+						self.run_suffix + '_timestep.nc'
+            return xr.open_dataset(out_file_path), out_file_path
+        else:
+            raise ValueError('No executable defined. Set as "executable" attribute of Simulation or check run_option')
 
 
 class FileManagerOption(Option):
