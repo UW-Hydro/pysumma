@@ -3,8 +3,8 @@ import unittest
 from shutil import copyfile
 from pysumma.Decisions import Decisions
 
-class test_decisions_class(unittest.TestCase):
 
+class test_decisions_class(unittest.TestCase):
     my_path = os.path.abspath(os.path.dirname(__file__))
     filename = 'Decision.txt'
     filepath = os.path.join(my_path, filename)
@@ -70,6 +70,7 @@ class test_decisions_class(unittest.TestCase):
         validate_value2 = 'STAS1'
         with self.assertRaises(ValueError):
             self.Decisions_obj.soilCatTbl.value = validate_value2
+
 
 if __name__ == '__main__':
     unittest.main()
