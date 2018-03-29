@@ -1,13 +1,15 @@
 #from Decisions import Decisions         # This is for testing in cmd window.
-from .Decisions import Decisions       # This is for testing in this python code.
+from pysumma.Option import Option
+from pysumma.Decisions import Decisions       # This is for testing in this python code.
 import subprocess
 import os
 import xarray as xr
 
+
 class Simulation:
     executable = ''
     def __init__(self, filepath):
-        self.filepath = os.path.abspath(filepath)
+        self.filepath = filepath
         self.setting_path = FileManagerOption('setting_path', self.filepath)
         self.input_path = FileManagerOption('input_path', self.filepath)
         self.output_path = FileManagerOption('output_path', self.filepath)
@@ -44,46 +46,30 @@ class Simulation:
 						self.run_suffix + '_1.nc'
             return xr.open_dataset(out_file_path)
 
-class FileManagerOption:
-    def __init__(self, name, filepath):
-        self.name = name
-        self.file_manager_filepath = filepath
-        self.text = self.open_read()
 
-    def open_read(self):
-        with open(self.file_manager_filepath, 'rt') as f:
-            return f.readlines()
+class FileManagerOption(Option):
+    # key_position is the position in line.split() where the key name is
+    # value_position is the position in line.split() where the value is
+    # By default, delimiter=None, but can be set to split each line on different characters
+    def __init__(self, name, file_manager_filepath):
+        super().__init__(name, file_manager_filepath, key_position=2, value_position=0, delimiter=None)
 
-    def get_line_no(self, name):
-        for line_no, line_contents in enumerate(self.text):
-            filepath_filename = line_contents.split("'")
-            name1 = filepath_filename[2].split(" ")[-1].strip()
-            if name1 == name:
-                return line_no, line_contents
-
-    def get_value(self):
-        self.line_no, self.line_contents = self.get_line_no(self.name)
-        words = self.line_contents.split("'")
-        words = [w.strip() for w in words if w.strip() != "" and w.strip() != "!"]
-        return words[0]
-
-    def write_value(self, new_value):
-        self.text[self.line_no] = self.line_contents.replace(self.value, new_value, 1)
-        self.edit_save()
-
-    def edit_save(self):
-        with open(self.file_manager_filepath, 'wt') as f:
-            f.writelines(self.text)
+    '''
+        value is the thing read from the Simulation file-a filepath with or without a trailing '/'
+        filepath adds a '/' to the value, if needed (does not contain the filename?)
+        filename is the last part of the value-only the filename
+        value = filepath + filename
+    '''
 
     @property
     def value(self):
         return self.get_value()
 
-
     @value.setter
     def value(self, new_value):
-        self.write_value(new_value)
+        self.write_value(old_value=self.value, new_value=new_value)
 
+    # filepath is the path up to the filename, not including it
     @property
     def filepath(self):
         if not self.value.endswith('/'):
@@ -91,17 +77,19 @@ class FileManagerOption:
         else:
             return self.value
 
+    # Replace the filepath in the value in fileManager.txt
     @filepath.setter
-    def filepath(self, new_value):
-        value = new_value + self.filename
-        self.write_value(value)
+    def filepath(self, new_filepath):
+        value = new_filepath + self.filename
+        self.write_value(old_value=self.value, new_value=value)
 
+    # TODO: Do we want to just use Unix file URLS (dir/dir/file) or also Windows (dir\dir\file)?
+    # Returns the file name of the FileManagerOption
     @property
     def filename(self):
         return self.value.split('/')[-1]
 
     @filename.setter
-    def filename(self, new_value):
-        value = self.filepath + new_value
-        self.write_value(value)
-
+    def filename(self, new_filename):
+        value = self.filepath + new_filename
+        self.write_value(old_value=self.value, new_value=value)
