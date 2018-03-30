@@ -47,7 +47,6 @@ class DecisionOption(Option):
 
         self.description, self.option_number = self.get_description()
         self.options = self.get_options()
-        self._value = self.get_value()
 
     def get_description(self):
         num_and_descrip = self.line_contents.split('!')[-1]
@@ -76,7 +75,7 @@ class DecisionOption(Option):
     @value.setter
     def value(self, new_value):
         if new_value in self.options:
-            self.write_value(self._value, new_value)
+            self.write_value(self.value, new_value)
         else:
             raise ValueError('Your input value {} is not one of the valid options {}'.format(new_value, self.options))
 
