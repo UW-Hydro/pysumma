@@ -71,6 +71,19 @@ class test_decisions_class(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.Decisions_obj.soilCatTbl.value = validate_value2
 
+    def test_SetSoilCategoryDatasetMultiple(self):
+        soil_cat_dataset = self.Decisions_obj.soilCatTbl
+        old = soil_cat_dataset.value
+        self.assertEqual(old, self.get_value(soil_cat_dataset.name))
+        new = 'ROSETTA'
+        soil_cat_dataset.value = new
+        self.assertEqual(self.get_value(soil_cat_dataset.name), new)
+
+        new = 'STAS'
+        soil_cat_dataset.value = new
+        self.assertEqual(self.get_value(soil_cat_dataset.name), new)
+
+
 
 if __name__ == '__main__':
     unittest.main()
