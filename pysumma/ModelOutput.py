@@ -32,7 +32,7 @@ class ModelOutput:
     # Writes <variable> to ModelOutput.txt iff it's a valid choice AND not already in the file
     def add_variable(self, variable):
         if variable not in self.var_choices:
-            #TODO: Replace w/ exception
+            # TODO: Replace w/ exception
             raise Exception("Not a valid variable choice!")
         elif self.check_for_variable(variable) is True:
             raise Exception("Variable already in file!")
@@ -62,3 +62,8 @@ class ModelOutput:
             # Write the new text (without the line with <variable>) to <filepath>
             with open(self.filepath, 'w') as file:
                 file.writelines(output_text)
+
+    # Clears the file of all variables
+    def clear_variables(self):
+        for var in self.read_variables_from_file():
+            self.remove_variable(var)
