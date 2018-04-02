@@ -6,36 +6,36 @@ class Decisions:
         self.filepath = filepath
         self.simulStart = SimulDatetime('simulStart', self.filepath)
         self.simulFinsh = SimulDatetime('simulFinsh', self.filepath)
-        self.soilCatTbl = PDecisionOption('soilCatTbl', self.filepath)
-        self.vegeParTbl = PDecisionOption('vegeParTbl', self.filepath)
-        self.soilStress = PDecisionOption('soilStress', self.filepath)
-        self.stomResist = PDecisionOption('stomResist', self.filepath)
-        self.num_method = PDecisionOption('num_method', self.filepath)
-        self.fDerivMeth = PDecisionOption('fDerivMeth', self.filepath)
-        self.LAI_method = PDecisionOption('LAI_method', self.filepath)
-        self.f_Richards = PDecisionOption('f_Richards', self.filepath)
-        self.groundwatr = PDecisionOption('groundwatr', self.filepath)
-        self.hc_profile = PDecisionOption('hc_profile', self.filepath)
-        self.bcUpprTdyn = PDecisionOption('bcUpprTdyn', self.filepath)
-        self.bcLowrTdyn = PDecisionOption('bcLowrTdyn', self.filepath)
-        self.bcUpprSoiH = PDecisionOption('bcUpprSoiH', self.filepath)
-        self.bcLowrSoiH = PDecisionOption('bcLowrSoiH', self.filepath)
-        self.veg_traits = PDecisionOption('veg_traits', self.filepath)
-        self.canopyEmis = PDecisionOption('canopyEmis', self.filepath)
-        self.snowIncept = PDecisionOption('snowIncept', self.filepath)
-        self.windPrfile = PDecisionOption('windPrfile', self.filepath)
-        self.astability = PDecisionOption('astability', self.filepath)
-        self.canopySrad = PDecisionOption('canopySrad', self.filepath)
-        self.alb_method = PDecisionOption('alb_method', self.filepath)
-        self.compaction = PDecisionOption('compaction', self.filepath)
-        self.snowLayers = PDecisionOption('snowLayers', self.filepath)
-        self.thCondSnow = PDecisionOption('thCondSnow', self.filepath)
-        self.thCondSoil = PDecisionOption('thCondSoil', self.filepath)
-        self.spatial_gw = PDecisionOption('spatial_gw', self.filepath)
-        self.subRouting = PDecisionOption('subRouting', self.filepath)
+        self.soilCatTbl = DecisionOption('soilCatTbl', self.filepath)
+        self.vegeParTbl = DecisionOption('vegeParTbl', self.filepath)
+        self.soilStress = DecisionOption('soilStress', self.filepath)
+        self.stomResist = DecisionOption('stomResist', self.filepath)
+        self.num_method = DecisionOption('num_method', self.filepath)
+        self.fDerivMeth = DecisionOption('fDerivMeth', self.filepath)
+        self.LAI_method = DecisionOption('LAI_method', self.filepath)
+        self.f_Richards = DecisionOption('f_Richards', self.filepath)
+        self.groundwatr = DecisionOption('groundwatr', self.filepath)
+        self.hc_profile = DecisionOption('hc_profile', self.filepath)
+        self.bcUpprTdyn = DecisionOption('bcUpprTdyn', self.filepath)
+        self.bcLowrTdyn = DecisionOption('bcLowrTdyn', self.filepath)
+        self.bcUpprSoiH = DecisionOption('bcUpprSoiH', self.filepath)
+        self.bcLowrSoiH = DecisionOption('bcLowrSoiH', self.filepath)
+        self.veg_traits = DecisionOption('veg_traits', self.filepath)
+        self.canopyEmis = DecisionOption('canopyEmis', self.filepath)
+        self.snowIncept = DecisionOption('snowIncept', self.filepath)
+        self.windPrfile = DecisionOption('windPrfile', self.filepath)
+        self.astability = DecisionOption('astability', self.filepath)
+        self.canopySrad = DecisionOption('canopySrad', self.filepath)
+        self.alb_method = DecisionOption('alb_method', self.filepath)
+        self.compaction = DecisionOption('compaction', self.filepath)
+        self.snowLayers = DecisionOption('snowLayers', self.filepath)
+        self.thCondSnow = DecisionOption('thCondSnow', self.filepath)
+        self.thCondSoil = DecisionOption('thCondSoil', self.filepath)
+        self.spatial_gw = DecisionOption('spatial_gw', self.filepath)
+        self.subRouting = DecisionOption('subRouting', self.filepath)
 
 
-class PDecisionOption(Option):
+class DecisionOption(Option):
     def __init__(self, name, filepath):
         super().__init__(name, filepath, key_position=0, value_position=1, delimiter=None)
         self.line_no, self.line_contents = self.get_line_info()
@@ -73,7 +73,7 @@ class PDecisionOption(Option):
             raise ValueError('Your input value {} is not one of the valid options {}'.format(new_value, self.options))
 
 
-class SimulDatetime(PDecisionOption):
+class SimulDatetime(DecisionOption):
     def get_default_date_time(self):
         date_time = self.line_contents.split("'")[1]
         return date_time
