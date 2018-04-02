@@ -1,3 +1,7 @@
+{file version}                                                                         ! fman_ver
+{settings path}                                                                                   ! setting_path
+{input path}                                                                                      ! input_path
+{output path}                                                                                     ! output_path
 'Decision.txt'                                                                                    ! decision
 'meta/summa_zTimeMeta.txt'                                                                        ! meta_time
 'meta/summa_zLocalAttributeMeta.txt'                                                              ! meta_attr

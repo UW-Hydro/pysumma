@@ -7,22 +7,29 @@ from pysumma.Simulation import Simulation
 class TestSimulation(unittest.TestCase):
     # Create a new fileManager.txt file with the correct file paths for the system it's run on
     my_path = os.path.abspath(os.path.dirname(__file__))
-    whitespace = 50
-    with open("pysumma/tests/tmp_fileManager.txt", "w") as file:
-        file.write("'SUMMA FILE_MANAGER_V1.0'")
-        file.write("! fman_ver\n".rjust(whitespace))
-        file.write("'" + my_path + "/'")
-        file.write("! setting_path\n".rjust(whitespace))
-        file.write("'" + my_path + "/'")
-        file.write("! input_path\n".rjust(whitespace))
-        file.write("'" + my_path + "/'")
-        file.write("! output_path\n".rjust(whitespace))
-        # Take the template file (never changes) and append it to fileManager.txt
-        with open("pysumma/tests/fileManager.txt", "r") as template:
-            for line in template:
-                file.write(line)
-            template.close()
-        file.close()
+    filename = 'fileManager.txt'
+    filepath = os.path.join(my_path, filename)
+    filename2 = 'tmp_{}'.format(filename)
+    filepath2 = os.path.join(my_path, filename2)
+    copyfile(filepath, filepath2)
+
+    with open(filepath2, 'r') as infile:
+        text = infile.readlines()
+    out_text = []
+    for line in text:
+        if '{file version}' in line:
+            line = line.replace('{file version}', "'SUMMA FILE_MANAGER_V1.0'")
+        if '{settings path}' in line:
+            line = line.replace('{settings path}', "'" + my_path + "/'")
+        if '{input path}' in line:
+            line = line.replace('{input path}', "'" + my_path + "/'")
+        if '{output path}' in line:
+            line = line.replace('{output path}', "'" + my_path + "/'")
+        out_text.append(line)
+    with open(filepath2, 'w') as outfile:
+        outfile.writelines(out_text)
+    Simulation_obj = Simulation(filepath2)
+
 
     # Setting up test environment and creating Simulation object
     filepath2 = my_path + '/tmp_fileManager.txt'
