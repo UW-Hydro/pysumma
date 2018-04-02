@@ -9,6 +9,7 @@ import xarray as xr
 
 class Simulation:
     executable = ''
+
     def __init__(self, filepath):
         self.filepath = filepath
         self.setting_path = FileManagerOption('setting_path', self.filepath)
@@ -33,7 +34,7 @@ class Simulation:
         self.output_prefix = FileManagerOption('output_prefix', self.filepath)
         self.decision_obj = Decisions(self.setting_path.value + self.decision_path.value)
         self.modeloutput_object = ModelOutput(self.filepath, 'pysumma/var_lookup.f90')
-        #TODO: Make a modeloutput object
+        #TODO: Make a modeloutput variable
 
     def execute(self,     run_suffix):
         self.run_suffix = run_suffix
@@ -57,13 +58,7 @@ class FileManagerOption(Option):
     def __init__(self, name, file_manager_filepath):
         super().__init__(name, file_manager_filepath, key_position=2, value_position=0, delimiter=None)
 
-    '''
-        value is the thing read from the Simulation file-a filepath with or without a trailing '/'
-        filepath adds a '/' to the value, if needed (does not contain the filename?)
-        filename is the last part of the value-only the filename
-        value = filepath + filename
-    '''
-
+    # value = filepath + filename
     @property
     def value(self):
         return self.get_value()

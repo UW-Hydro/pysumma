@@ -1,9 +1,10 @@
 class ModelOutput:
     def __init__(self, filepath, master_file_filepath):
         self.filepath = filepath
+        self.master_file_filepath = master_file_filepath
         self.text = self.read_file()
         # TODO: Get the master list here
-        self.var_choices = self.read_master_file(master_file_filepath)
+        self.var_choices = self.read_master_file()
 
     # Returns the entire text of the file at self.filepath
     def read_file(self):
@@ -11,14 +12,13 @@ class ModelOutput:
             return f.readlines()
 
     # Reads var_lookup.f90, the list of all possible ModelOutput variables
-    def read_master_file(self, filepath):
+    def read_master_file(self):
         out = []
-        with open(filepath, 'r') as file:
+        with open(self.master_file_filepath, 'r') as file:
             for line in file:
                 if "::" in line and line.split(sep='::')[1].split(sep='=')[0] is not None:
                     out.append(line.split(sep='::')[1].split(sep='=')[0].strip())
         return out
-
 
     # Returns a list of every variable in the file
     def read_variables_from_file(self):
@@ -33,11 +33,9 @@ class ModelOutput:
     def add_variable(self, variable):
         if variable not in self.var_choices:
             #TODO: Replace w/ exception
-            # print("Not a valid variable to add!")
-            return
+            raise Exception("Not a valid variable choice!")
         elif self.check_for_variable(variable) is True:
-            #print("Variable already in output file!")
-            return
+            raise Exception("Variable already in file!")
         else:
             with open(self.filepath, 'a') as file:
                 file.write(variable + " | \n")
@@ -55,7 +53,6 @@ class ModelOutput:
         self.text = self.read_file()
         output_text = []
         if variable not in self.var_choices:
-            #print("Not a valid variable to remove!")
             return
         else:
             for line in self.text:
