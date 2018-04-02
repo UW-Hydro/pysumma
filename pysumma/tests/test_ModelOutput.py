@@ -13,7 +13,6 @@ class TestModelOutput(unittest.TestCase):
     filepath2 = os.path.join(my_path, filename2)
     copyfile(filepath, filepath2)
     mo = ModelOutput(filepath2, 'pysumma/var_lookup.f90')
-    print("choices: " + str(mo.var_choices))
 
     def read_vars(self):
         var_list = []
