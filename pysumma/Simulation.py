@@ -1,6 +1,7 @@
 #from Decisions import Decisions         # This is for testing in cmd window.
 from pysumma.Option import Option
 from pysumma.Decisions import Decisions       # This is for testing in this python code.
+from pysumma.ModelOutput import ModelOutput
 import subprocess
 import os
 import xarray as xr
@@ -31,6 +32,7 @@ class Simulation:
         self.para_trial = FileManagerOption('para_trial', self.filepath)
         self.output_prefix = FileManagerOption('output_prefix', self.filepath)
         self.decision_obj = Decisions(self.setting_path.value + self.decision_path.value)
+        self.modeloutput_object = ModelOutput(self.filepath, 'pysumma/var_lookup.f90')
         #TODO: Make a modeloutput object
 
     def execute(self,     run_suffix):
