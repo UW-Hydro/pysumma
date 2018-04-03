@@ -15,29 +15,30 @@
  - Get and set model parameters(Decision and fileManager file) (in progress)
  - Run SUMMA Model (in progress)
  - Visualize netCDF outputs (in progress)
+ - Operate pysumma with jupyter notebook environment (in progress)
+ - Interact Hydorshare to download SUMMA TestCases and post the output of SUMMA (in progress)
+ - Create UserInterface of Decision and filemanager file for User
  - Automate model calibration or sensitivity studies (Future work)
- - Operate pysumma with jupyter notebook environment in Hydroshare (Future work)
+
 
 ## Installation and Usage
 
 **pySUMMA requires Python 3.6 and following packages : **
 
- - seaborn 0.8.1 : statistical data visualization
+ - os :
  - xarray 0.10.0 : N-D labeled arrays and datasets in python
  - numpy 1.13.3 : the fundamental package for scientific computing with Python
  - matplotlib 2.1.1 : a Python 2D plotting library 
- - Cartopy 0.15.1 : a library providing cartographic tools.
- - Shapely 1.6.3 : a package for creation, manipulation, and analysis of planar geometry    
-                   objects based on GEOS.
+ - seaborn : 
  - jupyterthemes 0.18.3
- - pyproj 1.9.5.1 : an interface to the PROJ.4 library for cartographic transformations.
- - GDAL 2.2.3 : (Geospatial Data Abstraction Library), a translator library for raster  
-           geospatial data formats.
- - Fiona 1.7.11(required GDAL) : OGR's neater API
- - geopandas 0.3.0 (required numpy, pandas, shapely, fiona, six, pyproj) 
+ - subprocess
+ - shutil : 
+ - PyQT5 : 
+ - datetime :
+ - urllib : 
  - Linux Environment (VirtualBox 5.1.32, lubuntu-16-10)              
 
-## Download pysumma_alpha and summa_testcase :
+## Download pysumma and summa_testcase :
 
 **1.)**  open VirtualBox
 
@@ -233,7 +234,7 @@ layer_time = [['midSoilStartIndex','13'], ['midTotoStartIndex','14'],
 
 
 ## Bugs
-  Our issue tracker is at https://github.com/DavidChoi76/pysumma_alpha0/issues.
+  Our issue tracker is at https://github.com/DavidChoi76/pysumma/issues.
   Please report any bugs that you find.  Or, even better, fork the repository on
   GitHub and create a pull request.  All changes are welcome, big or small, and we
   will help you make the pull request if you are new to git
