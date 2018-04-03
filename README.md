@@ -17,7 +17,7 @@
  - Visualize netCDF outputs (in progress)
  - Operate pysumma with jupyter notebook environment (in progress)
  - Interact Hydorshare to download SUMMA TestCases and post the output of SUMMA (in progress)
- - Create UserInterface of Decision and filemanager file for User
+ - Create UserInterface of Decision and filemanager file for User (in progress)
  - Automate model calibration or sensitivity studies (Future work)
 
 
