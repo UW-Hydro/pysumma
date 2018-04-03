@@ -78,11 +78,9 @@ class test_decisions_class(unittest.TestCase):
         new = 'ROSETTA'
         soil_cat_dataset.value = new
         self.assertEqual(self.get_value(soil_cat_dataset.name), new)
-
         new = 'STAS'
         soil_cat_dataset.value = new
         self.assertEqual(self.get_value(soil_cat_dataset.name), new)
-
 
 
 if __name__ == '__main__':
