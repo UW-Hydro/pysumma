@@ -1,5 +1,5 @@
 from pysumma.Option import Option
-from pysumma.Decisions import Decisions       # This is for testing in this python code.
+from pysumma.Decisions import Decisions
 import subprocess
 import os
 import xarray as xr
@@ -34,35 +34,23 @@ class Simulation:
         self.decision_obj = Decisions(self.setting_path.value + self.decision_path.value)
 
     def open_read(self):
+        # read filemanager text file
         with open(self.filepath, 'rt') as f:
+            # read every line of filemanager and return as list format
             return f.readlines()
 
     def execute(self, run_suffix, run_option):
         self.run_suffix = run_suffix
         if run_option == 'local':
-            cmd = "{} -p never -s {}       -m {}".format(self.executable, self.run_suffix, self.filepath)
-            # subprocess.run(cmd, shell=True)
-            # out_file_path = self.output_path.filepath + \
-            #                 self.output_prefix.value+'_' + \
-            #                 self.decision_obj.simulStart.value[0:4] + '-' + \
-            #                 self.decision_obj.simulFinsh.value[0:4] + '_' + \
-            #                 self.run_suffix + '_1.nc'
-            # return xr.open_dataset(out_file_path)
+            cmd = "{} -p never -s {} -m {}".format(self.executable, self.run_suffix, self.filepath)
 
-        elif run_option == "docker_latest" :
+        elif run_option == "docker_latest":
             self.executable = 'bartnijssen/summa:latest'
-            cmd = "docker run -v {}:{}".format(self.file_dir, self.file_dir)+ \
-                  " -v {}:{}".format(self.setting_path.filepath, self.setting_path.filepath)+ \
-                  " -v {}:{}".format(self.input_path.filepath, self.input_path.filepath)+ \
-                  " -v {}:{}".format(self.output_path.filepath, self.output_path.filepath)+ \
+            cmd = "docker run -v {}:{}".format(self.file_dir, self.file_dir) + \
+                  " -v {}:{}".format(self.setting_path.filepath, self.setting_path.filepath) + \
+                  " -v {}:{}".format(self.input_path.filepath, self.input_path.filepath) + \
+                  " -v {}:{}".format(self.output_path.filepath, self.output_path.filepath) + \
                   " {} -p never -s {} -m {}".format(self.executable, self.run_suffix, self.filepath)
-            # subprocess.run(cmd, shell=True)
-            # out_file_path = self.output_path.filepath + \
-            #                 self.output_prefix.value + '_' + \
-            #                 self.decision_obj.simulStart.value[0:4] + '-' + \
-            #                 self.decision_obj.simulFinsh.value[0:4] + '_' + \
-            #                 self.run_suffix + '_1.nc'
-            # return xr.open_dataset(out_file_path)
 
         elif run_option == "docker_develop":
             self.executable = 'bartnijssen/summa:develop'
@@ -74,21 +62,22 @@ class Simulation:
 
         else:
             raise ValueError('No executable defined. Set as "executable" attribute of Simulation or check run_option')
-
+        # run shell script in python
         subprocess.run(cmd, shell=True)
+        # define output file name
         out_file_path = self.output_path.filepath + \
                         self.output_prefix.value + '_output_' + \
                         self.run_suffix + '_timestep.nc'
         return xr.open_dataset(out_file_path), out_file_path
 
+
 class FileManagerOption(Option):
+
     # key_position is the position in line.split() where the key name is
     # value_position is the position in line.split() where the value is
     # By default, delimiter=None, but can be set to split each line on different characters
     def __init__(self, parent, name):
-        super().__init__(name, parent, key_position=1, value_position=0,
-                         delimiter = "!")
-        # self.text = self.open_read()
+        super().__init__(name, parent, key_position=1, value_position=0, delimiter="!")
 
     @property
     def value(self):
@@ -112,7 +101,6 @@ class FileManagerOption(Option):
         value = new_filepath + self.filename
         self.write_value(old_value=self.value, new_value=value)
 
-    # TODO: Do we want to just use Unix file URLS (dir/dir/file) or also Windows (dir\dir\file)?
     # Returns the file name of the FileManagerOption
     @property
     def filename(self):
