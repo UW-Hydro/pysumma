@@ -44,7 +44,6 @@ class DecisionOption(Option):
     def __init__(self, parent, name):
         super().__init__(name, parent, key_position=0, value_position=1,
                          delimiter=None)
-
         self.description, self.option_number = self.get_description()
         self.options = self.get_options()
 
@@ -82,8 +81,7 @@ class DecisionOption(Option):
 
 class SimulDatetime(Option):
     def __init__(self, parent, name):
-        super().__init__(name, parent, key_position=0, value_position=1,
-                     delimiter="'")
+        super().__init__(name, parent, key_position=0, value_position=1, delimiter="'")
 
     @property
     def value(self):
