@@ -30,12 +30,6 @@ class TestSimulation(TestCase):
         outfile.writelines(out_text)
     Simulation_obj = Simulation(filepath2)
 
-
-    # Setting up test environment and creating Simulation object
-    filepath2 = my_path + '/tmp_fileManager.txt'
-    print("filepath2: " + filepath2)
-    Simulation_obj = Simulation(filepath2)
-
     def read_value_from_file(self, setting_name):
         with open(self.filepath2) as fileManager_file:
             for line in fileManager_file:
