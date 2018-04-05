@@ -1,5 +1,6 @@
 from pysumma.Option import Option
 from pysumma.Decisions import Decisions       # This is for testing in this python code.
+from pysumma.ModelOutput import ModelOutput
 import subprocess
 import os
 import xarray as xr
@@ -32,6 +33,8 @@ class Simulation:
         self.para_trial = FileManagerOption(self, 'para_trial')
         self.output_prefix = FileManagerOption(self, 'output_prefix')
         self.decision_obj = Decisions(self.setting_path.value + self.decision_path.value)
+        self.modeloutput_obj = ModelOutput(self.setting_path.value + self.OUTPUT_CONTROL.value)
+
 
     def open_read(self):
         with open(self.filepath, 'rt') as f:
