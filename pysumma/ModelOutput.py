@@ -1,9 +1,8 @@
 class ModelOutput:
-    def __init__(self, filepath, master_file_filepath):
+    def __init__(self, filepath, master_file_filepath='pysumma/var_lookup.f90'):
         self.filepath = filepath
         self.master_file_filepath = master_file_filepath
         self.text = self.read_file()
-        # TODO: Get the master list here
         self.var_choices = self.read_master_file()
 
     # Returns the entire text of the file at self.filepath
@@ -32,10 +31,9 @@ class ModelOutput:
     # Writes <variable> to ModelOutput.txt iff it's a valid choice AND not already in the file
     def add_variable(self, variable):
         if variable not in self.var_choices:
-            # TODO: Replace w/ exception
-            raise Exception("Not a valid variable choice!")
+            raise ValueError("Not a valid variable choice!")
         elif self.check_for_variable(variable) is True:
-            raise Exception("Variable already in file!")
+            raise ValueError("Variable already in file!")
         else:
             with open(self.filepath, 'a') as file:
                 file.write(variable + " | \n")

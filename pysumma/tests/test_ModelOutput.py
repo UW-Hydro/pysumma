@@ -36,11 +36,11 @@ class TestModelOutput(unittest.TestCase):
         self.mo.add_variable('mLayerdPsi_dTheta')
 
     def test_add_invalid_variable(self):
-        with self.assertRaises(Exception):
+        with self.assertRaises(ValueError):
             self.mo.add_variable('pptrate')
 
     def test_add_duplicate_variable(self):
-        with self.assertRaises(Exception):
+        with self.assertRaises(ValueError):
             self.mo.add_variable('pptrate')
 
     def test_add_multiple_variables(self):
@@ -78,7 +78,6 @@ class TestModelOutput(unittest.TestCase):
         self.mo.clear_variables()
         self.assertEqual([], self.mo.read_variables_from_file())
 
-    # TODO: make the tests independent (add/delete in one method)
 
 
 
