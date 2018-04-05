@@ -112,7 +112,6 @@ class FileManagerOption(Option):
         value = new_filepath + self.filename
         self.write_value(old_value=self.value, new_value=value)
 
-    # TODO: Do we want to just use Unix file URLS (dir/dir/file) or also Windows (dir\dir\file)?
     # Returns the file name of the FileManagerOption
     @property
     def filename(self):
