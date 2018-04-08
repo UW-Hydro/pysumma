@@ -84,14 +84,14 @@ class Simulation:
                         self.run_suffix + '_timestep.nc'
         return xr.open_dataset(out_file_path), out_file_path
 
+
 class FileManagerOption(Option):
     # key_position is the position in line.split() where the key name is
     # value_position is the position in line.split() where the value is
     # By default, delimiter=None, but can be set to split each line on different characters
     def __init__(self, parent, name):
         super().__init__(name, parent, key_position=1, value_position=0,
-                         delimiter = "!")
-        # self.text = self.open_read()
+                         delimiter="!")
 
     @property
     def value(self):
