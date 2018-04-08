@@ -16,6 +16,8 @@ class TestSimulation(TestCase):
     with open(filepath2, 'r') as infile:
         text = infile.readlines()
     out_text = []
+
+    # Replaces the fileManager.txt placeholders with the paths/values for this system
     for line in text:
         if '{file version}' in line:
             line = line.replace('{file version}', "'SUMMA FILE_MANAGER_V1.0'")
@@ -51,7 +53,7 @@ class TestSimulation(TestCase):
         with open(self.read_value_from_file(setting_name)) as file:
             return ''.join(file.readlines())
 
-    #  Test the setting_path, input_path, and output_path FM objects (they represent paths, not files)
+    # Test the setting_path, input_path, and output_path FM objects (they represent paths, not files)
     def test_path_FM_objects(self):
         # Are the names, values, filepaths, and filenames correct upon FileManagerOption object instantiation?
         fileManagerObject = self.Simulation_obj.setting_path
@@ -75,56 +77,47 @@ class TestSimulation(TestCase):
         self.assertEqual(fileManagerObject.filepath, self.get_filepath_from_value(setting_name))
         self.assertEqual(fileManagerObject.filename, self.get_filename_from_value(setting_name))
 
-
-        # Change the value of the paths in the fileManagerOption objects, and save the old ones
+        # Save the old path values
         old_setting_path_value = self.Simulation_obj.setting_path.value
         old_input_path_value = self.Simulation_obj.input_path.value
         old_output_path_value = self.Simulation_obj.output_path.value
 
+        # Set new values for the path variables
         new_setting_path_value = self.Simulation_obj.setting_path.value + "settingsample/"
         new_input_path_value = self.Simulation_obj.input_path.value + "inputsample/"
         new_output_path_value = self.Simulation_obj.output_path.value + "outputsample/"
         self.Simulation_obj.setting_path.value = new_setting_path_value
         self.Simulation_obj.input_path.value = new_input_path_value
         self.Simulation_obj.output_path.value = new_output_path_value
+
+        # Did ModelOutput change them in the file?
         self.assertEqual(self.read_value_from_file('setting_path'), new_setting_path_value)
         self.assertEqual(self.read_value_from_file('input_path'), new_input_path_value)
         self.assertEqual(self.read_value_from_file('output_path'), new_output_path_value)
-
-
 
         # Change the values back
         self.Simulation_obj.setting_path.value = old_setting_path_value
         self.Simulation_obj.input_path.value = old_input_path_value
         self.Simulation_obj.output_path.value = old_output_path_value
 
-        # Are the values, filepaths, and filenames updated correctly?
+        # Are the values updated correctly?
         self.assertEqual(self.read_value_from_file('setting_path'), old_setting_path_value)
         self.assertEqual(self.read_value_from_file('input_path'), old_input_path_value)
         self.assertEqual(self.read_value_from_file('output_path'), old_output_path_value)
 
+    def test_FM_ModelOutput_obj(self):
+        # Make sure that the ModelOutput object can read from the master file
+        self.assertNotEqual([], self.Simulation_obj.modeloutput_obj.read_master_file())
 
-    # Tests the value, filepath, and filename for all fileManager objects
-    # def test_file_FM_objects(self):
-    #     self.name_value_filepath_filename_test(self.Simulation_obj.decision_path, 'decision')
-    #
-    #     self.name_value_filepath_filename_test(self.Simulation_obj.meta_time, 'meta_time')
-    #     self.name_value_filepath_filename_test(self.Simulation_obj.meta_attr, 'meta_attr')
-    #     self.name_value_filepath_filename_test(self.Simulation_obj.meta_type, 'meta_type')
-    #     self.name_value_filepath_filename_test(self.Simulation_obj.meta_force, 'meta_force')
-    #     self.name_value_filepath_filename_test(self.Simulation_obj.meta_localpar, 'meta_localpar')
-    #     self.name_value_filepath_filename_test(self.Simulation_obj.OUTPUT_CONTROL, 'OUTPUT_CONTROL')
-    #     self.name_value_filepath_filename_test(self.Simulation_obj.meta_index, 'meta_index')
-    #     self.name_value_filepath_filename_test(self.Simulation_obj.meta_basinpar, 'meta_basinpar')
-    #     self.name_value_filepath_filename_test(self.Simulation_obj.meta_basinvar, 'meta_basinvar')
-    #
-    #     self.name_value_filepath_filename_test(self.Simulation_obj.local_attr, 'local_attr')
-    #     self.name_value_filepath_filename_test(self.Simulation_obj.local_par, 'local_par')
-    #     self.name_value_filepath_filename_test(self.Simulation_obj.basin_par, 'basin_par')
-    #     self.name_value_filepath_filename_test(self.Simulation_obj.forcing_list, 'forcing_list')
-    #     self.name_value_filepath_filename_test(self.Simulation_obj.initial_cond, 'initial_cond')
-    #     self.name_value_filepath_filename_test(self.Simulation_obj.para_trial, 'para_trial')
-    #
-    #     self.name_value_filepath_filename_test(self.Simulation_obj.output_prefix, 'output_prefix')
-    #
-    #
+        # Add a variable that's already in the file
+        with self.assertRaises(ValueError):
+            self.Simulation_obj.modeloutput_obj.add_variable('pptrate')
+
+        # Add a valid variable and make sure it's in the file
+        self.Simulation_obj.modeloutput_obj.add_variable('aquiferScaleFactor')
+        self.assertIn('aquiferScaleFactor', self.Simulation_obj.modeloutput_obj.read_variables_from_file())
+
+        # Remove that variable, make sure it isn't in the file
+        self.Simulation_obj.modeloutput_obj.remove_variable('aquiferScaleFactor')
+        self.assertNotIn('aquiferScaleFactor', self.Simulation_obj.modeloutput_obj.read_variables_from_file())
+
