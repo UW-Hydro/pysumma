@@ -3,8 +3,8 @@ import unittest
 from shutil import copyfile
 from pysumma.Decisions import Decisions
 
-class test_decisions_class(unittest.TestCase):
 
+class test_decisions_class(unittest.TestCase):
     my_path = os.path.abspath(os.path.dirname(__file__))
     filename = 'Decision.txt'
     filepath = os.path.join(my_path, filename)
@@ -125,6 +125,18 @@ class test_decisions_class(unittest.TestCase):
 
         new_soil_cat = self.get_value(soil_cat_dataset.name)
         self.assertEqual(new_soil_cat, new_soil_cat_val)
+
+    def test_SetSoilCategoryDatasetMultiple(self):
+        soil_cat_dataset = self.Decisions_obj.soilCatTbl
+        old = soil_cat_dataset.value
+        self.assertEqual(old, self.get_value(soil_cat_dataset.name))
+        new = 'ROSETTA'
+        soil_cat_dataset.value = new
+        self.assertEqual(self.get_value(soil_cat_dataset.name), new)
+        new = 'STAS'
+        soil_cat_dataset.value = new
+        self.assertEqual(self.get_value(soil_cat_dataset.name), new)
+
 
 if __name__ == '__main__':
     unittest.main()
