@@ -20,7 +20,7 @@ class Simulation:
         self.meta_type = FileManagerOption(self, 'meta_type')
         self.meta_force = FileManagerOption(self, 'meta_force')
         self.meta_localpar = FileManagerOption(self, 'meta_localpar')
-        self.OUTPUT_CONTROL = FileManagerOption(self, 'OUTPUT_CONTROL')
+        self.OUTPUT_CONTROL = FileManagerOption(self, 'output_control')
         self.meta_index = FileManagerOption(self, 'meta_index')
         self.meta_basinpar = FileManagerOption(self, 'meta_basinpar')
         self.meta_basinvar = FileManagerOption(self, 'meta_basinvar')
@@ -63,10 +63,14 @@ class Simulation:
         else:
             raise ValueError('No executable defined. Set as "executable" attribute of Simulation or check run_option')
         # run shell script in python
-        subprocess.run(cmd, shell=True)
+        if self.library_path:
+            cmd = "".join(['export LD_LIBRARY_PATH="{}";'.format(self.library_path),
+                          cmd])
+        proc = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         # define output file name
         out_file_path = self.output_path.filepath + \
-                        self.output_prefix.value + '_output_' + \
+                        self.output_prefix.value + 'output_' + \
                         self.run_suffix + '_timestep.nc'
         return xr.open_dataset(out_file_path), out_file_path
 
