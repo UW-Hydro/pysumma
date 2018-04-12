@@ -39,7 +39,7 @@ class Simulation:
             # read every line of filemanager and return as list format
             return f.readlines()
 
-    def execute(self, run_suffix, run_option):
+    def execute(self, run_suffix, run_option, arglist=[]):
         self.run_suffix = run_suffix
         if run_option == 'local':
             cmd = "{} -p never -s {} -m {}".format(self.executable, self.run_suffix, self.filepath)
@@ -63,16 +63,22 @@ class Simulation:
         else:
             raise ValueError('No executable defined. Set as "executable" attribute of Simulation or check run_option')
         # run shell script in python
+        preprocess = []
         if self.library_path:
-            cmd = "".join(['export LD_LIBRARY_PATH="{}";'.format(self.library_path),
-                          cmd])
+            preprocess = ['export LD_LIBRARY_PATH="{}" && '.format(self.library_path)]
+        if arglist:
+            preprocess.append('{} && '.join(arglist))
+        preprocess = "".join(preprocess)
+        cmd = preprocess + " && " + cmd
+        print(preprocess)
+        print(cmd)
         proc = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         # define output file name
         out_file_path = self.output_path.filepath + \
                         self.output_prefix.value + 'output_' + \
                         self.run_suffix + '_timestep.nc'
-        return xr.open_dataset(out_file_path), out_file_path
+        return proc, out_file_path
 
 
 class FileManagerOption(Option):
