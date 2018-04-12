@@ -1,4 +1,5 @@
-import weakref
+from pysumma.Option import Option
+
 class Decisions:
     def __init__(self, filepath):
         self.filepath = filepath
@@ -37,33 +38,20 @@ class Decisions:
         with open(self.filepath, 'rt') as f:
             return f.readlines()
 
-class DecisionOption:
+
+class DecisionOption(Option):
     def __init__(self, parent, name):
-        self.parent =parent
-        # self.text = parent.file_contents
-        self.name = name
-        self.line_no, self.line_contents = self.get_line_no(self.name)
-        self.get_description()
+        super().__init__(name, parent, key_position=0, value_position=1,
+                         delimiter=None)
+        self.description, self.option_number = self.get_description()
         self.options = self.get_options()
-
-    # def open_read(self):
-    #     with open(self.filepath, 'rt') as f:
-    #         return f.readlines()
-
-    def get_line_no(self, text_startwith):
-        for line_no, line_contents in enumerate(self.parent.file_contents):
-            if line_contents.split()[0].startswith(text_startwith):
-                return line_no, line_contents
-
-    def get_default_value(self):
-        self.line_no, self.line_contents = self.get_line_no(self.name)
-        return self.line_contents.split()[1].strip()
 
     def get_description(self):
         num_and_descrip = self.line_contents.split('!')[-1]
-        self.description = num_and_descrip.split(')')[-1].strip()
+        description = num_and_descrip.split(')')[-1].strip()
         number = num_and_descrip.find('(')
-        self.option_number = num_and_descrip[number+1:number+3]
+        option_number = num_and_descrip[number+1:number+3]
+        return description, option_number
 
     def get_options(self):
         start_line = 43
@@ -71,45 +59,33 @@ class DecisionOption:
         for num, line_contents in enumerate(self.parent.file_contents[start_line:]):
             line_num = num + start_line
             if line_contents.startswith('! ({})'.format(self.option_number)):
-                while self.parent.file_contents[line_num+1].find("---") < 0 and self.parent.file_contents[line_num+1].find("****") < 0:
+                while self.parent.file_contents[line_num+1].find("---") < 0 and \
+                                self.parent.file_contents[line_num+1].find("****") < 0:
                     line_num += 1
                     option_list.append(self.parent.file_contents[line_num].split('!')[1].strip())
                 else:
                     return option_list
 
-    def write_value(self, new_value):
-        self.parent.file_contents[self.line_no] = self.line_contents.replace(self.value, new_value, 1)
-        # print (self.parent.file_contents[self.line_no])
-        # self.parent.file_contents[self.line_no] = self.line_contents.replace(self.value, new_value, 1)
-        # print (self.line_contents.replace(self.value, new_value, 1))
-
-        self.edit_save()
-
-    def edit_save(self):
-        with open(self.parent.filepath, 'wt') as f:
-            f.writelines(self.parent.file_contents)
-            # S = Simulation(att)
-
     @property
     def value(self):
-        return self.get_default_value()
+        return self.get_value()
 
     @value.setter
     def value(self, new_value):
         if new_value in self.options:
-            self.write_value(new_value)
+            self.write_value(self.value, new_value)
         else:
-            raise ValueError ('Your input value {} is not one of the valid options {}'.format(new_value, self.options))
+            raise ValueError('Your input value {} is not one of the valid options {}'.format(new_value, self.options))
 
-class SimulDatetime(DecisionOption):
-    def get_default_date_time(self):
-        date_time = self.line_contents.split("'")[1]
-        return date_time
+
+class SimulDatetime(Option):
+    def __init__(self, parent, name):
+        super().__init__(name, parent, key_position=0, value_position=1, delimiter="'")
 
     @property
     def value(self):
-        return self.get_default_date_time()
+        return self.get_value()
 
     @value.setter
     def value(self, new_date_time):
-        self.write_value(new_date_time)
+        self.write_value(self.value, new_date_time)
