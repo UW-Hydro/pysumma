@@ -23,11 +23,11 @@ class hydroshare():
         # load the HS environment variables
         # todo: this should be set as a path variable somehow.
         #       possibly add JPY_TMP to Dockerfile
-        self.cache = cache
-        if cache:
-            utilities.load_environment(os.path.join(
-                                        os.environ['NOTEBOOK_HOME'], '.env'))
-        self.auth_path = '/home/jeff/.auth'
+        # self.cache = cache
+        # if cache:
+            # utilities.load_environment(os.path.join(
+                                        # os.environ['NOTEBOOK_HOME'], '.env'))
+        self.auth_path = os.path.join(os.path.expanduser('~'), '.auth')
 
         # todo: either use JPY_USR or ask them to
         #       enter their hydroshare username
@@ -85,9 +85,8 @@ class hydroshare():
                                 '\'%s\': ' % username)
             auth = HydroShareAuthBasic(username=username, password=p)
 
-            if self.cache:
-                with open(self.auth_path, 'wb') as f:
-                    pickle.dump(auth, f, protocol=2)
+            with open(self.auth_path, 'wb') as f:
+                pickle.dump(auth, f, protocol=2)
 
         else:
 
