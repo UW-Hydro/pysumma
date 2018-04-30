@@ -16,6 +16,7 @@ class Decisions:
         self.LAI_method = DecisionOption(self, 'LAI_method')
         self.f_Richards = DecisionOption(self, 'f_Richards')
         self.groundwatr = DecisionOption(self, 'groundwatr')
+        self.rootProfil = DecisionOption(self, 'rootProfil')
         self.hc_profile = DecisionOption(self, 'hc_profile')
         self.bcUpprTdyn = DecisionOption(self, 'bcUpprTdyn')
         self.bcLowrTdyn = DecisionOption(self, 'bcLowrTdyn')
