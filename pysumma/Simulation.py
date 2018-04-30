@@ -1,5 +1,6 @@
 from pysumma.Option import Option
 from pysumma.Decisions import Decisions
+from pysumma.OutputControl import OutputControl
 import subprocess
 import os
 import xarray as xr
@@ -31,7 +32,10 @@ class Simulation:
         self.initial_cond = FileManagerOption(self, 'initial_cond')
         self.para_trial = FileManagerOption(self, 'para_trial')
         self.output_prefix = FileManagerOption(self, 'output_prefix')
-        self.decision_obj = Decisions(self.setting_path.value + self.decision_path.value)
+        self.decision_obj = Decisions(
+                self.setting_path.value + self.decision_path.value)
+        self.output_control = OutputControl(
+                self.setting_path.value + self.OUTPUT_CONTROL.value)
 
     def open_read(self):
         # read filemanager text file
