@@ -74,8 +74,6 @@ class Simulation:
             preprocess.append('{} && '.join(arglist))
         preprocess = "".join(preprocess)
         cmd = preprocess + " && " + cmd
-        print(preprocess)
-        print(cmd)
         proc = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         # define output file name
