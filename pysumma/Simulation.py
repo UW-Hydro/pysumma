@@ -74,7 +74,7 @@ class Simulation:
                   " -v {}:{}".format(self.input_path.filepath, self.input_path.filepath) + \
                   " -v {}:{}".format(self.output_path.filepath, self.output_path.filepath) + \
                   " {} -p never -s {} -m {}".format(self.executable, self.run_suffix, self.filepath)
-
+            print(cmd)
         else:
             raise ValueError('No executable defined. Set as "executable" attribute of Simulation or check run_option')
 
