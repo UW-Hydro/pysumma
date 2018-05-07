@@ -4,7 +4,7 @@ from pysumma.ModelOutput import ModelOutput
 import subprocess
 import os
 import xarray as xr
-
+import shlex
 
 class Simulation:
     def __init__(self, filepath):
@@ -78,7 +78,13 @@ class Simulation:
         else:
             raise ValueError('No executable defined. Set as "executable" attribute of Simulation or check run_option')
 
-        subprocess.run(cmd, shell=True)
+        #print(shlex.split(cmd))
+        cmd = shlex.split(cmd)
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+        output = p.communicate()[0].decode('utf-8')
+        print(output)
+        if 'FATAL ERROR' in output:
+            raise Exception("SUMMA failed to execute!")
         out_file_path = self.output_path.filepath + \
                         self.output_prefix.value + '_output_' + \
                         self.run_suffix + '_timestep.nc'
