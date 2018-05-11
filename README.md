@@ -72,6 +72,9 @@ Part 2. Model implementation and case studies. Water Resources Research,
 
 **(5)** [pySUMMA General Plot example](https://github.com/uva-hydroinformatics/pysumma/blob/master/sopron_2018_notebooks/pySUMMA_General_Plot_Example.ipynb)
 
+#### The UML of pySUMMA
+![Image of UML](https://github.com/uva-hydroinformatics/pysumma/blob/master/pySUMMA_UML.jpg)
+
 ## Reference of SUMMA
 
  - [Document](http://summa.readthedocs.io/en/latest/) : SUMMA documentation is available online and remains a work in progress.
