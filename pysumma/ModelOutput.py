@@ -2,9 +2,9 @@ import os
 
 class ModelOutput:
     def __init__(self, filepath, master_file_filepath='/var_lookup.f90'):
-        print('ModelOuput master file filepath: ' + os.path.dirname(__file__) + master_file_filepath)
+        print('ModelOuput master file filepath: ' + os.path.dirname(os.path.abspath('__file__')) + master_file_filepath)
         self.filepath = filepath
-        self.master_file_filepath = os.path.dirname(__file__) + master_file_filepath
+        self.master_file_filepath = os.path.dirname(os.path.abspath('__file__')) + master_file_filepath
         self.text = self.read_file()
         self.var_choices = self.read_master_file()
 
@@ -39,7 +39,7 @@ class ModelOutput:
             raise ValueError("Variable already in file!")
         else:
             with open(self.filepath, 'a') as file:
-                file.write(variable + " | \n")
+                file.write(variable + " | 1\n")
 
     # If <variable> is in the file, return TRUE. Else, return FALSE
     def check_for_variable(self, variable):
