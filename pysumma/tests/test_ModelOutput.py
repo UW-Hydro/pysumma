@@ -13,7 +13,7 @@ class TestModelOutput(unittest.TestCase):
     filename2 = 'tmp_{}'.format(filename)
     filepath2 = os.path.join(my_path, filename2)
     copyfile(filepath, filepath2)
-    mo = ModelOutput(filepath2, 'pysumma/var_lookup.f90')
+    mo = ModelOutput(filepath2, '\\var_lookup.f90')
 
     def read_vars(self):
         var_list = []
