@@ -2,10 +2,9 @@ import shutil
 import os
 from urllib.request import urlretrieve
 import subprocess
-from hs_restclient import HydroShare, HydroShareAuthBasic
+
 
 class utils():
-
     def install_test_cases(directory):
         url = "https://ral.ucar.edu/sites/default/files/public/projects/structure-for-unifying-multiple-modeling-alternatives-summa/summatestcases-2.x.tar.gz"
         filepath = directory + "summatestcases-2.x.tar.gz"
