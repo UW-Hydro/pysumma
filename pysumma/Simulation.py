@@ -1,9 +1,10 @@
 from pysumma.Option import Option
-from pysumma.Decisions import Decisions
+from pysumma.Decisions import Decisions       # This is for testing in this python code.
+from pysumma.ModelOutput import ModelOutput
 import subprocess
 import os
 import xarray as xr
-
+import shlex
 
 class Simulation:
     def __init__(self, filepath):
@@ -32,6 +33,8 @@ class Simulation:
         self.para_trial = FileManagerOption(self, 'para_trial')
         self.output_prefix = FileManagerOption(self, 'output_prefix')
         self.decision_obj = Decisions(self.setting_path.value + self.decision_path.value)
+        self.modeloutput_obj = ModelOutput(self.setting_path.value + self.OUTPUT_CONTROL.value)
+
 
     def open_read(self):
         # read filemanager text file
@@ -59,11 +62,18 @@ class Simulation:
                   " -v {}:{}".format(self.input_path.filepath, self.input_path.filepath) + \
                   " -v {}:{}".format(self.output_path.filepath, self.output_path.filepath) + \
                   " {} -p never -s {} -m {}".format(self.executable, self.run_suffix, self.filepath)
-
+            print(cmd)
         else:
             raise ValueError('No executable defined. Set as "executable" attribute of Simulation or check run_option')
-        # run shell script in python
-        subprocess.run(cmd, shell=True)
+
+        # run shell script in python and print(shlex.split(cmd))
+        cmd = shlex.split(cmd)
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+        output = p.communicate()[0].decode('utf-8')
+        print(output)
+        if 'FATAL ERROR' in output:
+            raise Exception("SUMMA failed to execute!")
+
         # define output file name
         out_file_path = self.output_path.filepath + \
                         self.output_prefix.value + '_output_' + \
