@@ -1,6 +1,6 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 import datetime
-#import pyqtgraph as pg
+
 
 class userinterface(object):
 
@@ -49,25 +49,13 @@ class userinterface(object):
                 item = QtWidgets.QTableWidgetItem()
                 self.tableWidget.setItem(i_col_cell, i_row_cell, item)
 
-
         self.tab_3 = QtWidgets.QWidget()
         self.tab_3.setObjectName("tab_3")
 
         self.tabWidget.addTab(self.tab, "")
-
         self.tabWidget.addTab(self.tab_3, "")
 
-        # self.pushButton_2 = QtWidgets.QPushButton(self.tab)
-        # self.pushButton_2.setGeometry(QtCore.QRect(950, 680, 75, 23))
-        # self.pushButton_2.setObjectName("file_save")
-        # self.pushButton_2.clicked.connect(self.edit_filemanager)
-        #
-        # self.pushButton_3 = QtWidgets.QPushButton(self.tab_3)
-        # self.pushButton_3.setGeometry(QtCore.QRect(680, 460, 75, 23))
-        # self.pushButton_3.setObjectName("pushButton_3")
-        # self.pushButton_3.clicked.connect(self.edit_Decision)
-
-        # need to change default date & time from Deicision file
+        # get default date & time from Deicision file
         self.dateTimeEdit = QtWidgets.QDateTimeEdit(self.tab_3)
         self.dateTimeEdit.setGeometry(QtCore.QRect(180, 20, 181, 22))
         self.dateTimeEdit.setObjectName("dateTimeEdit")
@@ -80,8 +68,7 @@ class userinterface(object):
                                        simulStart_dt.minute)
         self.dateTimeEdit.setDateTime(simulStart1)
 
-
-        # need to change default date & time from Deicision file
+        # get default date & time from Deicision file
         self.dateTimeEdit_2 = QtWidgets.QDateTimeEdit(self.tab_3)
         self.dateTimeEdit_2.setGeometry(QtCore.QRect(180, 50, 181, 22))
         self.dateTimeEdit_2.setObjectName("dateTimeEdit_2")
@@ -93,7 +80,6 @@ class userinterface(object):
                                        simulFinsh_dt.hour,
                                        simulFinsh_dt.minute)
         self.dateTimeEdit_2.setDateTime(simulFinsh1)
-
 
         self.comboBox_3 = QtWidgets.QComboBox(self.tab_3)
         self.comboBox_3.setGeometry(QtCore.QRect(180, 80, 181, 22))
@@ -618,7 +604,6 @@ class userinterface(object):
         item = self.tableWidget.item(20, 2)
         item.setText(_translate("Form", self.S.output_prefix.name))
         item = self.tableWidget.item(20, 2).setBackground(QtGui.QColor(250, 250, 170))
-
 
         self.lineEdit.setText(_translate("Form", "simulStart"))
         self.lineEdit_2.setText(_translate("Form", "simulFinsh"))
