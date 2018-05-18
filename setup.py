@@ -7,7 +7,7 @@ setup(name='pysumma',
       author = 'YoungDon Choi',
       author_email = 'yc5ef@virginia.edu',
       license = 'BSD-3-Clause',
-      packages=['pysumma'],
+      packages=find_packages(),
       install_requires=[
           'scipy',
           'xarray',
