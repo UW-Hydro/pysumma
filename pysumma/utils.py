@@ -4,14 +4,13 @@ from urllib.request import urlretrieve
 import subprocess
 from hs_restclient import HydroShare
 
-
 class utils():
-    def install_test_cases(directory):
+    def install_test_cases_summa_web(save_filepath):
         url = "https://ral.ucar.edu/sites/default/files/public/projects/structure-for-unifying-multiple-modeling-alternatives-summa/summatestcases-2.x.tar.gz"
-        filepath = directory + "summatestcases-2.x.tar.gz"
+        filepath = save_filepath + "summatestcases-2.x.tar.gz"
         urlretrieve(url, filepath)
         shutil.unpack_archive(filepath, extract_dir=os.path.dirname(filepath))
-        cmd = "cd {}/summaTestCases_2.x/; ./installTestCases_local.sh".format(directory)
+        cmd = "cd {}/summaTestCases_2.x/; ./installTestCases_local.sh".format(save_filepath)
         subprocess.run(cmd, shell=True)
 
     def install_test_cases_hs(save_filepath):
