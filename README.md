@@ -58,22 +58,22 @@ G. N. Flerchinger, D. G. Marks, 2015b: A unified approach for process-based hydr
 Part 2. Model implementation and case studies. Water Resources Research, 
 [doi:10.1002/2015WR017200](https://agupubs.onlinelibrary.wiley.com/doi/abs/10.1002/2015WR017200).
 
-**(1)** [Modeling the Impact of Stomatal Resistance Parameterizations on Total Evapotranspiration 
-         in the Reynolds Mountain East catchment using pySUMMA](https://github.com/uva-hydroinformatics/pysumma/blob/master/sopron_2018_notebooks/pySUMMA_Demo_Example_Fig7_Using_TestCase_from_Hydroshare.ipynb) 
+**(Test Case-1)** [Modeling the Impact of Stomatal Resistance Parameterizations on Total Evapotranspiration 
+         in the Reynolds Mountain East catchment using pySUMMA](https://github.com/uva-hydroinformatics/pysumma/blob/develop/notebooks/pySUMMA_Test_Case_1.ipynb) 
 
-**(2)** [Modeling the Impact of Root Distributions Parameterizations on Total Evapotranspiration 
-         in the Reynolds Mountain East catchment using pySUMMA](https://github.com/uva-hydroinformatics/pysumma/blob/master/sopron_2018_notebooks/pySUMMA_Demo_Example_Fig8_left_Using_TestCase_from_Hydroshare.ipynb)
+**(Test Case-2)** [Modeling the Impact of Root Distributions Parameterizations on Total Evapotranspiration 
+         in the Reynolds Mountain East catchment using pySUMMA](https://github.com/uva-hydroinformatics/pysumma/blob/develop/notebooks/pySUMMA_Test_Case_2.ipynb)
 
-**(3)** [Modeling the Impact of Lateral Flow Parameterizations on Total Evapotranspiration in the 
-         Reynolds Mountain East catchment using pySUMMA](https://github.com/uva-hydroinformatics/pysumma/blob/master/sopron_2018_notebooks/pySUMMA_Demo_Example_Fig8_right_Using_TestCase_from_Hydroshare.ipynb)
+**(Test Case-3 Evapotranspiration)** [Modeling the Impact of Lateral Flow Parameterizations on Total Evapotranspiration
+         in the Reynolds Mountain East catchment using pySUMMA](https://github.com/uva-hydroinformatics/pysumma/blob/develop/notebooks/pySUMMA_Test_Case_3_Evapotranspiration.ipynb)
 
-**(4)** [Modeling the Impact of Lateral Flow Parameterizations on Basin Wide Runoff in the Reynolds 
-         Mountain East catchment using pySUMMA](https://github.com/uva-hydroinformatics/pysumma/blob/master/sopron_2018_notebooks/pySUMMA_Demo_Example_Fig9_Using_TestCase_from_Hydroshare.ipynb)
+**(Test Case-3 Runoff)** [Modeling the Impact of Lateral Flow Parameterizations on Basin Wide Runoff in the Reynolds 
+         Mountain East catchment using pySUMMA](https://github.com/uva-hydroinformatics/pysumma/blob/develop/notebooks/pySUMMA_Test_Case_3_Runoff.ipynb)
 
-**(5)** [pySUMMA General Plot example](https://github.com/uva-hydroinformatics/pysumma/blob/master/sopron_2018_notebooks/pySUMMA_General_Plot_Example.ipynb)
+**(5)** [pySUMMA General Plot example](https://github.com/uva-hydroinformatics/pysumma/blob/develop/notebooks/pySUMMA_General_Plot_Example.ipynb)
 
 #### The UML of pySUMMA
-![Image of UML](https://github.com/uva-hydroinformatics/pysumma/blob/master/pySUMMA_UML.jpg)
+![Image of UML](https://github.com/uva-hydroinformatics/pysumma/blob/develop/pySUMMA_UML.jpg)
 
 ## Reference of SUMMA
 
