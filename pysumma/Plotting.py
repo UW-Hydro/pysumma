@@ -18,6 +18,7 @@ class Plotting:
 	def plot_1d(self, variable):
 		ax = self.ds[variable].plot()
 		plt.ylabel('{} ({})'.format(self.ds[variable].long_name, self.ds[variable].units))
+		plt.savefig('/media/sf_pysumma/pptrate.png')
 		plt.show()
 		return ax
 
