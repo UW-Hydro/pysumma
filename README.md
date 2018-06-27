@@ -35,12 +35,12 @@ SUMMA model (Structure for Unifying Multiple Modeling Alternatives)
 
 **1.)**  Download pySUMMA
 ```python
-~/Downloads\$ git clone https://github.com/uva-hydroinformatics/pysumma.git
+~/Downloads$ git clone https://github.com/uva-hydroinformatics/pysumma.git
 ```
         
 **2.)**  change directory into pysumma folder same level with setup.py.
 ```python
-~/Downloads/pysumma\$ pip install .
+~/Downloads/pysumma$ pip install .
 ```
 
 ## Examples of unit test :
@@ -48,7 +48,7 @@ SUMMA model (Structure for Unifying Multiple Modeling Alternatives)
 **a unit test using unittest library**  
 
 ```python
-~/Downloads/pysumma\$ python setup.py test
+~/Downloads/pysumma$ python setup.py test
 ```
 ## Examples of manipulating and running pySUMMA :
 
