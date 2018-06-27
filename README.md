@@ -59,21 +59,21 @@ Part 2. Model implementation and case studies. Water Resources Research,
 [doi:10.1002/2015WR017200](https://agupubs.onlinelibrary.wiley.com/doi/abs/10.1002/2015WR017200).
 
 **(Test Case-1)** [Modeling the Impact of Stomatal Resistance Parameterizations on Total Evapotranspiration 
-         in the Reynolds Mountain East catchment using pySUMMA](https://github.com/uva-hydroinformatics/pysumma/blob/develop/notebooks/pySUMMA_Test_Case_1.ipynb) 
+         in the Reynolds Mountain East catchment using pySUMMA](notebooks/pySUMMA_Test_Case_1.ipynb) 
 
 **(Test Case-2)** [Modeling the Impact of Root Distributions Parameterizations on Total Evapotranspiration 
-         in the Reynolds Mountain East catchment using pySUMMA](https://github.com/uva-hydroinformatics/pysumma/blob/develop/notebooks/pySUMMA_Test_Case_2.ipynb)
+         in the Reynolds Mountain East catchment using pySUMMA](notebooks/pySUMMA_Test_Case_2.ipynb)
 
 **(Test Case-3 Evapotranspiration)** [Modeling the Impact of Lateral Flow Parameterizations on Total Evapotranspiration
-         in the Reynolds Mountain East catchment using pySUMMA](https://github.com/uva-hydroinformatics/pysumma/blob/develop/notebooks/pySUMMA_Test_Case_3_Evapotranspiration.ipynb)
+         in the Reynolds Mountain East catchment using pySUMMA](notebooks/pySUMMA_Test_Case_3_Evapotranspiration.ipynb)
 
 **(Test Case-3 Runoff)** [Modeling the Impact of Lateral Flow Parameterizations on Basin Wide Runoff in the Reynolds 
-         Mountain East catchment using pySUMMA](https://github.com/uva-hydroinformatics/pysumma/blob/develop/notebooks/pySUMMA_Test_Case_3_Runoff.ipynb)
+         Mountain East catchment using pySUMMA](notebooks/pySUMMA_Test_Case_3_Runoff.ipynb)
 
-**(5)** [pySUMMA General Plot example](https://github.com/uva-hydroinformatics/pysumma/blob/develop/notebooks/pySUMMA_General_Plot_Example.ipynb)
+**(5)** [pySUMMA General Plot example](notebooks/pySUMMA_General_Plot_Example.ipynb)
 
 #### The UML of pySUMMA
-![Image of UML](https://github.com/uva-hydroinformatics/pysumma/blob/develop/pySUMMA_UML.jpg)
+![Image of UML](pySUMMA_UML.jpg)
 
 ## Reference of SUMMA
 
