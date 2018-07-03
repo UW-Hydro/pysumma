@@ -4,6 +4,7 @@ import shapely
 import numpy as np
 import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
+import cartopy.feature as cfeature
 from cartopy.feature import NaturalEarthFeature
 from matplotlib.collections import PatchCollection
 from matplotlib.patches import Polygon
@@ -21,15 +22,15 @@ def add_map_features(ax, states_provinces=True, country_borders=True,
         ctry_borders = NaturalEarthFeature(
             category='cultural', name='admin_0_boundary_lines_land',
             scale='50m', facecolor='none')
-        ax.add_feature(ctry_borders, edgecolor='black', zorder=2, linewidth=1)
+        ax.add_feature(ctry_borders, edgecolor='black', zorder=2, alpha=0.8, linewidth=1)
     if land:
         land = NaturalEarthFeature(
-            category='physical', name='land', scale='50m', facecolor='gray')
-        ax.add_feature(land, facecolor='lightgray', zorder=0)
+            category='physical', name='land', edgecolor='face', facecolor=cfeature.COLORS['land'], scale='50m')
+        ax.add_feature(land, zorder=0)
     if ocean:
         ocean = NaturalEarthFeature(
-            category='physical', name='ocean', scale='50m', facecolor='blue')
-        ax.add_feature(ocean, facecolor='lightblue', zorder=1)
+            category='physical', name='ocean', edgecolor='face', facecolor=cfeature.COLORS['water'], scale='50m')
+        ax.add_feature(ocean, zorder=1)
     if lake:
         rivers_lakes = NaturalEarthFeature(
             category='physical', name='rivers_lake_centerlines',
@@ -37,7 +38,7 @@ def add_map_features(ax, states_provinces=True, country_borders=True,
         ax.add_feature(rivers_lakes, facecolor='lightblue', zorder=2)
 
 
-def gen_patches(data_array, geodf, simplify_level=0, robust=False):
+def gen_patches(data_array, geodf, simplify_level=0, robust=False, colormap='viridis'):
     '''Simplify polygons and generate a PatchCollection for faster plotting'''
     vals = []
     patches = []
@@ -46,7 +47,7 @@ def gen_patches(data_array, geodf, simplify_level=0, robust=False):
     for val, shp in zip(data_array.values, geoms):
         if isinstance(shp, shapely.geometry.MultiPolygon):
             for sub in shp:
-                if not simplify_level:
+                if simplify_level:
                     patches.append(Polygon(np.asarray(
                         sub.simplify(simplify_level).exterior)))
                 else:
@@ -54,14 +55,14 @@ def gen_patches(data_array, geodf, simplify_level=0, robust=False):
                         sub.exterior)))
                 vals.append(val)
         else:
-            if not simplify_level:
+            if simplify_level:
                 patches.append(
                         Polygon(np.asarray(shp.simplify(simplify_level).exterior)))
             else:
                 patches.append(Polygon(np.asarray(shp.exterior)))
             vals.append(val)
     vals = np.array(vals)
-    patches = PatchCollection(patches, linewidth=0., edgecolor=None, alpha=1.0)
+    patches = PatchCollection(patches, linewidth=0., edgecolor=None, alpha=1.0, cmap=colormap)
     patches.set_array(vals)
     if robust:
         if type(robust) is list:
@@ -72,11 +73,11 @@ def gen_patches(data_array, geodf, simplify_level=0, robust=False):
 
 
 def spatial(data_array, geodf, simplify_level=500, proj=ccrs.Mercator(),
-            robust=False):
+            robust=False, colorbar=True, colormap='viridis'):
     '''Make a spatial plot'''
     # Preprocess the data
     geodf_crs = geodf.to_crs(crs=proj.proj4_params)
-    patches = gen_patches(data_array, geodf_crs, simplify_level, robust)
+    patches = gen_patches(data_array, geodf_crs, simplify_level, robust, colormap)
 
     # Map plotting
     fig, ax = plt.subplots(nrows=1, ncols=1, subplot_kw=dict(projection=proj))
@@ -92,12 +93,14 @@ def spatial(data_array, geodf, simplify_level=500, proj=ccrs.Mercator(),
             minval, maxval = np.percentile(data_array.values, [2, 98])
     else:
         minval, maxval = np.min(data_array.values), np.max(data_array.values)
-    sm = plt.cm.ScalarMappable(norm=plt.Normalize(vmin=minval, vmax=maxval))
-    sm._A = []
-    cax = fig.add_axes([0.92, 0.2, 0.015, 0.6])
-    cax.tick_params()
-    cb = plt.colorbar(sm, cax=cax)
-    cb.set_label(data_array.name)
+
+    if colorbar:
+        sm = plt.cm.ScalarMappable(norm=plt.Normalize(vmin=minval, vmax=maxval))
+        sm._A = []
+        cax = fig.add_axes([0.92, 0.2, 0.015, 0.6])
+        cax.tick_params()
+        cb = plt.colorbar(sm, cax=cax)
+        cb.set_label(data_array.name)
     return fig, ax
 
 
