@@ -4,3 +4,4 @@ from .plot import *
 from .spatial import spatial, add_map_features
 from .hovmoller import hovmoller
 from .timeseries import *
+from .water_balance import *
