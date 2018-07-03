@@ -53,4 +53,8 @@ def hovmoller(data_array, xdim, ydim, how='mean', cmap='viridis'):
     daysofweek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday',
                   'Thursday', 'Friday', 'Saturday']
     seasons = ['DJF', 'MAM', 'JJA', 'SON']
+    months = ['January', 'February', 'March', 'April',
+              'May', 'June', 'July', 'August',
+              'September', 'October', 'November', 'December']
+    months_wb = months[0:-4] + months[-3:]
     return fig, ax
