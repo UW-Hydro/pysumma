@@ -1,6 +1,5 @@
 from pysumma.Option import Option
 
-
 class Decisions:
     def __init__(self, filepath):
         self.filepath = filepath

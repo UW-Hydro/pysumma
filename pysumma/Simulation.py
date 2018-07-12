@@ -1,10 +1,11 @@
 from pysumma.Option import Option
 from pysumma.Decisions import Decisions
+from pysumma.ModelOutput import ModelOutput
 from pysumma.OutputControl import OutputControl
 import subprocess
 import os
 import xarray as xr
-
+import shlex
 
 class Simulation:
     def __init__(self, filepath):
@@ -36,6 +37,9 @@ class Simulation:
                 self.setting_path.value + self.decision_path.value)
         self.output_control = OutputControl(
                 self.setting_path.value + self.OUTPUT_CONTROL.value)
+        self.modeloutput_obj = ModelOutput(
+                self.setting_path.value + self.OUTPUT_CONTROL.value)
+
 
     def open_read(self):
         # read filemanager text file
@@ -63,7 +67,7 @@ class Simulation:
                   " -v {}:{}".format(self.input_path.filepath, self.input_path.filepath) + \
                   " -v {}:{}".format(self.output_path.filepath, self.output_path.filepath) + \
                   " {} -p never -s {} -m {}".format(self.executable, self.run_suffix, self.filepath)
-
+            print(cmd)
         else:
             raise ValueError('No executable defined. Set as "executable" attribute of Simulation or check run_option')
         # run shell script in python
