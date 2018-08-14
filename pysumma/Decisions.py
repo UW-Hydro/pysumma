@@ -1,5 +1,5 @@
-import weakref
 from pysumma.Option import Option
+
 
 class Decisions:
     def __init__(self, filepath):
@@ -16,6 +16,7 @@ class Decisions:
         self.LAI_method = DecisionOption(self, 'LAI_method')
         self.f_Richards = DecisionOption(self, 'f_Richards')
         self.groundwatr = DecisionOption(self, 'groundwatr')
+        self.rootProfil = DecisionOption(self, 'rootProfil')
         self.hc_profile = DecisionOption(self, 'hc_profile')
         self.bcUpprTdyn = DecisionOption(self, 'bcUpprTdyn')
         self.bcLowrTdyn = DecisionOption(self, 'bcLowrTdyn')
@@ -39,23 +40,6 @@ class Decisions:
         with open(self.filepath, 'rt') as f:
             return f.readlines()
 
-class DecisionOption:
-    def __init__(self, parent, name):
-        self.parent =parent
-        # self.text = parent.file_contents
-        self.name = name
-        self.line_no, self.line_contents = self.get_line_no(self.name)
-        self.get_description()
-        self.options = self.get_options()
-
-    # def open_read(self):
-    #     with open(self.filepath, 'rt') as f:
-    #         return f.readlines()
-
-    def get_line_no(self, text_startwith):
-        for line_no, line_contents in enumerate(self.parent.file_contents):
-            if line_contents.split()[0].startswith(text_startwith):
-                return line_no, line_contents
 
 class DecisionOption(Option):
     def __init__(self, parent, name):

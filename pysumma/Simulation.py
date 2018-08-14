@@ -1,15 +1,24 @@
+import os
+import subprocess
+
 from pysumma.Option import Option
 from pysumma.Decisions import Decisions
-import subprocess
-import os
-import xarray as xr
+from pysumma.ModelOutput import ModelOutput
+from pysumma.OutputControl import OutputControl
 
 
-class Simulation:
-    def __init__(self, filepath):
-        self.filepath = os.path.abspath(filepath)
-        self.file_dir = os.path.dirname(self.filepath)
-        self.file_contents = self.open_read()
+class Simulation(object):
+    """
+    A wrapper class around a SUMMA simulation.
+    """
+    proc = None
+
+    def __init__(self, file_manager):
+        """Constructor"""
+        self.file_manager_path = os.path.abspath(file_manager)
+        self.file_manager_dir = os.path.dirname(file_manager)
+        with open(self.file_manager, 'r') as f:
+            self.file_manager = f.readlines()
         self.fman_ver = FileManagerOption(self, 'fman_ver')
         self.setting_path = FileManagerOption(self, 'setting_path')
         self.input_path = FileManagerOption(self, 'input_path')
@@ -20,7 +29,7 @@ class Simulation:
         self.meta_type = FileManagerOption(self, 'meta_type')
         self.meta_force = FileManagerOption(self, 'meta_force')
         self.meta_localpar = FileManagerOption(self, 'meta_localpar')
-        self.OUTPUT_CONTROL = FileManagerOption(self, 'output_control')
+        self.output_control = FileManagerOption(self, 'output_control')
         self.meta_index = FileManagerOption(self, 'meta_index')
         self.meta_basinpar = FileManagerOption(self, 'meta_basinpar')
         self.meta_basinvar = FileManagerOption(self, 'meta_basinvar')
@@ -31,57 +40,91 @@ class Simulation:
         self.initial_cond = FileManagerOption(self, 'initial_cond')
         self.para_trial = FileManagerOption(self, 'para_trial')
         self.output_prefix = FileManagerOption(self, 'output_prefix')
-        self.decision_obj = Decisions(self.setting_path.value + self.decision_path.value)
+        self.decision_obj = Decisions(
+                self.setting_path.value + self.decision_path.value)
+        self.output_control = OutputControl(
+                self.setting_path.value + self.output_control.value)
+        self.modeloutput_obj = ModelOutput(
+                self.setting_path.value + self.output_control.value)
 
-    def open_read(self):
-        # read filemanager text file
-        with open(self.filepath, 'rt') as f:
-            # read every line of filemanager and return as list format
-            return f.readlines()
-
-    def execute(self, run_suffix, run_option):
+    def execute(self, run_suffix, run_option, arglist=[]):
         self.run_suffix = run_suffix
         if run_option == 'local':
-            cmd = "{} -p never -s {} -m {}".format(self.executable, self.run_suffix, self.filepath)
-
+            cmd = "{} -p never -s {} -m {}".format(
+                    self.executable, self.run_suffix, self.file_manager_path)
         elif run_option == "docker_latest":
             self.executable = 'bartnijssen/summa:latest'
-            cmd = "docker run -v {}:{}".format(self.file_dir, self.file_dir) + \
-                  " -v {}:{}".format(self.setting_path.filepath, self.setting_path.filepath) + \
-                  " -v {}:{}".format(self.input_path.filepath, self.input_path.filepath) + \
-                  " -v {}:{}".format(self.output_path.filepath, self.output_path.filepath) + \
-                  " {} -p never -s {} -m {}".format(self.executable, self.run_suffix, self.filepath)
-
+            cmd = "".join([
+                "docker run -v {}:{}".format(self.file_dir, self.file_dir),
+                " -v {}:{}".format(
+                    self.setting_path.filepath, self.setting_path.filepath),
+                " -v {}:{}".format(
+                    self.input_path.filepath, self.input_path.filepath),
+                " -v {}:{}".format(
+                    self.output_path.filepath, self.output_path.filepath),
+                " {} -p never -s {} -m {}".format(
+                    self.executable, self.run_suffix, self.filepath)])
         elif run_option == "docker_develop":
             self.executable = 'bartnijssen/summa:develop'
-            cmd = "docker run -v {}:{}".format(self.file_dir, self.file_dir) + \
-                  " -v {}:{}".format(self.setting_path.filepath, self.setting_path.filepath) + \
-                  " -v {}:{}".format(self.input_path.filepath, self.input_path.filepath) + \
-                  " -v {}:{}".format(self.output_path.filepath, self.output_path.filepath) + \
-                  " {} -p never -s {} -m {}".format(self.executable, self.run_suffix, self.filepath)
-
+            cmd = "".join([
+                "docker run -v {}:{}".format(self.file_dir, self.file_dir),
+                " -v {}:{}".format(
+                    self.setting_path.filepath, self.setting_path.filepath),
+                " -v {}:{}".format(
+                    self.input_path.filepath, self.input_path.filepath),
+                " -v {}:{}".format(
+                    self.output_path.filepath, self.output_path.filepath),
+                " {} -p never -s {} -m {}".format(
+                    self.executable, self.run_suffix, self.filepath)])
         else:
-            raise ValueError('No executable defined. Set as "executable" attribute of Simulation or check run_option')
+            raise ValueError('No executable defined. Set as "executable" '
+                             'attribute of Simulation or check run_option')
         # run shell script in python
+        preprocess = []
         if self.library_path:
-            cmd = "".join(['export LD_LIBRARY_PATH="{}";'.format(self.library_path),
-                          cmd])
-        proc = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            preprocess = ['export LD_LIBRARY_PATH="{}" && '.format(
+                self.library_path)]
+        if arglist:
+            preprocess.append('{} && '.join(arglist))
+        preprocess = "".join(preprocess)
+        cmd = preprocess + " && " + cmd
+        self.proc = subprocess.Popen(cmd, shell=True,
+                                     stdin=subprocess.PIPE,
+                                     stdout=subprocess.PIPE,
+                                     stderr=subprocess.PIPE)
         # define output file name
-        out_file_path = self.output_path.filepath + \
-                        self.output_prefix.value + 'output_' + \
-                        self.run_suffix + '_timestep.nc'
-        return xr.open_dataset(out_file_path), out_file_path
+        self.out_file_path = "".join([self.output_path.filepath,
+                                      self.output_prefix.value, 'output_',
+                                      self.run_suffix, '_timestep.nc'])
+        return self.proc
+
+    def monitor(self):
+        """
+        Wait until the simulation is finished and set
+        variables for the return code, stdout, and stderr
+        """
+        if self.proc is None:
+            return
+        self.return_code = self.proc.wait()
+        self.stdout = self.proc.stdout.read()
+        self.stderr = self.proc.stderr.read()
+
+    def set_decision(self, key, value):
+        """Helper function for setting decision options"""
+        self.decision_obj.__dict__[key].value = value
 
 
 class FileManagerOption(Option):
 
-    # key_position is the position in line.split() where the key name is
-    # value_position is the position in line.split() where the value is
-    # By default, delimiter=None, but can be set to split each line on different characters
     def __init__(self, parent, name):
-        super().__init__(name, parent, key_position=1, value_position=0, delimiter="!")
+        """
+        key_position is the position in line.split() where the key name is
+        value_position is the position in line.split() where the value is
+        By default, delimiter=None, but can be set to split each line on
+        different characters
+        """
+        super().__init__(name, parent, key_position=1,
+                         value_position=0, delimiter="!")
 
     @property
     def value(self):
@@ -91,23 +134,23 @@ class FileManagerOption(Option):
     def value(self, new_value):
         self.write_value(old_value=self.value, new_value=new_value)
 
-    # filepath is the path up to the filename, not including it
     @property
     def filepath(self):
+        """filepath is the path up to the filename, not including it"""
         if not self.value.endswith('/'):
             return "/".join(self.value.split('/')[:-1]) + "/"
         else:
             return self.value
 
-    # Replace the filepath in the value in fileManager.txt
     @filepath.setter
     def filepath(self, new_filepath):
+        """Replace the filepath in the value in fileManager.txt"""
         value = new_filepath + self.filename
         self.write_value(old_value=self.value, new_value=value)
 
-    # Returns the file name of the FileManagerOption
     @property
     def filename(self):
+        """Returns the file name of the FileManagerOption"""
         return self.value.split('/')[-1]
 
     @filename.setter
