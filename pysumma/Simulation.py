@@ -47,22 +47,13 @@ class Simulation:
         if run_option == 'local':
             cmd = "{} -p never -s {} -m {}".format(self.executable, self.run_suffix, self.filepath)
 
-        elif run_option == "docker_latest":
-            self.executable = 'bartnijssen/summa:latest'
+        elif run_option == "docker_sopron_2018":
+            self.executable = 'uwhydro/summa:sopron_2018'
             cmd = "docker run -v {}:{}".format(self.file_dir, self.file_dir) + \
                   " -v {}:{}".format(self.setting_path.filepath, self.setting_path.filepath) + \
                   " -v {}:{}".format(self.input_path.filepath, self.input_path.filepath) + \
                   " -v {}:{}".format(self.output_path.filepath, self.output_path.filepath) + \
                   " {} -p never -s {} -m {}".format(self.executable, self.run_suffix, self.filepath)
-
-        elif run_option == "docker_develop":
-            self.executable = 'bartnijssen/summa:develop'
-            cmd = "docker run -v {}:{}".format(self.file_dir, self.file_dir) + \
-                  " -v {}:{}".format(self.setting_path.filepath, self.setting_path.filepath) + \
-                  " -v {}:{}".format(self.input_path.filepath, self.input_path.filepath) + \
-                  " -v {}:{}".format(self.output_path.filepath, self.output_path.filepath) + \
-                  " {} -p never -s {} -m {}".format(self.executable, self.run_suffix, self.filepath)
-            print(cmd)
         else:
             raise ValueError('No executable defined. Set as "executable" attribute of Simulation or check run_option')
 
