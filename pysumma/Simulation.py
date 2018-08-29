@@ -4,6 +4,7 @@ import shlex
 
 from .Decisions import Decisions
 from .FileManager import FileManager
+from .OutputControl import OutputControl
 
 
 class Simulation(object):
@@ -17,6 +18,9 @@ class Simulation(object):
         decision_path = "".join([self.manager.get_value('SETTINGS_PATH'),
                                  self.manager.get_value('DECISIONS_PATH')])
         self.decisions = Decisions(decision_path)
+        oc_path = "".join([self.manager.get_value('SETTINGS_PATH'),
+                           self.manager.get_value('OUTPUT_CONTROL')])
+        self.output_control = OutputControl(oc_path)
 
     def execute(self, run_suffix, run_option, arglist=[]):
         """Run a SUMMA simulation"""
