@@ -1,13 +1,16 @@
+from pysumma.Decisions import Decisions
 from pysumma.Option import Option
-from pysumma.Decisions import Decisions       # This is for testing in this python code.
 from pysumma.ModelOutput import ModelOutput
-import subprocess
-import os
-import xarray as xr
-import shlex
+import os              # get directory or filename from filepath
+import subprocess      # run shell script in python
+import shlex           # splite shell script
+import xarray as xr    # create xarray data from summa output (NetCDF file)
+from pysumma.specworker import jobs
 
 class Simulation:
+    # set filepath parameter as a a directory and a filename of file manager text file
     def __init__(self, filepath):
+        # create self object from file manager text file
         self.filepath = os.path.abspath(filepath)
         self.file_dir = os.path.dirname(self.filepath)
         self.file_contents = self.open_read()
@@ -32,9 +35,11 @@ class Simulation:
         self.initial_cond = FileManagerOption(self, 'initial_cond')
         self.para_trial = FileManagerOption(self, 'para_trial')
         self.output_prefix = FileManagerOption(self, 'output_prefix')
-        self.decision_obj = Decisions(self.setting_path.value + self.decision_path.value)
-        self.modeloutput_obj = ModelOutput(self.setting_path.value + self.OUTPUT_CONTROL.value)
-
+        self.base_dir = filepath.split('/settings')[0]
+        # create self object from decision text file
+        self.decision_obj = Decisions(self.base_dir + '/settings/' + self.decision_path.value)
+        #
+        self.modeloutput_obj = ModelOutput(self.base_dir + '/settings/' + self.OUTPUT_CONTROL.value)
 
     def open_read(self):
         # read filemanager text file
@@ -43,10 +48,20 @@ class Simulation:
             return f.readlines()
 
     def execute(self, run_suffix, run_option):
+        # set run_suffix to distinguish the output name of summa
         self.run_suffix = run_suffix
+        # 'local' run_option runs summa with summa execution file where is in a local computer.
         if run_option == 'local':
             cmd = "{} -p never -s {} -m {}".format(self.executable, self.run_suffix, self.filepath)
+            # run shell script in python and print output
+            cmd = shlex.split(cmd)
+            p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+            output = p.communicate()[0].decode('utf-8')
+            print(output)
+            if 'FATAL ERROR' in output:
+                raise Exception("SUMMA failed to execute!")
 
+        # 'docker_sopron_2018' run_option runs summa with docker hub online, and the version name is "'uwhydro/summa:sopron_2018'.
         elif run_option == "docker_sopron_2018":
             self.executable = 'uwhydro/summa:sopron_2018'
             cmd = "docker run -v {}:{}".format(self.file_dir, self.file_dir) + \
@@ -54,18 +69,31 @@ class Simulation:
                   " -v {}:{}".format(self.input_path.filepath, self.input_path.filepath) + \
                   " -v {}:{}".format(self.output_path.filepath, self.output_path.filepath) + \
                   " {} -p never -s {} -m {}".format(self.executable, self.run_suffix, self.filepath)
+            # run shell script in python and print output
+            cmd = shlex.split(cmd)
+            p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+            output = p.communicate()[0].decode('utf-8')
+            print(output)
+            if 'FATAL ERROR' in output:
+                raise Exception("SUMMA failed to execute!")
+
+        # "specworker" run_option run summa with summa image in docker of HydroShare Jupyter Hub
+        elif run_option == "specworker":
+            # save these paths in the env_vars dictionary which will be passed to the model
+            env_vars = {'LOCALBASEDIR': self.base_dir, 'MASTERPATH': self.filepath}
+            # define the image that we want to execute
+            image_name = 'ncar/summa'
+            # define the location we want to mount these data in the container
+            vol_target = '/tmp/summa'
+            # define the base path of the input data for SUMMA
+            vol_source = self.base_dir
+            # run the container with the arguments specified above
+            res = jobs.run(image_name, '-x', vol_source, vol_target, env_vars)
+
         else:
             raise ValueError('No executable defined. Set as "executable" attribute of Simulation or check run_option')
 
-        # run shell script in python and print(shlex.split(cmd))
-        cmd = shlex.split(cmd)
-        p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
-        output = p.communicate()[0].decode('utf-8')
-        print(output)
-        if 'FATAL ERROR' in output:
-            raise Exception("SUMMA failed to execute!")
-
-        # define output file name
+        # define output file name as sopron version of summa
         out_file_path = self.output_path.filepath + \
                         self.output_prefix.value + '_output_' + \
                         self.run_suffix + '_timestep.nc'
@@ -80,10 +108,11 @@ class FileManagerOption(Option):
     def __init__(self, parent, name):
         super().__init__(name, parent, key_position=1, value_position=0, delimiter="!")
 
+    # get value to change file manager value (value : a line divides by delimiter "!", and directory and filename are value)
     @property
     def value(self):
         return self.get_value()
-
+    # change old value by new value
     @value.setter
     def value(self, new_value):
         self.write_value(old_value=self.value, new_value=new_value)

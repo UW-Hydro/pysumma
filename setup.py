@@ -9,9 +9,12 @@ setup(name='pysumma',
       license = 'BSD-3-Clause',
       packages=find_packages(),
       install_requires=[
-          'scipy',
-          'xarray',
-          'matplotlib'
+          'numpy==1.13.3',
+          'xarray==0.10.0',
+          'matplotlib==2.1.1',
+          'ipyleaflet',
+          'jupyterthemes==0.18.3',
+          'seaborn==0.8.1'
           ],
       include_package_data=True,
       dat_files=[('pysumma', 'pysumma/var_lookup.f90')],
