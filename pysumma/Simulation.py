@@ -5,7 +5,7 @@ import os              # get directory or filename from filepath
 import subprocess      # run shell script in python
 import shlex           # splite shell script
 import xarray as xr    # create xarray data from summa output (NetCDF file)
-from pysumma.specworker import jobs
+from specworker import jobs
 
 class Simulation:
     # set filepath parameter as a a directory and a filename of file manager text file
@@ -39,7 +39,7 @@ class Simulation:
         # create self object from decision text file
         self.decision_obj = Decisions(self.base_dir + '/settings/' + self.decision_path.value)
         #
-        self.modeloutput_obj = ModelOutput(self.base_dir + '/settings/' + self.OUTPUT_CONTROL.value)
+        #self.modeloutput_obj = ModelOutput(self.base_dir + '/settings/' + self.OUTPUT_CONTROL.value)
 
     def open_read(self):
         # read filemanager text file
