@@ -5,7 +5,6 @@ import os              # get directory or filename from filepath
 import subprocess      # run shell script in python
 import shlex           # splite shell script
 import xarray as xr    # create xarray data from summa output (NetCDF file)
-from specworker import jobs
 
 class Simulation:
     # set filepath parameter as a a directory and a filename of file manager text file
@@ -87,6 +86,7 @@ class Simulation:
 
         # "specworker" run_option run summa with summa image in docker of HydroShare Jupyter Hub
         elif run_option == "specworker":
+            from specworker import jobs
             # define the image that we want to execute
             if specworker_img == 'ncar/summa' or 'ncar/summa_sopron':
                 # save these paths in the env_vars dictionary which will be passed to the model
