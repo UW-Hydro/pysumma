@@ -59,6 +59,8 @@ class DecisionOption(Option):
         for num, line_contents in enumerate(self.parent.file_contents[start_line:]):
             line_num = num + start_line
             if line_contents.startswith('! ({})'.format(self.option_number)):
+                # if there is no '---' or '****', find() method return '-1', so go next line.
+                # when there is '---' or '****', find() return the location index that is more than 0
                 while self.parent.file_contents[line_num+1].find("---") < 0 and \
                                 self.parent.file_contents[line_num+1].find("****") < 0:
                     line_num += 1
