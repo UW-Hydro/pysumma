@@ -47,7 +47,7 @@ class Simulation:
             # read every line of filemanager and return as list format
             return f.readlines()
 
-    def execute(self, run_suffix, run_option):
+    def execute(self, run_suffix, run_option, specworker_img = None):
         # set run_suffix to distinguish the output name of summa
         self.run_suffix = run_suffix
         # 'local' run_option runs summa with summa execution file where is in a local computer.
@@ -60,6 +60,10 @@ class Simulation:
             print(output)
             if 'FATAL ERROR' in output:
                 raise Exception("SUMMA failed to execute!")
+            # define output file name as sopron version of summa
+            out_file_path = self.output_path.filepath + \
+                            self.output_prefix.value + '_output_' + \
+                            self.run_suffix + '_timestep.nc'
 
         # 'docker_sopron_2018' run_option runs summa with docker hub online, and the version name is "'uwhydro/summa:sopron_2018'.
         elif run_option == "docker_sopron_2018":
@@ -76,27 +80,36 @@ class Simulation:
             print(output)
             if 'FATAL ERROR' in output:
                 raise Exception("SUMMA failed to execute!")
+            # define output file name as sopron version of summa
+            out_file_path = self.output_path.filepath + \
+                            self.output_prefix.value + '_output_' + \
+                            self.run_suffix + '_timestep.nc'
 
         # "specworker" run_option run summa with summa image in docker of HydroShare Jupyter Hub
         elif run_option == "specworker":
-            # save these paths in the env_vars dictionary which will be passed to the model
-            env_vars = {'LOCALBASEDIR': self.base_dir, 'MASTERPATH': self.filepath}
             # define the image that we want to execute
-            image_name = 'ncar/summa'
-            # define the location we want to mount these data in the container
-            vol_target = '/tmp/summa'
-            # define the base path of the input data for SUMMA
-            vol_source = self.base_dir
-            # run the container with the arguments specified above
-            res = jobs.run(image_name, '-x', vol_source, vol_target, env_vars)
+            if specworker_img == 'ncar/summa' or 'ncar/summa_sopron':
+                # save these paths in the env_vars dictionary which will be passed to the model
+                env_vars = {'LOCALBASEDIR': self.base_dir, 'MASTERPATH': self.filepath}
+                # define the location we want to mount these data in the container
+                vol_target = '/tmp/summa'
+                # define the base path of the input data for SUMMA
+                vol_source = self.base_dir
+                # run the container with the arguments specified above
+                res = jobs.run(specworker_img, '-x', vol_source, vol_target, env_vars)
+                # define output file name as sopron version of summa
+                out_file_path = self.base_dir + self.output_path.value.split('>')[1] + \
+                                self.output_prefix.value + '_' + \
+                                self.decision_obj.simulStart.value[0:4] + '-' + \
+                                self.decision_obj.simulFinsh.value[0:4] + '_' + \
+                                self.run_suffix + '1.nc'
+
+            else:
+                raise ValueError('You need to deinfe the exact SUMMA_image_name')
 
         else:
             raise ValueError('No executable defined. Set as "executable" attribute of Simulation or check run_option')
 
-        # define output file name as sopron version of summa
-        out_file_path = self.output_path.filepath + \
-                        self.output_prefix.value + '_output_' + \
-                        self.run_suffix + '_timestep.nc'
         return xr.open_dataset(out_file_path), out_file_path
 
 
