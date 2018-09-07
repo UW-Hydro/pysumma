@@ -1,3 +1,4 @@
+# This class is related with FileManagerOption method in Simulation.py
 class Option:
     def __init__(self, name, parent, key_position, value_position, delimiter=None):
         self.name = name
@@ -5,6 +6,7 @@ class Option:
         self.key_position = key_position
         self.value_position = value_position
         self.delimiter = delimiter
+        # file_contents is every line of filemanger as list format.
         self.text = parent.file_contents
         # Need line_no and line_contents in Option so that write_value can be in Option
         self.line_no, self.line_contents = self.get_line_info()
