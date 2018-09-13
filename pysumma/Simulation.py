@@ -107,13 +107,14 @@ class Simulation:
 
                 output_list = glob.glob(self.base_dir + self.output_path.value.split('>')[1]+"*.nc")
                 myoutput_list = ' '.join(output_list[1:])
-                output_name = self.output_prefix.value + '_' + \
-                              self.decision_obj.simulStart.value[0:4] + '-' + \
-                              self.decision_obj.simulFinsh.value[0:4] + '_' + \
-                              self.run_suffix + '1.nc'
+                if myoutput_list.count(self.output_prefix.value)>2:
+                    output_name = self.output_prefix.value + '_' + \
+                                self.decision_obj.simulStart.value[0:4] + '-' + \
+                                self.decision_obj.simulFinsh.value[0:4] + '_' + \
+                                self.run_suffix + '1.nc'
 
-                merge_netcdf = 'ncrcat ' + myoutput_list + ' -O ' + output_name
-                subprocess.run(merge_netcdf, shell=True)
+                    merge_netcdf = 'ncrcat ' + myoutput_list + ' -O ' + output_name
+                    subprocess.run(merge_netcdf, shell=True)
 
                 # define output file name as sopron version of summa
                 out_file_path = self.base_dir + self.output_path.value.split('>')[1] + \
