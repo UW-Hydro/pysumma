@@ -116,6 +116,9 @@ class Simulation:
                                 self.run_suffix + '1.nc'
                     merge_netcdf = 'ncrcat ' + myoutput_list + ' -O ' + output_name
                     subprocess.run(merge_netcdf, shell=True)
+                    myList = ' '.join(output_list[:])
+                    delete_netcdf = 'rm -rf ' + myList
+                    subprocess.run(delete_netcdf, shell=True)
 
                 # define output file name as sopron version of summa
                 out_file_path = self.base_dir + self.output_path.value.split('>')[1] + \
