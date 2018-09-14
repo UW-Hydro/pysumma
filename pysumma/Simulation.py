@@ -105,9 +105,10 @@ class Simulation:
                 # run the container with the arguments specified above
                 res = jobs.run(specworker_img, '-x', vol_source, vol_target, env_vars)
 
-                output_list = glob.glob(self.base_dir + self.output_path.value.split('>')[1]+"*.nc")
+                list = glob.glob(self.base_dir + self.output_path.value.split('>')[1]+"*.nc")
+                output_list = [x for x in list if self.output_prefix.value in x]
                 myoutput_list = ' '.join(output_list[1:])
-                if myoutput_list.count(self.output_prefix.value)>2:
+                if myoutput_list.count(self.output_prefix.value) > 1:
                     output_name = self.base_dir + self.output_path.value.split('>')[1] + \
                                 self.output_prefix.value + '_' + \
                                 self.decision_obj.simulStart.value[0:4] + '-' + \
