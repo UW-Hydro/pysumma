@@ -39,7 +39,7 @@ def spatial(data_array, geodf, simplify_level=500, proj=ccrs.Mercator(),
     '''Make a spatial plot'''
     # Preprocess the data
     geodf_crs = geodf.to_crs(crs=proj.proj4_params)
-    patches = gen_patches(data_array, geodf_crs, simplify_level, robust, colormap)
+    patches = gen_patches(data_array, geodf_crs, robust)
     # Map plotting
     fig, ax = plt.subplots(nrows=1, ncols=1, subplot_kw=dict(projection=proj))
     ax.add_collection(patches)
