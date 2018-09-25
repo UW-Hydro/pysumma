@@ -77,6 +77,7 @@ class DecisionOption(Option):
         if new_value in self.options:
             self.write_value(self.value, new_value)
         else:
+            self.write_value(self.value, new_value)
             raise ValueError('Your input value {} is not one of the valid options {}'.format(new_value, self.options))
 
 
