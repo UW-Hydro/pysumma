@@ -9,9 +9,9 @@ import glob
 
 class Simulation:
     # set filepath parameter as a a directory and a filename of file manager text file
-    def __init__(self, filepath):
+    def __init__(self, case_data, summa_code = None):
         # create self object from file manager text file
-        self.filepath = os.path.abspath(filepath)
+        self.filepath = os.path.abspath(case_data)
         self.file_dir = os.path.dirname(self.filepath)
         self.file_contents = self.open_read()
         self.fman_ver = FileManagerOption(self, 'fman_ver')
@@ -35,11 +35,17 @@ class Simulation:
         self.initial_cond = FileManagerOption(self, 'initial_cond')
         self.para_trial = FileManagerOption(self, 'para_trial')
         self.output_prefix = FileManagerOption(self, 'output_prefix')
-        self.base_dir = filepath.split('/settings')[0]
+        self.base_dir = case_data.split('/settings')[0]
         # create self object from decision text file
         self.decision_obj = Decisions(self.base_dir + '/settings/' + self.decision_path.value)
         #
-        #self.modeloutput_obj = ModelOutput(self.base_dir + '/settings/' + self.OUTPUT_CONTROL.value)
+
+        if summa_code == None:
+            self.modeloutput_obj = ModelOutput(self.base_dir + '/settings/' + self.OUTPUT_CONTROL.value, self.base_dir + '/settings/meta/var_lookup.f90')
+            self.summa_code = summa_code
+        else:
+            self.summa_code = summa_code
+            self.modeloutput_obj = ModelOutput(self.base_dir + '/settings/' + self.OUTPUT_CONTROL.value,summa_code + '/build/source/dshare/var_lookup.f90')
 
     def open_read(self):
         # read filemanager text file
@@ -51,19 +57,35 @@ class Simulation:
         # set run_suffix to distinguish the output name of summa
         self.run_suffix = run_suffix
         # 'local' run_option runs summa with summa execution file where is in a local computer.
-        if run_option == 'local':
-            cmd = "{} -p never -s {} -m {}".format(self.executable, self.run_suffix, self.filepath)
-            # run shell script in python and print output
-            cmd = shlex.split(cmd)
-            p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
-            output = p.communicate()[0].decode('utf-8')
-            print(output)
-            if 'FATAL ERROR' in output:
-                raise Exception("SUMMA failed to execute!")
-            # define output file name as sopron version of summa
-            out_file_path = self.output_path.filepath + \
-                            self.output_prefix.value + '_output_' + \
-                            self.run_suffix + '_timestep.nc'
+        if run_option == 'local' :
+            if self.summa_code == None:
+                cmd = "{} -p never -s {} -m {}".format(self.executable, self.run_suffix, self.filepath)
+                # run shell script in python and print output
+                cmd = shlex.split(cmd)
+                p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+                output = p.communicate()[0].decode('utf-8')
+                print(output)
+                if 'FATAL ERROR' in output:
+                    raise Exception("SUMMA failed to execute!")
+                # define output file name as sopron version of summa
+                out_file_path = self.output_path.filepath + \
+                                self.output_prefix.value + '_output_' + \
+                                self.run_suffix + '_timestep.nc'
+            else:
+                self.executable = self.summa_code + '/bin/summa.exe'
+                cmd = "{} -p never -s {} -m {}".format(self.executable, self.run_suffix, self.filepath)
+                # run shell script in python and print output
+                cmd = shlex.split(cmd)
+                p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+                output = p.communicate()[0].decode('utf-8')
+                print(output)
+                if 'FATAL ERROR' in output:
+                    raise Exception("SUMMA failed to execute!")
+                # define output file name as sopron version of summa
+                out_file_path = self.output_path.filepath + \
+                                self.output_prefix.value + '_output_' + \
+                                self.run_suffix + '_timestep.nc'
+
 
         # 'docker_sopron_2018' run_option runs summa with docker hub online, and the version name is "'uwhydro/summa:sopron_2018'.
         elif run_option == "docker_sopron_2018":
@@ -87,9 +109,14 @@ class Simulation:
             if 'FATAL ERROR' in output:
                 raise Exception("SUMMA failed to execute!")
             # define output file name as sopron version of summa
-            out_file_path = self.output_path.filepath + \
-                        self.output_prefix.value + '_output_' + \
-                        self.run_suffix + '_timestep.nc'
+            if self.output_path.filepath.split('/')[0] == '<BASEDIR>':
+                out_file_path = self.output_path.filepath.split('<BASEDIR>')[1] + \
+                                self.output_prefix.value + '_output_' + \
+                                self.run_suffix + '_timestep.nc'
+            else:
+                out_file_path = self.output_path.filepath + \
+                                self.output_prefix.value + '_output_' + \
+                                self.run_suffix + '_timestep.nc'
 
         # "specworker" run_option run summa with summa image in docker of HydroShare Jupyter Hub
         elif run_option == "specworker":
