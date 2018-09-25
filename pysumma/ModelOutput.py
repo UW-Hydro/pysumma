@@ -1,10 +1,10 @@
 import os
 
 class ModelOutput:
-    def __init__(self, filepath, master_file_filepath='/var_lookup.f90'):
-        print('ModelOuput master file filepath: ' + os.path.dirname(os.path.abspath('__file__')) + master_file_filepath)
+    def __init__(self, filepath, master_file_filepath):
+        print('ModelOuput master file filepath: ' + master_file_filepath)
         self.filepath = filepath
-        self.master_file_filepath = os.path.dirname(os.path.abspath('__file__')) + master_file_filepath
+        self.master_file_filepath = master_file_filepath
         self.text = self.read_file()
         self.var_choices = self.read_master_file()
 
