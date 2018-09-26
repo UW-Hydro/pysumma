@@ -36,3 +36,28 @@ class utils():
         shutil.unpack_archive(executable_filepath, extract_dir=os.path.dirname(executable_filepath))
         executable = save_filepath + '/' + resource_id + '/' + resource_id + '/data/contents/summa-master/bin'
         return  os.path.dirname(executable)
+
+
+    def download_model_instance_sopron(resource_id):
+        path = os.getcwd() + '/' + resource_id + '/' + resource_id + '/data/contents/'
+        hs = HydroShare()
+        hs.getResource(resource_id, destination=os.getcwd(), unzip=True)
+
+        # unpack the simulation archive and remove unncessary files
+        Model_Instance_Name = os.listdir(path)[0]
+        shutil.unpack_archive(path + Model_Instance_Name, extract_dir=os.getcwd())
+        cmd = "rm -rf " + resource_id
+        subprocess.run(cmd, shell=True)
+        cmd = 'cd ' + Model_Instance_Name.split('.')[0] +'/; ./installTestCases_local.sh'
+        subprocess.run(cmd, shell=True)
+
+    def download_model_instance(resource_id):
+        path = os.getcwd() + '/' + resource_id + '/' + resource_id + '/data/contents/'
+        hs = HydroShare()
+        hs.getResource(resource_id, destination=os.getcwd(), unzip=True)
+
+        # unpack the simulation archive and remove unncessary files
+        Model_Instance_Name = os.listdir(path)[0]
+        shutil.unpack_archive(path + Model_Instance_Name, extract_dir=os.getcwd())
+        cmd = "rm -rf " + resource_id
+        subprocess.run(cmd, shell=True)
