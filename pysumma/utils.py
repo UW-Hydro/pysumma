@@ -46,9 +46,9 @@ class utils():
         # unpack the simulation archive and remove unncessary files
         Model_Instance_Name = os.listdir(path)[0]
         shutil.unpack_archive(path + Model_Instance_Name, extract_dir=os.getcwd())
-        cmd = "rm -rf e1a73bc4e7c34166895ff20ae53371f5"
+        cmd = "rm -rf " + resource_id
         subprocess.run(cmd, shell=True)
-        cmd = 'cd SummaModel_ReynoldsAspenStand_StomatalResistance/; ./installTestCases_local.sh'
+        cmd = 'cd ' + Model_Instance_Name.split('.')[0] +'/; ./installTestCases_local.sh'
         subprocess.run(cmd, shell=True)
 
     def download_model_instance(resource_id):
@@ -59,5 +59,5 @@ class utils():
         # unpack the simulation archive and remove unncessary files
         Model_Instance_Name = os.listdir(path)[0]
         shutil.unpack_archive(path + Model_Instance_Name, extract_dir=os.getcwd())
-        cmd = "rm -rf e1a73bc4e7c34166895ff20ae53371f5"
+        cmd = "rm -rf" + resource_id
         subprocess.run(cmd, shell=True)
