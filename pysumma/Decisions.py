@@ -78,7 +78,7 @@ class DecisionOption(Option):
             self.write_value(self.value, new_value)
         else:
             self.write_value(self.value, new_value)
-            raise ValueError('Your input value {} is not one of the valid options {}'.format(new_value, self.options))
+            #raise ValueError('Your input value {} is not one of the valid options {}'.format(new_value, self.options))
 
 
 class SimulDatetime(Option):
