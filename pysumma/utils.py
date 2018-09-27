@@ -48,8 +48,11 @@ class utils():
         shutil.unpack_archive(path + Model_Instance_Name, extract_dir=os.getcwd())
         cmd = "rm -rf " + resource_id
         subprocess.run(cmd, shell=True)
-        cmd = 'cd ' + Model_Instance_Name.split('.')[0] +'/; ./installTestCases_local.sh'
-        subprocess.run(cmd, shell=True)
+        cmd = 'cd ' + Model_Instance_Name.split('.')[0] +'/; chmod +x ./installTestCases_local.sh'
+        subprocess.run(cmd, shell=True, stderr=subprocess.STDOUT)
+        cmd = 'cd ' + Model_Instance_Name.split('.')[0] + '/; ./installTestCases_local.sh'
+        subprocess.run(cmd, shell=True, stderr=subprocess.STDOUT)
+        return Model_Instance_Name.split('.')[0]
 
     def download_model_instance(resource_id):
         path = os.getcwd() + '/' + resource_id + '/' + resource_id + '/data/contents/'
@@ -61,3 +64,4 @@ class utils():
         shutil.unpack_archive(path + Model_Instance_Name, extract_dir=os.getcwd())
         cmd = "rm -rf " + resource_id
         subprocess.run(cmd, shell=True)
+        return Model_Instance_Name.split('.')[0]
