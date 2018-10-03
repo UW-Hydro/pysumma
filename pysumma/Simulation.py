@@ -9,6 +9,7 @@ from .OutputControl import OutputControl
 
 class Simulation(object):
     """The simulation object provides a wrapper for SUMMA simulations"""
+    library_path = None
 
     def __init__(self, executable, filemanager):
         """Initialize a new simulation object"""
