@@ -122,7 +122,7 @@ class Simulation:
         elif run_option == "specworker":
             from specworker import jobs
             # define the image that we want to execute
-            if specworker_img == 'ncar/summa' or 'ncar/summa_sopron':
+            if specworker_img == 'ncar/summa':
                 # save these paths in the env_vars dictionary which will be passed to the model
                 env_vars = {'LOCALBASEDIR': self.base_dir, 'MASTERPATH': self.filepath}
                 # define the location we want to mount these data in the container
@@ -153,6 +153,22 @@ class Simulation:
                                 self.decision_obj.simulStart.value[0:4] + '-' + \
                                 self.decision_obj.simulFinsh.value[0:4] + '_' + \
                                 self.run_suffix + '1.nc'
+
+            elif specworker_img == 'ncar/summa_sopron':
+                # save these paths in the env_vars dictionary which will be passed to the model
+                env_vars = {'LOCALBASEDIR': self.base_dir, 'MASTERPATH': self.filepath}
+                # define the location we want to mount these data in the container
+                vol_target = '/tmp/summa'
+                # define the base path of the input data for SUMMA
+                vol_source = self.base_dir
+                # run the container with the arguments specified above
+                res = jobs.run(specworker_img, '-x', vol_source, vol_target, env_vars)
+                if 'FATAL ERROR' in res:
+                    raise Exception("SUMMA failed to execute!")
+                # define output file name as sopron version of summa
+                out_file_path = self.output_path.filepath + \
+                                self.output_prefix.value + '_output_' + \
+                                self.run_suffix + '_timestep.nc'
 
             else:
                 raise ValueError('You need to deinfe the exact SUMMA_image_name')
