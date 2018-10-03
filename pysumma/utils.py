@@ -61,7 +61,7 @@ class utils():
 
         # unpack the simulation archive and remove unncessary files
         Model_Instance_Name = os.listdir(path)[0]
-        shutil.unpack_archive(path + Model_Instance_Name, extract_dir=os.getcwd())
+        shutil.unpack_archive(path + Model_Instance_Name+'.zip', extract_dir=os.getcwd())
         cmd = "rm -rf " + resource_id
         subprocess.run(cmd, shell=True)
         return Model_Instance_Name.split('.')[0]
