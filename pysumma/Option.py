@@ -99,5 +99,5 @@ class OptionContainer(object):
 
     def validate(self):
         """Ensure no options are repeated"""
-        names = [o.var for o in self.options]
+        names = [o.name for o in self.options]
         assert len(names) == len(set(names)), 'Duplicate options not allowed!'
