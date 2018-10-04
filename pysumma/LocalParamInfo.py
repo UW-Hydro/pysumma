@@ -13,17 +13,15 @@ class LocalParamInfo(object):
         for i, ln in enumerate(self.new_contents):
             if ln.startswith(key):
                 k, de, lo, up = ln.split('|')
-                k = k.strip()
-                de = de.strip()
-                lo = lo.strip()
-                up = up.strip()
+                k_l, de_l, lo_l, up_l = len(k), len(de), len(lo), len(up)
                 if not low:
                     low = lo
                 if not uppr:
-                    upr = up
-                self.new_contents[i] = (ln.replace(de, str(default))
-                                          .replace(lo, str(low))
-                                          .replace(up, str(upr)))
+                    uppr = up
+                self.new_contents[i] = (
+                    ln.replace(de, str(default).rjust(de_l-1)+' ')
+                      .replace(lo, str(low).rjust(lo_l-1)+' ')
+                      .replace(up.strip(), str(uppr)))
         with open(self.filepath, 'w') as f:
             f.writelines(self.new_contents)
 
