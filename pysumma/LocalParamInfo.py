@@ -21,7 +21,7 @@ class LocalParamInfo(object):
                 self.new_contents[i] = (
                     ln.replace(de, str(default).rjust(de_l-1)+' ')
                       .replace(lo, str(low).rjust(lo_l-1)+' ')
-                      .replace(up.strip(), str(uppr)))
+                      .replace(up.strip(), str(uppr).strip()))
         with open(self.filepath, 'w') as f:
             f.writelines(self.new_contents)
 
