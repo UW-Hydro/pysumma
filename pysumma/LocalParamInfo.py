@@ -9,19 +9,12 @@ class LocalParamInfo(object):
             self.original_contents = f.readlines()
         self.new_contents = copy.deepcopy(self.original_contents)
 
-    def replace(self, key, default, low=None, uppr=None):
+    def replace(self, key, default, low, uppr):
         for i, ln in enumerate(self.new_contents):
             if ln.startswith(key):
-                k, de, lo, up = ln.split('|')
-                k_l, de_l, lo_l, up_l = len(k), len(de), len(lo), len(up)
-                if not low:
-                    low = lo
-                if not uppr:
-                    uppr = up
                 self.new_contents[i] = (
-                    ln.replace(de, str(default).rjust(de_l-1)+' ')
-                      .replace(lo, str(low).rjust(lo_l-1)+' ')
-                      .replace(up.strip(), str(uppr).strip()))
+                        "{:25s} | {:>12.4f} | {:>12.4f} | {:>12.4f}\n"
+                        .format(key, default, low, uppr))
         with open(self.filepath, 'w') as f:
             f.writelines(self.new_contents)
 
