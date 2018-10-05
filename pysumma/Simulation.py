@@ -53,7 +53,7 @@ class Simulation:
             # read every line of filemanager and return as list format
             return f.readlines()
 
-    def execute(self, run_suffix, run_option, specworker_img = None):
+    def execute(self, run_option, run_suffix, specworker_img = None):
         # set run_suffix to distinguish the output name of summa
         self.run_suffix = run_suffix
         # 'local' run_option runs summa with summa execution file where is in a local computer.
@@ -120,6 +120,7 @@ class Simulation:
 
         # "specworker" run_option run summa with summa image in docker of HydroShare Jupyter Hub
         elif run_option == "specworker":
+            self.run_suffix = ""
             from specworker import jobs
             # define the image that we want to execute
             if specworker_img == 'cuahsi/summa:master':
@@ -151,8 +152,7 @@ class Simulation:
                 out_file_path = self.base_dir + self.output_path.value.split('>')[1] + \
                                 self.output_prefix.value + '_' + \
                                 self.decision_obj.simulStart.value[0:4] + '-' + \
-                                self.decision_obj.simulFinsh.value[0:4] + '_' + \
-                                self.run_suffix + '1.nc'
+                                self.decision_obj.simulFinsh.value[0:4] + '_' + '1.nc'
 
             elif specworker_img == 'cuahsi/summa:sopron':
                 # save these paths in the env_vars dictionary which will be passed to the model
@@ -166,8 +166,7 @@ class Simulation:
 
                 # define output file name as sopron version of summa
                 out_file_path = self.base_dir + '/' + self.output_path.filepath.split('/')[1] + '/' + \
-                                self.output_prefix.value + '_output_' + \
-                                self.run_suffix + 'timestep.nc'
+                                self.output_prefix.value + '_output_' + 'timestep.nc'
 
             else:
                 raise ValueError('You need to deinfe the exact SUMMA_image_name')
