@@ -176,7 +176,7 @@ class Simulation:
         return xr.open_dataset(out_file_path), out_file_path
 
     def get_output(self, version, output_prefix):
-        if version == "cuahsi_sopron_":
+        if version == "cuahsi_sopron":
             out_file_path = self.base_dir + '/' + self.output_path.filepath.split('/')[1] + '/' + \
                             output_prefix + '_output_' + \
                             self.run_suffix + 'timestep.nc'
@@ -198,7 +198,7 @@ class Simulation:
                                 self.run_suffix + '_timestep.nc'
             xr_output = xr.open_dataset(out_file_path)
         else:
-            raise ValueError('You need to write "cuahsi_sopron" or "cuahsi_master"or "docker_sorpon_" for version')
+            raise ValueError('You need to write "cuahsi_sopron" or "cuahsi_master"or "docker_sorpon" for version')
         return xr_output, out_file_path
 
 class FileManagerOption(Option):
