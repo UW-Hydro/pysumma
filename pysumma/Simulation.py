@@ -163,10 +163,14 @@ class Simulation:
                 vol_source = self.base_dir
                 # run the container with the arguments specified above
                 res = jobs.run(specworker_img, '-x', vol_source, vol_target, env_vars)
+
                 # define output file name as sopron version of summa
-                out_file_path = self.output_path.filepath + \
+                out_file_path = self.base_dir + '/' + self.output_path.filepath.split('/')[1] + '/' + \
                                 self.output_prefix.value + '_output_' + \
                                 self.run_suffix + '_timestep.nc'
+
+            if 'FATAL ERROR' in res:
+                raise Exception("SUMMA failed to execute!")
 
             else:
                 raise ValueError('You need to deinfe the exact SUMMA_image_name')
