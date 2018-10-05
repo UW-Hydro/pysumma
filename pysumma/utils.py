@@ -44,8 +44,8 @@ class utils():
         hs.getResource(resource_id, destination=os.getcwd(), unzip=True)
 
         # unpack the simulation archive and remove unncessary files
-        Model_Instance_Name = os.listdir(path)[0]
-        shutil.unpack_archive(path + Model_Instance_Name+'_sopron.zip', extract_dir=os.getcwd())
+        Model_Instance_Name = os.listdir(path)[1]
+        shutil.unpack_archive(path + Model_Instance_Name, extract_dir=os.getcwd())
         cmd = "rm -rf " + resource_id
         subprocess.run(cmd, shell=True)
         cmd = 'cd ' + Model_Instance_Name.split('.')[0] +'/; chmod +x ./installTestCases_local.sh'
@@ -61,7 +61,7 @@ class utils():
 
         # unpack the simulation archive and remove unncessary files
         Model_Instance_Name = os.listdir(path)[0]
-        shutil.unpack_archive(path + Model_Instance_Name+'_master.zip', extract_dir=os.getcwd())
+        shutil.unpack_archive(path + Model_Instance_Name, extract_dir=os.getcwd())
         cmd = "rm -rf " + resource_id
         subprocess.run(cmd, shell=True)
         return Model_Instance_Name.split('.')[0]
