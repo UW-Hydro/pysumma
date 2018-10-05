@@ -122,7 +122,7 @@ class Simulation:
         elif run_option == "specworker":
             from specworker import jobs
             # define the image that we want to execute
-            if specworker_img == 'ncar/summa':
+            if specworker_img == 'cuahsi/summa:master':
                 # save these paths in the env_vars dictionary which will be passed to the model
                 env_vars = {'LOCALBASEDIR': self.base_dir, 'MASTERPATH': self.filepath}
                 # define the location we want to mount these data in the container
@@ -154,7 +154,7 @@ class Simulation:
                                 self.decision_obj.simulFinsh.value[0:4] + '_' + \
                                 self.run_suffix + '1.nc'
 
-            elif specworker_img == 'ncar/summa_sopron':
+            elif specworker_img == 'cuahsi/summa:sopron':
                 # save these paths in the env_vars dictionary which will be passed to the model
                 env_vars = {'LOCALBASEDIR': self.base_dir, 'MASTERPATH': self.filepath}
                 # define the location we want to mount these data in the container
