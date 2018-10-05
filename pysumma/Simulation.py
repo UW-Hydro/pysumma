@@ -38,7 +38,6 @@ class Simulation:
         self.base_dir = case_data.split('/settings')[0]
         # create self object from decision text file
         self.decision_obj = Decisions(self.base_dir + '/settings/' + self.decision_path.value)
-        #
 
         if summa_code == None:
             self.modeloutput_obj = ModelOutput(self.base_dir + '/settings/' + self.OUTPUT_CONTROL.value, self.base_dir + '/settings/meta/var_lookup.f90')
@@ -176,6 +175,31 @@ class Simulation:
 
         return xr.open_dataset(out_file_path), out_file_path
 
+    def get_output(self, version, output_prefix):
+        if version == "cuahsi_sopron":
+            out_file_path = self.base_dir + '/' + self.output_path.filepath.split('/')[1] + '/' + \
+                            output_prefix + '_output_' + \
+                            self.run_suffix + 'timestep.nc'
+            xr_output = xr.open_dataset(out_file_path)
+        elif version == "cuahsi_master":
+            out_file_path = self.base_dir + self.output_path.value.split('>')[1] + \
+                            output_prefix + '_' + \
+                            self.decision_obj.simulStart.value[0:4] + '-' + \
+                            self.decision_obj.simulFinsh.value[0:4] + '_' + '1.nc'
+            xr_output = xr.open_dataset(out_file_path)
+        elif version == "docker_sopron":
+            if self.output_path.filepath.split('/')[0] == '<BASEDIR>':
+                out_file_path = self.output_path.filepath.split('<BASEDIR>')[1] + \
+                                self.output_prefix.value + '_output_' + \
+                                self.run_suffix + '_timestep.nc'
+            else:
+                out_file_path = self.output_path.filepath + \
+                                self.output_prefix.value + '_output_' + \
+                                self.run_suffix + '_timestep.nc'
+            xr_output = xr.open_dataset(out_file_path)
+        else:
+            raise ValueError('You need to write "cuahsi_sopron" or "cuahsi_master"or "docker_sorpon" for version')
+        return xr_output, out_file_path
 
 class FileManagerOption(Option):
 
