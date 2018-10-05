@@ -169,9 +169,6 @@ class Simulation:
                                 self.output_prefix.value + '_output_' + \
                                 self.run_suffix + '_timestep.nc'
 
-            if 'FATAL ERROR' in res:
-                raise Exception("SUMMA failed to execute!")
-
             else:
                 raise ValueError('You need to deinfe the exact SUMMA_image_name')
 
