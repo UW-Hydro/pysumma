@@ -79,18 +79,16 @@ class utils():
         subprocess.run(cmd, shell=True, stderr=subprocess.STDOUT)
         return Model_Instance_Name.split('.')[0]
 
-    def get_output_sopron(self, prefix):
-        self.output_prefix.value = prefix
+    def get_output_sopron(self, output_prefix):
         out_file_path = self.base_dir + '/' + self.output_path.filepath.split('/')[1] + '/' + \
-                        self.output_prefix.value + '_output_' + \
+                        output_prefix + '_output_' + \
                         self.run_suffix + 'timestep.nc'
         xr_output = xr.open_dataset(out_file_path)
         return xr_output, out_file_path
 
-    def get_output_master(self, prefix):
-        self.output_prefix.value = prefix
+    def get_output_master(self, output_prefix):
         out_file_path = self.base_dir + self.output_path.value.split('>')[1] + \
-                        self.output_prefix.value + '_' + \
+                        output_prefix + '_' + \
                         self.decision_obj.simulStart.value[0:4] + '-' + \
                         self.decision_obj.simulFinsh.value[0:4] + '_' + '1.nc'
         xr_output = xr.open_dataset(out_file_path)
