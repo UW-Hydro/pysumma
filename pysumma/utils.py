@@ -5,6 +5,7 @@ import subprocess
 from hs_restclient import HydroShare
 
 class utils():
+
     # download SUMMA TestCases from ucar web site, however this is old version of SUMMA TestCases
     def install_test_cases_summa_web(save_filepath):
         url = "https://ral.ucar.edu/sites/default/files/public/projects/structure-for-unifying-multiple-modeling-alternatives-summa/summatestcases-2.x.tar.gz"
