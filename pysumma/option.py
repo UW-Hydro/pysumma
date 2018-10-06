@@ -101,3 +101,23 @@ class OptionContainer(object):
         """Ensure no options are repeated"""
         names = [o.name for o in self.options]
         assert len(names) == len(set(names)), 'Duplicate options not allowed!'
+
+    def __getattr__(self, name):
+        if name == 'options':
+            object.__getattribute__(self, name)
+
+        decisions = [o.name for o in self.options]
+        if name in decisions:
+            return self.get_option(name)
+        else:
+            object.__getattribute__(self, name)
+
+    def __setattr__(self, name, value):
+        try:
+            decisions = [o.name for o in self.options]
+            if name in decisions:
+                return self.set_option(name, value)
+            else:
+                object.__setattr__(self, name, value)
+        except AttributeError:
+            object.__setattr__(self, name, value)

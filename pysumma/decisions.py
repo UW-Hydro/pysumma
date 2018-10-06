@@ -2,13 +2,14 @@ import os
 import re
 import json
 import pkg_resources
-from .Option import BaseOption
-from .Option import OptionContainer
+from .option import BaseOption
+from .option import OptionContainer
 
 
 METADATA_PATH = pkg_resources.resource_filename(
-        __name__, 'metadata/decisions.json')
-DECISION_META = json.load(METADATA_PATH)
+        __name__, 'meta/decisions.json')
+with open(METADATA_PATH, 'r') as f:
+    DECISION_META = json.load(f)
 
 
 class DecisionOption(BaseOption):
@@ -16,8 +17,8 @@ class DecisionOption(BaseOption):
 
     def __init__(self, name, value):
         super().__init__(name)
-        self.description = DECISION_META[name]['options']
-        self.available_options = DECISION_META[name]['description']
+        self.description = DECISION_META[name]['description']
+        self.available_options = DECISION_META[name]['options']
         self.set_value(value)
 
     def set_value(self, new_value):
@@ -50,7 +51,7 @@ class Decisions(OptionContainer):
     def set_option(self, key, value):
         try:
             o = self.get_option(key, strict=True)
-            o.value = value
+            o.set_value(value)
         except ValueError:
             if key in DECISION_META.keys():
                 self.options.append(DecisionOption(key, value))
