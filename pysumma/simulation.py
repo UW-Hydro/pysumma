@@ -2,9 +2,10 @@ import subprocess
 import os
 import shlex
 
-from .Decisions import Decisions
-from .FileManager import FileManager
-from .OutputControl import OutputControl
+from .decisions import Decisions
+from .file_manager import FileManager
+from .output_control import OutputControl
+from .local_param_info import LocalParamInfo
 
 
 class Simulation(object):
@@ -22,6 +23,9 @@ class Simulation(object):
         oc_path = "".join([self.manager.get_value('SETTINGS_PATH'),
                            self.manager.get_value('OUTPUT_CONTROL')])
         self.output_control = OutputControl(oc_path)
+        lpi_path = "".join([self.manager.get_value('SETTINGS_PATH'),
+                            self.manager.get_value('LOCAL_PARAM_INFO')])
+        self.local_param_info = LocalParamInfo(lpi_path)
 
     def execute(self, run_suffix, run_option, arglist=[]):
         """Run a SUMMA simulation"""

@@ -1,15 +1,16 @@
-from .Option import BaseOption, OptionContainer
+import json
+import pkg_resources
+
+from .option import BaseOption, OptionContainer
 
 # Option names for the file manager, this is just a list,
 # as the order of these values matters. They may also not be
 # explicitely writtn out in the given file.
-OPTION_NAMES = ['FILEMANAGER_VERSION', 'SETTINGS_PATH', 'INPUT_PATH',
-                'OUTPUT_PATH', 'DECISIONS_PATH', 'META_TIME', 'META_ATTR',
-                'META_TYPE', 'META_FORCE', 'META_LOCALPARAM',
-                'OUTPUT_CONTROL', 'META_LOCALINDEX', 'META_BASINPARAM',
-                'META_BASINMVAR', 'LOCAL_ATTRIBUTES', 'LOCAL_PARAM_INFO',
-                'BASIN_PARAM_INFO', 'FORCING_FILE_LIST', 'MODEL_INIT_COND',
-                'PARAMETER_TRIAL', 'OUTPUT_PREFIX']
+METADATA_PATH = pkg_resources.resource_filename(
+        __name__, 'meta/file_manager.json')
+with open(METADATA_PATH, 'r') as f:
+    FILEMANAGER_META = json.load(f)
+OPTION_NAMES = FILEMANAGER_META['OPTION_NAMES']
 
 
 class FileManagerOption(BaseOption):
@@ -18,6 +19,9 @@ class FileManagerOption(BaseOption):
     def __init__(self, name, value):
         self.name = name
         self.value = value
+
+    def set_value(self, new_value):
+        self.value = new_value
 
     def __repr__(self):
         return "'{}'    ! {}".format(self.value, self.name)
@@ -31,6 +35,10 @@ class FileManager(OptionContainer):
 
     def __init__(self, path):
         super().__init__(path, FileManagerOption)
+
+    def set_option(self, key, value):
+        o = self.get_option(key)
+        o.set_value(value)
 
     def get_constructor_args(self, line):
         return (OPTION_NAMES[self.opt_count],
