@@ -69,7 +69,7 @@ class Simulation:
                 # define output file name as sopron version of summa
                 out_file_path = self.output_path.filepath + \
                                 self.output_prefix.value + '_output_' + \
-                                self.run_suffix + 'timestep.nc'
+                                self.run_suffix + '_timestep.nc'
             else:
                 self.executable = self.summa_code + '/bin/summa.exe'
                 cmd = "{} -p never -s {} -m {}".format(self.executable, self.run_suffix, self.filepath)
