@@ -22,7 +22,7 @@ class DecisionOption(BaseOption):
         self.set_value(value)
 
     def set_value(self, new_value):
-        datestring = r'[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}'
+        datestring = r"[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}"
         if (self.name in ['simulStart', 'simulFinsh'] and
                 re.match(datestring, new_value) is not None):
             self.value = new_value
@@ -34,9 +34,13 @@ class DecisionOption(BaseOption):
                   'You gave a value of: {}'.format(new_value),
                   'Valid options include: {}'.format(self.available_options)]))
 
-    def __repr__(self):
+    def __str__(self):
+        if self.name in ['simulStart', 'simulFinsh']:
+            value = "'{}'".format(self.value)
+        else:
+            value = self.value
         return "{0}    {1: <20} ! {2}".format(
-                self.name, self.value, self.description)
+                self.name, value, self.description)
 
 
 class Decisions(OptionContainer):
