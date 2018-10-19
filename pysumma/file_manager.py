@@ -10,7 +10,7 @@ METADATA_PATH = pkg_resources.resource_filename(
         __name__, 'meta/file_manager.json')
 with open(METADATA_PATH, 'r') as f:
     FILEMANAGER_META = json.load(f)
-OPTION_NAMES = FILEMANAGER_META['OPTION_NAMES']
+OPTION_NAMES = FILEMANAGER_META['option_names']
 
 
 class FileManagerOption(BaseOption):
@@ -23,7 +23,7 @@ class FileManagerOption(BaseOption):
     def set_value(self, new_value):
         self.value = new_value
 
-    def __repr__(self):
+    def __str__(self):
         return "'{}'    ! {}".format(self.value, self.name)
 
 
