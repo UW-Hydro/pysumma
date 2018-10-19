@@ -1,4 +1,3 @@
-import copy
 from .option import BaseOption
 from .option import OptionContainer
 
@@ -12,7 +11,7 @@ class LocalParamOption(BaseOption):
     def set_value(self, new_value):
         self.value = new_value
 
-    def __repr__(self):
+    def __str__(self):
         return ("{:25s} | {:>12.4f} | {:>12.4f} | {:>12.4f}".format(
             self.name, self.value[0], self.value[1], self.value[2]))
 

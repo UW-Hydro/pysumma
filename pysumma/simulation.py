@@ -17,17 +17,22 @@ class Simulation(object):
         self.executable = executable
         self.manager_path = filemanager
         self.manager = FileManager(filemanager)
-        decision_path = "".join([self.manager.get_value('SETTINGS_PATH'),
-                                 self.manager.get_value('DECISIONS_PATH')])
+        try:
+            decision_path = "".join([self.manager.get_value('settings_path'),
+                                     self.manager.get_value('decisions_path')])
+            oc_path = "".join([self.manager.get_value('settings_path'),
+                               self.manager.get_value('output_control')])
+            lpi_path = "".join([self.manager.get_value('settings_path'),
+                                self.manager.get_value('local_param_info')])
+        except Exception as e:
+            raise ValueError('Incorrect file manager layout - see SUMMA '
+                             'documentation for guidelines') from e
+
         self.decisions = Decisions(decision_path)
-        oc_path = "".join([self.manager.get_value('SETTINGS_PATH'),
-                           self.manager.get_value('OUTPUT_CONTROL')])
         self.output_control = OutputControl(oc_path)
-        lpi_path = "".join([self.manager.get_value('SETTINGS_PATH'),
-                            self.manager.get_value('LOCAL_PARAM_INFO')])
         self.local_param_info = LocalParamInfo(lpi_path)
 
-    def execute(self, run_suffix, run_option, arglist=[]):
+    def start(self, run_suffix, run_option, arglist=[]):
         """Run a SUMMA simulation"""
         errstring = ('No executable defined. Set as "executable" attribute'
                      ' of Simulation or check run_option ')
@@ -62,15 +67,31 @@ class Simulation(object):
 
         preprocess = []
         if self.library_path:
-            preprocess = ['export LD_LIBRARY_PATH="{}" && '.format(
+            preprocess = ['export LD_LIBRARY_PATH="{}" '.format(
                 self.library_path)]
-        if arglist:
+        if len(arglist):
             preprocess.append('{} && '.join(arglist))
         preprocess = "".join(preprocess)
-        cmd = preprocess + " && " + cmd
+        if len(preprocess):
+            cmd = preprocess + " && " + cmd
 
-        # run shell script in python and print(shlex.split(cmd))
-        cmd = shlex.split(cmd)
-        p = subprocess.Popen(cmd, stdout=subprocess.PIPE,
-                             stderr=subprocess.PIPE)
-        return p
+        self.process = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                                        stderr=subprocess.PIPE, shell=True)
+
+    def monitor(self):
+        if not self.process:
+            raise RuntimeError('No simulation running! Use simulation.start '
+                               'or simulation.execute to begin a simulation!')
+        result = bool(self.process.wait())
+        self.stdout = self.process.stdout.read().decode('utf-8')
+        self.stderr = self.process.stderr.read().decode('utf-8')
+        return result
+
+    def execute(self, run_suffix, run_option, arglist=[], monitor=False):
+        """Run a SUMMA simulation"""
+        self.start(run_suffix, run_option, arglist)
+        if monitor:
+            return self.monitor()
+        else:
+            return self.process
+
