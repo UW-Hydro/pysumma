@@ -6,24 +6,46 @@ import calendar
 
 SEC_PER_DAY = 86400
 MM_PER_M = 1000
+WB_COMPONENTS = ['scalarTotalRunoff', 'scalarGroundEvaporation', 'pptrate',
+                 'scalarCanopyEvaporation', 'scalarCanopyTranspiration',
+                 'scalarSnowSublimation', 'scalarCanopySublimation',
+                 'scalarSWE', 'scalarTotalSoilWat', 'scalarCanopyWat']
 WB_LONGNAMES = ['Evapotranspiration (ET)', 'Runoff', 'Precipitation',
-                'Soil & canopy moisture', 'Snow water equivalent (SWE)']
+                'Soil & canopy moisture',
+                'Snow water equivalent (SWE)', 'Baseflow']
+
+
+def _determine_suffix(ds):
+    suffix = ''
+    for var in list(ds.keys()):
+        if var.startswith(WB_COMPONENTS[0]):
+            if var == WB_COMPONENTS[0]:
+                return suffix
+            else:
+                return var.replace(WB_COMPONENTS[0], '_')
 
 
 def aggregate_wb_vars(ds):
     out_vars = ['evaporation', 'precipitation', 'runoff',
-                'swe', 'soil_moisture', 'canopy_moisture']
-    ds = ds.where(ds['scalarTotalRunoff_mean'] > -100, drop=True)
-    ds['precipitation'] = ds['pptrate_mean'] * SEC_PER_DAY
-    ds['evaporation'] = SEC_PER_DAY * (ds['scalarGroundEvaporation_mean']
-                                       + ds['scalarCanopyEvaporation_mean']
-                                       + ds['scalarCanopyTranspiration_mean']
-                                       + ds['scalarSnowSublimation_mean']
-                                       + ds['scalarCanopySublimation_mean'])
-    ds['runoff'] = -ds['scalarTotalRunoff_mean'] * SEC_PER_DAY * MM_PER_M
-    ds['swe'] = -ds['scalarSWE']
-    ds['soil_moisture'] = -ds['scalarTotalSoilLiq'] - ds['scalarTotalSoilIce']
-    ds['canopy_moisture'] = -ds['scalarCanopyIce'] - ds['scalarCanopyLiq']
+                'swe', 'soil_moisture', 'baseflow']  # , 'canopy_moisture']
+    suffix = _determine_suffix(ds)
+    ds = ds.where(ds['scalarTotalRunoff{}'.format(suffix)] > -100, drop=True)
+    ds['precipitation'] = ds['pptrate{}'.format(suffix)] * SEC_PER_DAY
+    ds['evaporation'] = SEC_PER_DAY * (
+            ds['scalarGroundEvaporation{}'.format(suffix)]
+            + ds['scalarCanopyEvaporation{}'.format(suffix)]
+            + ds['scalarCanopyTranspiration{}'.format(suffix)]
+            + ds['scalarSnowSublimation{}'.format(suffix)]
+            + ds['scalarCanopySublimation{}'.format(suffix)])
+    ds['runoff'] = -(ds['scalarTotalRunoff{}'.format(suffix)]
+                     * SEC_PER_DAY * MM_PER_M)
+    ds['baseflow'] = - SEC_PER_DAY * MM_PER_M * (
+            ds['scalarAquiferBaseflow{}'.format(suffix)])
+    ds['swe'] = -ds['scalarSWE{}'.format(suffix)]
+    ds['soil_moisture'] = -(ds['scalarTotalSoilLiq{}'.format(suffix)]
+                            + ds['scalarTotalSoilIce{}'.format(suffix)]
+                            + ds['scalarCanopyIce{}'.format(suffix)]
+                            + ds['scalarCanopyLiq{}'.format(suffix)])
     return ds[out_vars]
 
 
@@ -38,6 +60,7 @@ def calc_monthly_flux(da: xr.DataArray, year: int) -> xr.DataArray:
            f'01-31-{year}', f'02-{feb_end}-{year}', f'03-31-{year}',
            f'04-30-{year}', f'05-31-{year}', f'06-30-{year}',
            f'07-31-{year}', f'08-31-{year}', f'09-30-{year}']
+    da = da.copy(deep=True).resample(time='D').mean()
     return np.array([da.sel(time=e).values - da.sel(time=s).values
                      for s, e in zip(start, end)])
 
@@ -53,6 +76,7 @@ def calc_monthly_sum(da: xr.DataArray, year: int) -> xr.DataArray:
            f'01-31-{year}', f'02-{feb_end}-{year}', f'03-31-{year}',
            f'04-30-{year}', f'05-31-{year}', f'06-30-{year}',
            f'07-31-{year}', f'08-31-{year}', f'09-30-{year}']
+    da = da.copy(deep=True).resample(time='D').mean()
     return np.array([da.sel(time=slice(s, e)).sum(dim='time')
                      for s, e in zip(start, end)])
 
@@ -60,18 +84,17 @@ def calc_monthly_sum(da: xr.DataArray, year: int) -> xr.DataArray:
 def monthly_water_balance(ds: xr.Dataset, year: int,
                           agg_dims: list=None) -> pd.DataFrame:
     wb_vars = ['evaporation', 'runoff', 'precipitation',
-               'soil_moisture', 'swe']
+               'soil_moisture', 'swe', 'baseflow']
     wy_slice = slice(f'10-01-{year-1}', f'9-30-{year}')
     time_group = ds.sel(time=wy_slice).time.dt.month
     wb_monthly = ds.sel(time=wy_slice).groupby(time_group).sum(dim=['time'])
     wb_monthly['swe'].values = calc_monthly_flux(ds['swe'], year)
     wb_monthly['soil_moisture'].values = (
             calc_monthly_flux(ds['soil_moisture'], year))
-    wb_monthly['soil_moisture'].values += (
-            calc_monthly_flux(ds['canopy_moisture'], year))
     wb_monthly['evaporation'].values = (
             calc_monthly_sum(ds['evaporation'], year))
     wb_monthly['runoff'].values = calc_monthly_sum(ds['runoff'], year)
+    wb_monthly['baseflow'].values = calc_monthly_sum(ds['baseflow'], year)
     wb_monthly['precipitation'].values = (
             calc_monthly_sum(ds['precipitation'], year))
     if agg_dims is not None:
@@ -90,6 +113,7 @@ def calc_seasonal_flux(da: xr.DataArray, year: int) -> xr.DataArray:
              f'06-01-{year}', f'08-31-{year}']
     end = [f'02-{feb_end}-{year}', f'05-31-{year}',
            f'08-31-{year}', f'11-30-{year}']
+    da = da.copy(deep=True).resample(time='D').mean()
     return np.array([da.sel(time=e).values - da.sel(time=s).values
                      for s, e in zip(start, end)])
 
@@ -101,6 +125,7 @@ def calc_seasonal_sum(da: xr.DataArray, year: int) -> xr.DataArray:
              f'06-01-{year}', f'09-01-{year}']
     end = [f'02-{feb_end}-{year}', f'05-31-{year}',
            f'08-31-{year}', f'11-30-{year}']
+    da = da.copy(deep=True).resample(time='D').sum()
     return np.array([da.sel(time=slice(s, e)).sum(dim='time')
                      for s, e in zip(start, end)])
 
@@ -108,7 +133,7 @@ def calc_seasonal_sum(da: xr.DataArray, year: int) -> xr.DataArray:
 def seasonal_water_balance(ds: xr.Dataset, year: int,
                            agg_dims: list=None) -> pd.DataFrame:
     wb_vars = ['evaporation', 'runoff', 'precipitation',
-               'soil_moisture', 'swe']
+               'soil_moisture', 'swe', 'baseflow']
     wy_slice = slice(f'11-30-{year-1}', f'12-31-{year}')
     time_group = ds.sel(time=wy_slice).time.dt.season
     wb_seasonal = ds.sel(time=wy_slice).groupby(time_group).sum(dim=['time'])
@@ -116,10 +141,9 @@ def seasonal_water_balance(ds: xr.Dataset, year: int,
     wb_seasonal['soil_moisture'].values = (
             calc_seasonal_flux(ds['soil_moisture'], year))
     wb_seasonal['soil_moisture'].values += (
-            calc_seasonal_flux(ds['canopy_moisture'], year))
-    wb_seasonal['evaporation'].values = (
             calc_seasonal_sum(ds['evaporation'], year))
     wb_seasonal['runoff'].values = calc_seasonal_sum(ds['runoff'], year)
+    wb_seasonal['baseflow'].values = calc_seasonal_sum(ds['baseflow'], year)
     wb_seasonal['precipitation'].values = (
             calc_seasonal_sum(ds['precipitation'], year))
     if agg_dims is not None:
@@ -130,7 +154,7 @@ def seasonal_water_balance(ds: xr.Dataset, year: int,
     return wb_df
 
 
-def plot_water_balance(ds, start_year, end_year, how='seasonal',
+def water_balance(ds, start_year, end_year, how='seasonal',
                        ax=None, legend=True):
     if how not in ['seasonal', 'monthly']:
         raise NotImplementedError()
