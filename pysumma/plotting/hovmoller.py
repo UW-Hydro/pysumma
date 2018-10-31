@@ -8,6 +8,9 @@ def hovmoller(data_array, xdim, ydim, how='mean', cmap='viridis'):
     time_groups = ['year', 'month', 'day', 'hour',
                    'minute', 'second', 'dayofyear',
                    'week', 'dayofweek', 'weekday', 'quarter']
+                   
+                   
+                   
     x_da_dim = xdim in list(data_array.dims)
     x_tg_dim = xdim in time_groups
     if x_tg_dim:
@@ -29,6 +32,9 @@ def hovmoller(data_array, xdim, ydim, how='mean', cmap='viridis'):
     elif not y_da_dim:
         raise Exception("y dimension not valid")
 
+        
+        
+        
     # Make sure the aggregation method is valid
     aggregation_methods = {'mean': lambda x: x.mean(),
                            'max': lambda x: x.max(),
