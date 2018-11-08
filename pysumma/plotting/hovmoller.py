@@ -52,8 +52,9 @@ def hovmoller(data_array, xdim, ydim, how='mean', cmap='viridis'):
     y = grouped2[(list(grouped2.dims)[0])]
     z = np.ma.masked_invalid(grouped2.values)
     fig, ax = plt.subplots(nrows=1, ncols=1)
-    ax.axes.pcolormesh(x, y, z, cmap=cmap)
+    im = ax.axes.pcolormesh(x, y, z, cmap=cmap)
     ax.axes.axis([x.min(), x.max(), y.min(), y.max()])
+    fig.colorbar(im)
 
     # TODO: Format axes and labels
     daysofweek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday',
