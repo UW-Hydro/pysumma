@@ -31,20 +31,18 @@ def aggregate_wb_vars(ds):
     suffix = _determine_suffix(ds)
     ds = ds.where(ds['scalarTotalRunoff{}'.format(suffix)] > -100, drop=True)
     ds['precipitation'] = ds['pptrate{}'.format(suffix)] * SEC_PER_DAY
-
-    ds['evaporation'] = - SEC_PER_DAY * (
+    ds['evaporation'] = SEC_PER_DAY * (
             ds['scalarGroundEvaporation{}'.format(suffix)]
             + ds['scalarCanopyEvaporation{}'.format(suffix)]
             + ds['scalarCanopyTranspiration{}'.format(suffix)]
             + ds['scalarSnowSublimation{}'.format(suffix)]
             + ds['scalarCanopySublimation{}'.format(suffix)])
-
-    ds['runoff'] = (ds['scalarTotalRunoff{}'.format(suffix)]
+    ds['runoff'] = -(ds['scalarTotalRunoff{}'.format(suffix)]
                      * SEC_PER_DAY * MM_PER_M)
-    ds['baseflow'] = SEC_PER_DAY * MM_PER_M * (
+    ds['baseflow'] = - SEC_PER_DAY * MM_PER_M * (
             ds['scalarAquiferBaseflow{}'.format(suffix)])
-    ds['swe'] = ds['scalarSWE{}'.format(suffix)]
-    ds['soil_moisture'] = (ds['scalarTotalSoilLiq{}'.format(suffix)]
+    ds['swe'] = -ds['scalarSWE{}'.format(suffix)]
+    ds['soil_moisture'] = -(ds['scalarTotalSoilLiq{}'.format(suffix)]
                             + ds['scalarTotalSoilIce{}'.format(suffix)]
                             + ds['scalarCanopyIce{}'.format(suffix)]
                             + ds['scalarCanopyLiq{}'.format(suffix)])
@@ -89,13 +87,7 @@ def monthly_water_balance(ds: xr.Dataset, year: int,
                'soil_moisture', 'swe', 'baseflow']
     wy_slice = slice(f'10-01-{year-1}', f'9-30-{year}')
     time_group = ds.sel(time=wy_slice).time.dt.month
-
     wb_monthly = ds.sel(time=wy_slice).groupby(time_group).sum(dim=['time'])
-    if agg_dims is not None:
-        wb_monthly = wb_monthly[wb_vars].sum(dim=agg_dims)
-    else:
-        wb_monthly = wb_monthly[wb_vars]
-        
     wb_monthly['swe'].values = calc_monthly_flux(ds['swe'], year)
     wb_monthly['soil_moisture'].values = (
             calc_monthly_flux(ds['soil_moisture'], year))
@@ -105,7 +97,10 @@ def monthly_water_balance(ds: xr.Dataset, year: int,
     wb_monthly['baseflow'].values = calc_monthly_sum(ds['baseflow'], year)
     wb_monthly['precipitation'].values = (
             calc_monthly_sum(ds['precipitation'], year))
-
+    if agg_dims is not None:
+        wb_monthly = wb_monthly[wb_vars].sum(dim=agg_dims)
+    else:
+        wb_monthly = wb_monthly[wb_vars]
     wb_df = wb_monthly.to_dataframe()
     wb_df.index -= 1
     return wb_df
@@ -142,12 +137,6 @@ def seasonal_water_balance(ds: xr.Dataset, year: int,
     wy_slice = slice(f'11-30-{year-1}', f'12-31-{year}')
     time_group = ds.sel(time=wy_slice).time.dt.season
     wb_seasonal = ds.sel(time=wy_slice).groupby(time_group).sum(dim=['time'])
-    
-    if agg_dims is not None:
-        wb_seasonal = wb_seasonal[wb_vars].sum(dim=agg_dims)
-    else:
-        wb_seasonal = wb_seasonal[wb_vars]
-        
     wb_seasonal['swe'].values = calc_seasonal_flux(ds['swe'], year)
     wb_seasonal['soil_moisture'].values = (
             calc_seasonal_flux(ds['soil_moisture'], year))
@@ -157,7 +146,10 @@ def seasonal_water_balance(ds: xr.Dataset, year: int,
     wb_seasonal['baseflow'].values = calc_seasonal_sum(ds['baseflow'], year)
     wb_seasonal['precipitation'].values = (
             calc_seasonal_sum(ds['precipitation'], year))
-
+    if agg_dims is not None:
+        wb_seasonal = wb_seasonal[wb_vars].sum(dim=agg_dims)
+    else:
+        wb_seasonal = wb_seasonal[wb_vars]
     wb_df = wb_seasonal.to_dataframe()
     return wb_df
 
@@ -170,12 +162,12 @@ def water_balance(ds, start_year, end_year, how='seasonal',
     ds_agg = aggregate_wb_vars(ds)
     if how == 'seasonal':
         for year in np.arange(start_year, end_year):
-            s_df.append(seasonal_water_balance(ds_agg, year, agg_dims=['hru']))
+            s_df.append(seasonal_water_balance(ds_agg, year))
         s_df = pd.concat(s_df).groupby('season').mean()
         months = ['Winter', 'Spring', 'Summer', 'Fall']
     elif how == 'monthly':
         for year in np.arange(start_year, end_year):
-            s_df.append(monthly_water_balance(ds_agg, year, agg_dims=['hru']))
+            s_df.append(monthly_water_balance(ds_agg, year))
         s_df = pd.concat(s_df).groupby('month').mean()
         months = ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar',
                   'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep']
