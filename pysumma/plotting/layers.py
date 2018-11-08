@@ -9,6 +9,7 @@ import itertools
 
 def layers(ds, var, cmap='viridis'):
     '''Plot a cross section of layers'''
+
     # midsoil number 8, row : time, column : hru number , value the number of midsoil layer
     layers = ds.nLayers.values.astype('int')
     # midToto number 13
