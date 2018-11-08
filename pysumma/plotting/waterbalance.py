@@ -31,18 +31,20 @@ def aggregate_wb_vars(ds):
     suffix = _determine_suffix(ds)
     ds = ds.where(ds['scalarTotalRunoff{}'.format(suffix)] > -100, drop=True)
     ds['precipitation'] = ds['pptrate{}'.format(suffix)] * SEC_PER_DAY
-    ds['evaporation'] = SEC_PER_DAY * (
+
+    ds['evaporation'] = - SEC_PER_DAY * (
             ds['scalarGroundEvaporation{}'.format(suffix)]
             + ds['scalarCanopyEvaporation{}'.format(suffix)]
             + ds['scalarCanopyTranspiration{}'.format(suffix)]
             + ds['scalarSnowSublimation{}'.format(suffix)]
             + ds['scalarCanopySublimation{}'.format(suffix)])
-    ds['runoff'] = -(ds['scalarTotalRunoff{}'.format(suffix)]
+
+    ds['runoff'] = (ds['scalarTotalRunoff{}'.format(suffix)]
                      * SEC_PER_DAY * MM_PER_M)
-    ds['baseflow'] = - SEC_PER_DAY * MM_PER_M * (
+    ds['baseflow'] = SEC_PER_DAY * MM_PER_M * (
             ds['scalarAquiferBaseflow{}'.format(suffix)])
-    ds['swe'] = -ds['scalarSWE{}'.format(suffix)]
-    ds['soil_moisture'] = -(ds['scalarTotalSoilLiq{}'.format(suffix)]
+    ds['swe'] = ds['scalarSWE{}'.format(suffix)]
+    ds['soil_moisture'] = (ds['scalarTotalSoilLiq{}'.format(suffix)]
                             + ds['scalarTotalSoilIce{}'.format(suffix)]
                             + ds['scalarCanopyIce{}'.format(suffix)]
                             + ds['scalarCanopyLiq{}'.format(suffix)])

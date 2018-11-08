@@ -9,10 +9,15 @@ import itertools
 
 def layers(ds, var, cmap='viridis'):
     '''Plot a cross section of layers'''
+
+    # midsoil number 8, row : time, column : hru number , value the number of midsoil layer
     layers = ds.nLayers.values.astype('int')
+    # midToto number 13
     max_layers = np.amax(layers)
+    # ifcToto number 14, row: time, column : 14 
     depths = np.empty((max_layers+1, len(ds.time)))
     depths[:] = np.nan
+    # midToto number 13, row: time, column : 13
     vals = np.empty((max_layers, len(ds.time)))
     vals[:] = np.nan
 
