@@ -55,6 +55,7 @@ def hovmoller(data_array, xdim, ydim, how='mean', cmap='viridis'):
     im = ax.axes.pcolormesh(x, y, z, cmap=cmap)
     ax.axes.axis([x.min(), x.max(), y.min(), y.max()])
     fig.colorbar(im)
+
     # TODO: Format axes and labels
     daysofweek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday',
                   'Thursday', 'Friday', 'Saturday']
