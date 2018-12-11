@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 
 def ParamTrial_from_csv(path, name):
     # Create a netCDF file
-    param_trial = Dataset('./settings/'+name, "w", format="NETCDF3_CLASSIC")
+    param_trial = Dataset(path.split(path.split('/')[-1])[0]+'settings/'+name, "w", format="NETCDF3_CLASSIC")
     # Read csv file using Panda
     param_trial_data = pd.read_csv(path, sep=',')
     # Create Dimension in a netCDF file
@@ -25,7 +25,7 @@ def ParamTrial_from_csv(path, name):
 
 def InitialCond_from_csv(hru_path, ifcToto_path, midToto_path, name):
     # Create a netCDF file
-    initial_cond = Dataset('./settings/'+name, "w", format="NETCDF3_CLASSIC")
+    initial_cond = Dataset(hru_path.split(hru_path.split('/')[-1])[0]+'settings/'+name, "w", format="NETCDF3_CLASSIC")
     # Read csv file using Panda
     hru_initial_cond = pd.read_csv(hru_path, sep=',')
     ifcToto_initial_cond = pd.read_csv(ifcToto_path, sep=',')
@@ -72,7 +72,7 @@ def InitialCond_from_csv(hru_path, ifcToto_path, midToto_path, name):
 
 def LocalAttribute_from_csv(localattri_path, name):
     # Create a netCDF file
-    loca_attri = Dataset('./settings/'+name, "w", format="NETCDF3_CLASSIC")
+    loca_attri = Dataset(localattri_path.split(localattri_path.split('/')[-1])[0]+'settings/'+name, "w", format="NETCDF3_CLASSIC")
     # Read csv file using Panda
     loca_attri_data = pd.read_csv(localattri_path, sep=',')
     # Create Dimension in a netCDF file
@@ -114,7 +114,7 @@ def LocalAttribute_from_csv(localattri_path, name):
 
 def forcingdata_from_csv(forcing_path, localattri_path, name, start_date_time, time_step='3600.0'):
     # Create a netCDF file
-    forcing = Dataset('./data/forcingData/'+name, "w", format="NETCDF3_CLASSIC")
+    forcing = Dataset(forcing_path.split(forcing_path.split('/')[-1])[0]+'data/forcingData/'+name, "w", format="NETCDF3_CLASSIC")
     # Read csv file using Panda
     forcing_data = pd.read_csv(forcing_path, sep=',')
     loca_attri_data = pd.read_csv(localattri_path, sep=',')
