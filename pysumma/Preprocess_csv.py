@@ -112,7 +112,7 @@ def LocalAttribute_from_csv(localattri_path, name):
     loca_attri.close()
 
 
-def forcingdata_from_csv(forcing_path, localattri_path, name, start_date_time, data_step='3600.0'):
+def forcingdata_from_csv(forcing_path, localattri_path, name, start_date_time, time_step='3600.0'):
     # Create a netCDF file
     forcing = Dataset('./data/forcingData/'+name, "w", format="NETCDF3_CLASSIC")
     # Read csv file using Panda
@@ -143,13 +143,13 @@ def forcingdata_from_csv(forcing_path, localattri_path, name, start_date_time, d
     dates = []
     for n in range(int(len(forcing_data) / len(loca_attri_data))):
         dates.append(datetime(int(start_date_time[0:4]), int(start_date_time[5:7]), int(start_date_time[8:10])) + n * timedelta(
-                hours=1))
+                days=1)) #hours=1
     time[:] = date2num(dates, units=time.units, calendar=time.calendar)
 
     data_step = forcing.createVariable("data_step", "f8", )
-    data_step.units = 'seconds'
-    data_step.long_name = "data step length in seconds"
-    data_step[:] = '3600.0'
+    data_step.units = 'days'#'seconds'
+    data_step.long_name = "data step length in days" #"data step length in seconds"
+    data_step[:] = time_step
 
     LWRadAtm = forcing.createVariable("LWRadAtm", "f8", ("time", "hru",), fill_value=-999.0)
     LWRadAtm.units = 'W m-2'
