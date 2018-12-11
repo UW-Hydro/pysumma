@@ -101,6 +101,7 @@ class Simulation:
                       " -v {}:{}".format(self.output_path.filepath, self.output_path.filepath) + \
                       " {} -p never -s {} -m {}".format(self.executable, self.run_suffix, self.filepath)
             # run shell script in python and print output
+            print(cmd)
             cmd = shlex.split(cmd)
             p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
             output = p.communicate()[0].decode('utf-8')
@@ -178,8 +179,7 @@ class Simulation:
     def get_output(self, version, output_prefix=None, run_suffix=None):
         if version == "cuahsi_sopron":
             out_file_path = self.base_dir + '/' + self.output_path.filepath.split('/')[1] + '/' + \
-                            output_prefix + '_output_' + \
-                            self.run_suffix + 'timestep.nc'
+                            output_prefix + '_output_' + 'timestep.nc'
             xr_output = xr.open_dataset(out_file_path)
         elif version == "cuahsi_master":
             out_file_path = self.base_dir + self.output_path.value.split('>')[1] + \
