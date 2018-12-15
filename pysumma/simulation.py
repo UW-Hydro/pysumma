@@ -6,6 +6,9 @@ import glob
 
 from .decisions import Decisions
 from .file_manager import FileManager
+from .output_control import OutputControl
+from .local_param_info import LocalParamInfo
+from .force_file_list import ForceFileList
 
 class Simulation(object):
 
@@ -14,25 +17,27 @@ class Simulation(object):
 
     manager: FileManager = None
     decisions: Decisions = None
+    output_control: OutputControl = None
+    local_param_info: LocalParamInfo = None
+    basin_param_info: LocalParamInfo = None
+    force_file_list: ForceFileList = None
+    local_attributes: xr.Dataset = None
+    parameter_trial: xr.Dataset = None
 
-    def __init__(self, executable, filemanager,
-                 run_suffix='_pysumma_run', summa_code=None):
-        """
-        Initialize a new simulation object
-        """
+    def __init__(self, executable, filemanager, run_suffix='_pysumma_run'):
+        """Initialize a new simulation object"""
         self.executable = executable
         self.manager_path = filemanager
         self.run_suffix = run_suffix
         self.manager = FileManager(filemanager)
         self.decisions = self.manager.decisions
         self.output_control = self.manager.output_control
-        self._status = 'initialized'
-
-    def open_read(self):
-        # read filemanager text file
-        with open(self.filepath, 'rt') as f:
-            # read every line of filemanager and return as list format
-            return f.readlines()
+        self.parameter_trial = self.manager.parameter_trial
+        self.force_file_list = self.manager.force_file_list
+        self.local_param_info = self.manager.local_param_info
+        self.basin_param_info = self.manager.basin_param_info
+        self.local_attributes = self.manager.local_attributes
+        self._status = 'Initialized'
 
     def execute(self, run_option, run_suffix, specworker_img=None):
         # set run_suffix to distinguish the output name of summa

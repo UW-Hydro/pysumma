@@ -59,36 +59,33 @@ class FileManager(OptionContainer):
         p = self.get_value('settings_path') + self.get_value('output_control')
         return OutputControl(p)
 
-    #TODO: Uncomment this when ready
-    # @property
-    # def local_param_info(self):
-    #     p = (self.get_value('settings_path')
-    #          + self.get_value('local_param_info'))
-    #     return LocalParamInfo(p)
+    @property
+    def local_param_info(self):
+        p = (self.get_value('settings_path')
+             + self.get_value('local_param_info'))
+        return LocalParamInfo(p)
 
-    # @property
-    # def basin_param_info(self):
-    #     p = (self.get_value('settings_path')
-    #          + self.get_value('basin_param_info'))
-    #     return LocalParamInfo(p)
+    @property
+    def basin_param_info(self):
+        p = (self.get_value('settings_path')
+             + self.get_value('basin_param_info'))
+        return LocalParamInfo(p)
 
-    # @property
-    # def force_file_list(self):
-    #     p1 = (self.get_value('settings_path')
-    #           + self.get_value('forcing_file_list'))
-    #     p2 = self.get_value('input_path')
-    #     return ForceFileList(p1, p2)
+    @property
+    def force_file_list(self):
+        p1 = (self.get_value('settings_path')
+              + self.get_value('forcing_file_list'))
+        p2 = self.get_value('input_path')
+        return ForceFileList(p1, p2)
 
-    # @property
-    # def local_attributes(self):
-    #     p = (self.get_value('settings_path')
-    #          + self.get_value('local_attributes'))
-    #     return xr.open_dataset(p)
+    @property
+    def local_attributes(self):
+        p = (self.get_value('settings_path')
+             + self.get_value('local_attributes'))
+        return xr.open_dataset(p)
 
-    # @property
-    # def parameter_trial(self):
-    #     p = (self.get_value('settings_path')
-    #          + self.get_value('parameter_trial'))
-    #     return xr.open_dataset(p)
-
-
+    @property
+    def parameter_trial(self):
+        p = (self.get_value('settings_path')
+             + self.get_value('parameter_trial'))
+        return xr.open_dataset(p)
