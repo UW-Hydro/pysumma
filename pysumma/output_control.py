@@ -1,70 +1,114 @@
-import os
+import pkg_resources
+from .option import BaseOption
+from .option import OptionContainer
 
-class ModelOutput:
-    def __init__(self, filepath, master_file_filepath):
-        print('ModelOuput master file filepath: ' + master_file_filepath)
-        self.filepath = filepath
-        self.master_file_filepath = master_file_filepath
-        self.text = self.read_file()
-        self.var_choices = self.read_master_file()
+def read_master_file(master_file_filepath):
+    """Get all varialbes from var_lookup file"""
+    #TODO: This may be fragile, move this to utils and create a static
+    #      version of this metadata. Then, we can use this function to
+    #      repopulate a new version of the metadata as necessary
+    out = []
+    with open(master_file_filepath, 'r') as file:
+        for line in file:
+            if "::" in line and line.split('::')[1].split('=')[0] is not None:
+                out.append(line.split('::')[1].split('=')[0].strip())
 
-    # Returns the entire text of the file at self.filepath
-    def read_file(self):
-        with open(self.filepath, 'rt') as f:
-            return f.readlines()
+    return {'variables': out}
 
-    # Reads var_lookup.f90, the list of all possible ModelOutput variables
-    def read_master_file(self):
-        out = []
-        with open(self.master_file_filepath, 'r') as file:
-            for line in file:
-                if "::" in line and line.split(sep='::')[1].split(sep='=')[0] is not None:
-                    out.append(line.split(sep='::')[1].split(sep='=')[0].strip())
-        return out
+METADATA_PATH = pkg_resources.resource_filename(
+        __name__, 'meta/var_lookup.f90')
+OUTPUT_META = read_master_file(METADATA_PATH)
 
-    # Returns a list of every variable in the file
-    def read_variables_from_file(self):
-        self.text = self.read_file()
-        var_list = []
-        for line in self.text:
-            if not line.startswith("!"):
-                var_list.append(line.split("|")[0].strip())
-        return var_list
 
-    # Writes <variable> to ModelOutput.txt iff it's a valid choice AND not already in the file
-    def add_variable(self, variable):
-        if variable not in self.var_choices:
-            raise ValueError("Not a valid variable choice!")
-        elif self.check_for_variable(variable) is True:
-            raise ValueError("Variable already in file!")
-        else:
-            with open(self.filepath, 'a') as file:
-                file.write(variable + " | 1\n")
+class OutputControlOption(BaseOption):
 
-    # If <variable> is in the file, return TRUE. Else, return FALSE
-    def check_for_variable(self, variable):
-        self.text = self.read_file()
-        for line in self.text:
-            if variable == line.split('|')[0].strip():
-                return True
-        return False
+    def __init__(self, var=None, period=None, sum=0, instant=1,
+                 mean=0, variance=0, min=0, max=0, mode=0):
+        self.name = var
+        self.period = int(period)
+        self.sum = int(sum)
+        self.instant = int(instant)
+        self.mean = int(mean)
+        self.variance = int(variance)
+        self.min = int(min)
+        self.max = int(max)
+        self.mode = int(mode)
+        self.validate()
 
-    # Removes the line ascribed to <variable>
-    def remove_variable(self, variable):
-        self.text = self.read_file()
-        output_text = []
-        if variable not in self.var_choices:
-            return
-        else:
-            for line in self.text:
-                # If <variable> = the first element on the line (before |)
-                if not variable == line.split('|')[0].strip():
-                    output_text += line
-            # Write the new text (without the line with <variable>) to <filepath>
-            with open(self.filepath, 'w') as file:
-                file.writelines(output_text)
+    @property
+    def statistic(self):
+        """This could be improved"""
+        if self.sum:
+            return 'sum'
+        elif self.instant:
+            return 'instant'
+        elif self.mean:
+            return 'mean'
+        elif self.variance:
+            return 'variance'
+        elif self.min:
+            return 'min'
+        elif self.max:
+            return 'max'
+        elif self.mode:
+            return 'mode'
 
-    # Clears the file of all variables
-    def clear_variables(self):
-        for var in self.read_variables_from_file():
-            self.remove_variable(var)
+    def validate(self):
+        total = (self.sum + self.instant + self.mean + self.variance
+                 + self.min + self.max + self.mode)
+        assert total == 1, "Only one output statistic is allowed!"
+
+    def get_print_list(self):
+        self.validate()
+        plist = [self.name, self.period, self.sum, self.instant, self.mean,
+                 self.variance, self.min, self.max, self.mode]
+        return [str(p) for p in plist]
+
+    def __str__(self):
+        return " | ".join(self.get_print_list())
+
+
+class OutputControl(OptionContainer):
+    """
+    The OutputControl object manages what output SUMMA will
+    write out.  Each output variable is stored in the `options`
+    list as an `OutputControlOption`.  These options are
+    automatically populated on instantiation, and can be
+    added or modified through the `set_option` method.
+    """
+
+    def __init__(self, path):
+        """
+        Instantiate the object and populate the
+        values from the given filepath.
+        """
+        super().__init__(path, OutputControlOption)
+
+    def set_option(self, name=None, period=None, sum=0, instant=1,
+                   mean=0, variance=0, min=0, max=0, mode=0):
+        """
+        Change or create a new entry in the output control
+        """
+        try:
+            o = self.get_option(name, strict=True)
+            o.period = period
+            o.sum = sum
+            o.instant = instant
+            o.mean = mean
+            o.variance = variance
+            o.min = min
+            o.max = max
+            o.mode = mode
+        except ValueError:
+            self.options.append(
+                    OutputControlOption(name, period, sum, instant,
+                                        mean, variance, min, max, mode))
+            if name in OUTPUT_META['variables']:
+                self.options.append(OutputControlOption(
+                        name, period, sum, instant, mean,
+                        variance, min, max, mode))
+            else:
+                raise
+
+    def get_constructor_args(self, line):
+        return line.split('!')[0].split('|')
