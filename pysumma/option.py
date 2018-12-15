@@ -1,37 +1,130 @@
-# This class is related with FileManagerOption method in Simulation.py
-class Option:
-    def __init__(self, name, parent, key_position, value_position, delimiter=None):
+import os
+
+
+class BaseOption(object):
+    """
+    Base implementation for representing options in the various
+    text based SUMMA configuration files. This class is meant to
+    be extended rather than used directly.
+    """
+
+    def __init__(self, name, value=None):
         self.name = name
-        self.parent = parent
-        self.key_position = key_position
-        self.value_position = value_position
-        self.delimiter = delimiter
-        # file_contents is every line of filemanger as list format.
-        self.text = parent.file_contents
-        # Need line_no and line_contents in Option so that write_value can be in Option
-        self.line_no, self.line_contents = self.get_line_info()
+        self.value = value
 
-    def edit_save(self):
-        with open(self.parent.filepath, 'wt') as f:
-            f.writelines(self.text)
-            f.close()
+    def __repr__(self):
+        return "{} : {}".format(self.name, self.value)
 
-    # Delimits each line on <delimiter>
-    # Picks out the element in <position> in the split-list
-    # Returns <line number, line contents> when line_content[position] == name
-    def get_line_info(self):
-        for line_no, line_contents in enumerate(self.text):
-            if line_contents.split(self.delimiter)[self.key_position].strip().startswith(self.name):
-                return line_no, line_contents
 
-    def write_value(self, old_value, new_value):
-        # self.text = self.open_read() # Read before you write to get the most recent file version
-        self.parent.file_contents[self.line_no] = self.line_contents.replace(old_value, new_value, 1)
-        self.edit_save()
+class OptionContainer(object):
+    """
+    Base implementation for representing text based configuration
+    files for SUMMA. This class is meant to be extended rather than
+    used directly.
+    """
 
-    # Splits line_contents on <delimiter> (whitespace if none)
-    # Returns the split-line list at <position> (String)
-    def get_value(self):
-        self.line_no, self.line_contents = self.get_line_info()
-        words = self.line_contents.split(self.delimiter)
-        return words[self.value_position].strip().strip("'")
+    def __init__(self, path, optiontype):
+        """
+        Instantiate the object and populate the
+        values from the given filepath.
+        """
+        self.OptionType = optiontype
+        self.opt_count = 0
+        self.original_path = path
+        self.header = []
+        self.options = []
+        self.read(path)
+
+    def set_option(self):
+        """This has to be implemented by subclasses"""
+        raise NotImplementedError()
+
+    def get_constructor_args(self, line):
+        """
+        This has to be implemented by subclasses
+
+        The purpose of this method is to be able to easily pass
+        arguments to the constructors of subclasses of BaseOption.
+        The implementation will depend on what is considered an
+        option.
+        """
+        raise NotImplementedError()
+
+    def __repr__(self):
+        return os.linesep.join([repr(o) for o in self.options])
+
+    def read(self, path):
+        """Read the configuration and populate the options"""
+        with open(path, 'r') as f:
+            self.original_contents = f.readlines()
+        for line in self.original_contents:
+            if line.startswith('!') and not self.opt_count:
+                self.header.append(line)
+            elif not line.startswith('!'):
+                self.options.append(self.OptionType(
+                    *self.get_constructor_args(line)))
+                self.opt_count += 1
+
+    def write(self, path=None):
+        """Write the configuration given the values of the options"""
+        self.validate()
+        if not path:
+            path = self.original_path
+        with open(path, 'w') as f:
+            f.writelines(self.header)
+            f.writelines((repr(o) + '\n' for o in self.options))
+
+    def get_option(self, name, strict=False):
+        """Retrieve an option"""
+        for o in self.options:
+            if name == o.name:
+                return o
+        if strict:
+            raise ValueError("Could not find option {}!".format(name))
+        return None
+
+    def get_value(self, name, strict=False):
+        """Retrieve the value of a given option"""
+        for o in self.options:
+            if name == o.name:
+                return o.value
+        if strict:
+            raise ValueError("Could not find option {}!".format(name))
+        return None
+
+    def remove_option(self, name, strict=False):
+        """Remove an option"""
+        for i, o in self.options:
+            if name == o.name:
+                return self.options.pop(i)
+        if strict:
+            raise ValueError("Could not find option {}!".format(name))
+        return None
+
+    def clear(self):
+        self.options = []
+
+    def validate(self):
+        """Ensure no options are repeated"""
+        names = [o.name for o in self.options]
+        assert len(names) == len(set(names)), 'Duplicate options not allowed!'
+
+    def __getattr__(self, name):
+        if name == 'options':
+            object.__getattribute__(self, name)
+
+        names = [o.name for o in self.options]
+        if name in names:
+            return self.get_option(name)
+        else:
+            object.__getattribute__(self, name)
+
+    def __setattr__(self, name, value):
+        try:
+            names = [o.name for o in self.options]
+            if name in names:
+                return self.set_option(name, value)
+            else:
+                object.__setattr__(self, name, value)
+        except AttributeError:
+            object.__setattr__(self, name, value)
