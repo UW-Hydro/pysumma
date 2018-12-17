@@ -10,8 +10,9 @@ from .output_control import OutputControl
 from .local_param_info import LocalParamInfo
 from .force_file_list import ForceFileList
 
-class Simulation(object):
 
+class Simulation(object):
+    """The simulation object provides a wrapper for SUMMA simulations"""
     library_path = None
     process = None
 
@@ -28,8 +29,9 @@ class Simulation(object):
         """Initialize a new simulation object"""
         self.executable = executable
         self.manager_path = filemanager
-        self.run_suffix = run_suffix
         self.manager = FileManager(filemanager)
+        self.run_suffix = run_suffix
+        self._status = 'Initialized'
         self.decisions = self.manager.decisions
         self.output_control = self.manager.output_control
         self.parameter_trial = self.manager.parameter_trial
@@ -37,39 +39,6 @@ class Simulation(object):
         self.local_param_info = self.manager.local_param_info
         self.basin_param_info = self.manager.basin_param_info
         self.local_attributes = self.manager.local_attributes
-        self._status = 'Initialized'
-
-    def exec_local(self, run_suffix):
-        if self.summa_code is None:
-            cmd = "{} -p never -s {} -m {}".format(
-                self.executable, run_suffix, self.manager_path)
-            # run shell script in python and print output
-            cmd = shlex.split(cmd)
-            p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
-            output = p.communicate()[0].decode('utf-8')
-            print(output)
-            if 'FATAL ERROR' in output:
-                raise Exception("SUMMA failed to execute!")
-            # define output file name as sopron version of summa
-            out_file_path = (self.manager.output_path.value
-                             + self.manager.output_prefix.value + '_output_'
-                             + run_suffix + '_timestep.nc')
-        else:
-            self.executable = self.summa_code + '/bin/summa.exe'
-            cmd = "{} -p never -s {} -m {}".format(
-                self.executable, self.run_suffix, self.manager_path)
-            # run shell script in python and print output
-            cmd = shlex.split(cmd)
-            p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
-            output = p.communicate()[0].decode('utf-8')
-            print(output)
-            if 'FATAL ERROR' in output:
-                raise Exception("SUMMA failed to execute!")
-            # define output file name as sopron version of summa
-            out_file_path = (self.manager.output_path.value
-                             + self.manager.output_prefix.value + '_output_'
-                             + run_suffix + '_timestep.nc')
-        return out_file_path
 
     def exec_hydroshare(self, run_suffix, specworker_img=None):
         #TODO: This needs to be updated
@@ -132,97 +101,160 @@ class Simulation(object):
                              'exact SUMMA_image_name')
         return out_file_path
 
-    def exec_docker(self, run_suffix, docker_img):
+    def start(self, run_option, run_suffix=None, preprocess_cmds=[]):
+        """Run a SUMMA simulation"""
+        #TODO: Implement running on hydroshare here
+        errstring = ('No executable defined. Set as "executable" attribute'
+                     ' of Simulation or check run_option ')
+        self._write_configuration()
+        if run_suffix:
+            self.run_suffix = run_suffix
+        summa_run_cmd = "{} -p m -s {} -m {}".format(
+                self.executable, self.run_suffix, self.manager_path)
 
-        self.executable = docker_img
-        in_path = self.input_path.filepath
-        out_path = self.output_path.filepath
-        base_cmd = "docker run -v {}:{}".format(
-            self.file_dir, self.file_dir)
-        if self.file_dir+'/' == self.setting_path.filepath:
-            cmd = (base_cmd
-                   + " -v {}:{}".format(in_path, in_path)
-                   + " -v {}:{}".format(out_path, out_path)
-                   + " {} -p never -s {} -m {}".format(self.executable,
-                                                       run_suffix,
-                                                       self.manager_path))
-        else:
-            setting_path = self.setting_path.filepath
-            cmd = (base_cmd
-                   + " -v {}:{}".format(setting_path, setting_path)
-                   + " -v {}:{}".format(in_path, in_path)
-                   + " -v {}:{}".format(out_path, out_path)
-                   + " {} -p never -s {} -m {}".format(self.executable,
-                                                       run_suffix,
-                                                       self.manager_path))
-        # run shell script in python and print output
-        cmd = shlex.split(cmd)
-        p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
-        output = p.communicate()[0].decode('utf-8')
-        if 'FATAL ERROR' in output:
-            raise Exception("SUMMA failed to execute!")
-        # define output file name as sopron version of summa
-        if self.output_path.filepath.split('/')[0] == '<BASEDIR>':
-            out_file_path = (
-                self.manager.output_path.value.split('<BASEDIR>')[1]
-                + self.manageroutput_prefix.value + '_output_'
-                + run_suffix + '_timestep.nc')
-        else:
-            out_file_path = (
-                self.manager.output_path.value
-                + self.manager.output_prefix.value + '_output_'
-                + run_suffix + '_timestep.nc')
-        return out_file_path
-
-    def execute(self, run_option, run_suffix, specworker_img=None):
-        # set run_suffix to distinguish the output name of summa
-        self.run_suffix = run_suffix
-        # 'local' run_option runs summa with summa execution
-        # file where is in a local computer.
         if run_option == 'local':
-            out_data = self.execute_local(run_suffix)
-        # 'docker_sopron_2018' run_option runs summa with docker hub online,
-        # and the version name is "'uwhydro/summa:sopron_2018'.
-        elif run_option == "docker_sopron_2018":
-            out_data = self.execute_docker(run_suffix, 'docker_sopron_2018')
-        # "specworker" run_option run summa with summa image
-        # in docker of HydroShare Jupyter Hub
-        elif run_option == "specworker":
-            out_data = self.execute_local(run_suffix,
-                                          specworker_img=specworker_img)
-        else:
-            raise ValueError('No executable defined. '
-                             'Set as "executable" attribute '
-                             'of Simulation or check run_option')
-        return xr.open_dataset(out_file_path), out_file_path
+            cmd = summa_run_cmd
+        elif run_option.startswith('docker'):
 
-    def get_output(self, version, output_prefix=None, run_suffix=None):
-        raise NotImplementedError('This will need to be updated')
-        if version == "cuahsi_sopron":
-            out_file_path = (self.base_dir + '/'
-                             + self.output_path.filepath.split('/')[1] + '/'
-                             + output_prefix + '_output_' + 'timestep.nc')
-            xr_output = xr.open_dataset(out_file_path)
-        elif version == "cuahsi_master":
-            out_file_path = (
-                self.base_dir + self.output_path.value.split('>')[1]
-                + output_prefix + '_'
-                + self.decision_obj.simulStart.value[0:4] + '-'
-                + self.decision_obj.simulFinsh.value[0:4] + '_' + '1.nc')
-            xr_output = xr.open_dataset(out_file_path)
-        elif version == "docker_sopron":
-            if self.output_path.filepath.split('/')[0] == '<BASEDIR>':
-                out_file_path = (
-                    self.output_path.filepath.split('<BASEDIR>')[1]
-                    + self.output_prefix.value + '_output_'
-                    + run_suffix + '_timestep.nc')
+            if run_option == 'docker_latest':
+                self.executable = 'bartnijssen/summa:latest'
+            elif run_option == 'doocker_develop':
+                self.executable = 'bartnijssen/summa:develop'
             else:
-                out_file_path = (
-                    self.output_path.filepath
-                    + self.output_prefix.value + '_output_'
-                    + run_suffix + '_timestep.nc')
-            xr_output = xr.open_dataset(out_file_path)
+                raise ValueError(errstring)
+
+            fman_dir = os.path.dirname(self.manager_path.value)
+            settings_path = self.manager.settings_path.value
+            input_path = self.manager.input_path.value
+            output_path = self.manager.output_path.value
+            cmd = "".join(["docker run -v {}:{}".format(fman_dir, fman_dir),
+                           " -v {}:{}".format(settings_path, settings_path),
+                           " -v {}:{}".format(input_path, input_path),
+                           " -v {}:{} ".format(output_path, output_path),
+                           summa_run_cmd])
         else:
-            raise ValueError('You need to write "cuahsi_sopron" or'
-                             ' "cuahsi_master"or "docker_sorpon" for version')
-        return xr_output, out_file_path
+            raise ValueError(errstring)
+
+        preprocess = []
+        if self.library_path:
+            preprocess = ['export LD_LIBRARY_PATH="{}" '.format(
+                self.library_path)]
+        if len(preprocess_cmds):
+            preprocess.append(' && '.join(preprocess_cmds))
+        preprocess = "".join(preprocess)
+        if len(preprocess):
+            cmd = preprocess + " && " + cmd
+
+        self.process = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                                        stderr=subprocess.PIPE, shell=True)
+        self._status = 'Running'
+
+    def _write_configuration(self):
+        #TODO: Still need to update for all netcdf writing
+        self.manager.write()
+        self.decisions.write()
+        self.force_file_list.write()
+        self.local_param_info.write()
+        self.basin_param_info.write()
+        self.output_control.write()
+
+    def _get_output(self):
+        output_files = set()
+        base_file = "".join(
+            [self.manager.output_path.value, self.manager.output_prefix.value,
+             'output_', self.run_suffix, '_{}.nc'])
+        for o in self.output_control.options:
+            if o.period == 1:
+                output_files.add(base_file.format('timestep'))
+            elif o.period > 1:
+                output_files.add(base_file.format(o.statistic))
+        return list(output_files)
+
+    def execute(self, run_option, run_suffix=None,
+                preprocess_cmds=[], monitor=False):
+        """Run a SUMMA simulation"""
+        self.start(run_option, run_suffix, preprocess_cmds)
+        if monitor:
+            result = self.monitor()
+            self.process = result
+            return result
+        else:
+            return self.process
+
+    def monitor(self):
+        if self.process is None:
+            raise RuntimeError('No simulation running! Use simulation.start '
+                               'or simulation.execute to begin a simulation!')
+        if self._status in ['Error', 'Success']:
+            return self._status == 'Success'
+        self._result = bool(self.process.wait())
+
+        try:
+            self._stderr = self.process.stderr.read().decode('utf-8')
+            self._stdout = self.process.stdout.read().decode('utf-8')
+        except UnicodeDecodeError:
+            self._stderr = self.process.stderr.read()
+            self._stdout = self.process.stdout.read()
+
+        try:
+            self._output = [xr.open_dataset(f) for f in self._get_output()]
+            if len(self._output) == 1:
+                self._output = self._output[0]
+        except Exception:
+            self._output = None
+        if self._result:
+            self._status = 'Error'
+        else:
+            self._status = 'Success'
+        return self._result
+
+    @property
+    def result(self):
+        if self.process is None:
+            raise RuntimeError('No simulation started! Use simulation.start '
+                               'or simulation.execute to begin a simulation!')
+        elif isinstance(self.process, str):
+            return self._status == 'Success'
+        else:
+            return self.monitor()
+
+    @property
+    def stdout(self):
+        if self.process is None:
+            raise RuntimeError('No simulation started! Use simulation.start '
+                               'or simulation.execute to begin a simulation!')
+        elif isinstance(self.process, str):
+            return self._stdout
+        else:
+            self.monitor()
+            return self._stdout
+
+    @property
+    def stderr(self):
+        if self.process is None:
+            raise RuntimeError('No simulation started! Use simulation.start '
+                               'or simulation.execute to begin a simulation!')
+        elif isinstance(self.process, str):
+            return self._stderr
+        else:
+            self.monitor()
+            return self._stderr
+
+    @property
+    def output(self):
+        if self.process is None:
+            raise RuntimeError('No simulation started! Use simulation.start '
+                               'or simulation.execute to begin a simulation!')
+        elif isinstance(self.process, str):
+            return self._output
+        else:
+            self.monitor()
+            return self._output
+
+    def __repr__(self):
+        repr = []
+        repr.append("Executable path: {}".format(self.executable))
+        repr.append("Simulation status: {}".format(self._status))
+        repr.append("File manager configuration:")
+        repr.append(str(self.manager))
+        return '\n'.join(repr)
