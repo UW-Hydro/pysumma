@@ -1,0 +1,7 @@
+scalarv,hru,scalarSnowAlbedo,scalarSnowDepth,scalarSWE,scalarSfcMeltPond,scalarCanopyTemp,scalarCanopyLiq,scalarCanopyIce,scalarCanairTemp,scalarAquiferStorage,nSoil,nSnow,dt_init
+1,1,0.82,0,0,0,290,3.16,0,286,0,8,0,360
+1,2,0.82,0,0,0,290,3.16,0,286,0,8,0,360
+1,3,0.82,0,0,0,290,3.16,0,286,0,8,0,360
+1,4,0.82,0,0,0,290,3.16,0,286,0,8,0,360
+1,5,0.82,0,0,0,290,3.16,0,286,0,8,0,360
+1,6,0.82,0,0,0,290,3.16,0,286,0,8,0,360
