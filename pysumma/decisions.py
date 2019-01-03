@@ -1,94 +1,69 @@
-from pysumma.Option import Option
-
-class Decisions:
-    def __init__(self, filepath):
-        self.filepath = filepath
-        self.file_contents = self.open_read()
-        self.simulStart = SimulDatetime(self, 'simulStart')
-        self.simulFinsh = SimulDatetime(self, 'simulFinsh')
-        self.soilCatTbl = DecisionOption(self, 'soilCatTbl')
-        self.vegeParTbl = DecisionOption(self, 'vegeParTbl')
-        self.soilStress = DecisionOption(self, 'soilStress')
-        self.stomResist = DecisionOption(self, 'stomResist')
-        self.num_method = DecisionOption(self, 'num_method')
-        self.fDerivMeth = DecisionOption(self, 'fDerivMeth')
-        self.LAI_method = DecisionOption(self, 'LAI_method')
-        self.f_Richards = DecisionOption(self, 'f_Richards')
-        self.groundwatr = DecisionOption(self, 'groundwatr')
-        self.hc_profile = DecisionOption(self, 'hc_profile')
-        self.bcUpprTdyn = DecisionOption(self, 'bcUpprTdyn')
-        self.bcLowrTdyn = DecisionOption(self, 'bcLowrTdyn')
-        self.bcUpprSoiH = DecisionOption(self, 'bcUpprSoiH')
-        self.bcLowrSoiH = DecisionOption(self, 'bcLowrSoiH')
-        self.veg_traits = DecisionOption(self, 'veg_traits')
-        self.canopyEmis = DecisionOption(self, 'canopyEmis')
-        self.snowIncept = DecisionOption(self, 'snowIncept')
-        self.windPrfile = DecisionOption(self, 'windPrfile')
-        self.astability = DecisionOption(self, 'astability')
-        self.canopySrad = DecisionOption(self, 'canopySrad')
-        self.alb_method = DecisionOption(self, 'alb_method')
-        self.compaction = DecisionOption(self, 'compaction')
-        self.snowLayers = DecisionOption(self, 'snowLayers')
-        self.thCondSnow = DecisionOption(self, 'thCondSnow')
-        self.thCondSoil = DecisionOption(self, 'thCondSoil')
-        self.spatial_gw = DecisionOption(self, 'spatial_gw')
-        self.subRouting = DecisionOption(self, 'subRouting')
-
-    def open_read(self):
-        with open(self.filepath, 'rt') as f:
-            return f.readlines()
+import os
+import re
+import json
+import pkg_resources
+from .option import BaseOption
+from .option import OptionContainer
 
 
-class DecisionOption(Option):
-    def __init__(self, parent, name):
-        super().__init__(name, parent, key_position=0, value_position=1,
-                         delimiter=None)
-        self.description, self.option_number = self.get_description()
-        self.options = self.get_options()
+METADATA_PATH = pkg_resources.resource_filename(
+        __name__, 'meta/decisions.json')
+with open(METADATA_PATH, 'r') as f:
+    DECISION_META = json.load(f)
 
-    def get_description(self):
-        num_and_descrip = self.line_contents.split('!')[-1]
-        description = num_and_descrip.split(')')[-1].strip()
-        number = num_and_descrip.find('(')
-        option_number = num_and_descrip[number+1:number+3]
-        return description, option_number
 
-    def get_options(self):
-        start_line = 43
-        option_list = []
-        for num, line_contents in enumerate(self.parent.file_contents[start_line:]):
-            line_num = num + start_line
-            if line_contents.startswith('! ({})'.format(self.option_number)):
-                # if there is no '---' or '****', find() method return '-1', so go next line.
-                # when there is '---' or '****', find() return the location index that is more than 0
-                while self.parent.file_contents[line_num+1].find("---") < 0 and \
-                                self.parent.file_contents[line_num+1].find("****") < 0:
-                    line_num += 1
-                    option_list.append(self.parent.file_contents[line_num].split('!')[1].strip())
-                else:
-                    return option_list
+class DecisionOption(BaseOption):
+    """Container for lines in a decisions file"""
 
-    @property
-    def value(self):
-        return self.get_value()
+    def __init__(self, name, value):
+        super().__init__(name)
+        self.description = DECISION_META[name]['description']
+        self.available_options = DECISION_META[name]['options']
+        self.set_value(value)
 
-    @value.setter
-    def value(self, new_value):
-        if new_value in self.options:
-            self.write_value(self.value, new_value)
+    def set_value(self, new_value):
+        datestring = r"[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}"
+        if (self.name in ['simulStart', 'simulFinsh'] and
+                re.match(datestring, new_value) is not None):
+            self.value = new_value
+        elif new_value in self.available_options:
+            self.value = new_value
         else:
-            self.write_value(self.value, new_value)
-            #raise ValueError('Your input value {} is not one of the valid options {}'.format(new_value, self.options))
+            raise ValueError(os.linesep.join([
+                  'Invalid option given for decision: {}'.format(self.name),
+                  'You gave a value of: {}'.format(new_value),
+                  'Valid options include: {}'.format(self.available_options)]))
+
+    def __repr__(self):
+        if self.name in ['simulStart', 'simulFinsh']:
+            value = "'{}'".format(self.value)
+        else:
+            value = self.value
+        return "{0}    {1: <20} ! {2}".format(
+                self.name, value, self.description)
 
 
-class SimulDatetime(Option):
-    def __init__(self, parent, name):
-        super().__init__(name, parent, key_position=0, value_position=1, delimiter="'")
+class Decisions(OptionContainer):
+    """
+    The Decisions object provides an interface to
+    a SUMMA decisions file.
+    """
 
-    @property
-    def value(self):
-        return self.get_value()
+    def __init__(self, path):
+        super().__init__(path, DecisionOption)
 
-    @value.setter
-    def value(self, new_date_time):
-        self.write_value(self.value, new_date_time)
+    def set_option(self, key, value):
+        try:
+            o = self.get_option(key, strict=True)
+            o.set_value(value)
+        except ValueError:
+            if key in DECISION_META.keys():
+                self.options.append(DecisionOption(key, value))
+            else:
+                raise
+
+    def get_constructor_args(self, line):
+        decision, *value = line.split('!')[0].split()
+        if isinstance(value, list):
+            value = " ".join(value).replace("'", "")
+        return decision, value
