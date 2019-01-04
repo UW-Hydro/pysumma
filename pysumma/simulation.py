@@ -132,7 +132,7 @@ class Simulation(object):
                              'exact SUMMA_image_name')
         return out_file_path
 
-    def exec_docker(self, run_suffix, docker_img):
+    def exec_docker(self, run_suffix, docker_img='uwhydro/summa:sopron_2018'):
 
         self.executable = docker_img
         in_path = self.input_path.filepath
