@@ -184,7 +184,7 @@ class Simulation(object):
         # 'docker_sopron_2018' run_option runs summa with docker hub online,
         # and the version name is "'uwhydro/summa:sopron_2018'.
         elif run_option == "docker_sopron_2018":
-            out_data = self.execute_docker(run_suffix, 'docker_sopron_2018')
+            out_data = self.execute_docker(run_suffix)
         # "specworker" run_option run summa with summa image
         # in docker of HydroShare Jupyter Hub
         elif run_option == "specworker":
