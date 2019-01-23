@@ -40,7 +40,7 @@ class Simulation(object):
         self._status = 'Initialized'
 
     def exec_local(self, run_suffix):
-        if self.summa_code is None:
+        if self.summa_code is not None:
             cmd = "{} -p never -s {} -m {}".format(
                 self.executable, run_suffix, self.manager_path)
             # run shell script in python and print output
