@@ -19,5 +19,4 @@ setup(name='pysumma',
           'seaborn==0.8.1'
           ],
       include_package_data=True,
-      dat_files=[('pysumma', 'pysumma/var_lookup.f90')],
       test_suite='pysumma.tests')
