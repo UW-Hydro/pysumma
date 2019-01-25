@@ -12,11 +12,8 @@ class BaseOption(object):
         self.name = name
         self.value = value
 
-    def __str__(self):
-        return "{} : {}".format(self.name, self.value)
-
     def __repr__(self):
-        return self.value
+        return "{} : {}".format(self.name, self.value)
 
 
 class OptionContainer(object):
@@ -53,8 +50,8 @@ class OptionContainer(object):
         """
         raise NotImplementedError()
 
-    def __str__(self):
-        return os.linesep.join([str(o) for o in self.options])
+    def __repr__(self):
+        return os.linesep.join([repr(o) for o in self.options])
 
     def read(self, path):
         """Read the configuration and populate the options"""
@@ -75,7 +72,7 @@ class OptionContainer(object):
             path = self.original_path
         with open(path, 'w') as f:
             f.writelines(self.header)
-            f.writelines((str(o) + '\n' for o in self.options))
+            f.writelines((repr(o) + '\n' for o in self.options))
 
     def get_option(self, name, strict=False):
         """Retrieve an option"""
@@ -104,6 +101,9 @@ class OptionContainer(object):
             raise ValueError("Could not find option {}!".format(name))
         return None
 
+    def clear(self):
+        self.options = []
+
     def validate(self):
         """Ensure no options are repeated"""
         names = [o.name for o in self.options]
@@ -113,16 +113,16 @@ class OptionContainer(object):
         if name == 'options':
             object.__getattribute__(self, name)
 
-        decisions = [o.name for o in self.options]
-        if name in decisions:
+        names = [o.name for o in self.options]
+        if name in names:
             return self.get_option(name)
         else:
             object.__getattribute__(self, name)
 
     def __setattr__(self, name, value):
         try:
-            decisions = [o.name for o in self.options]
-            if name in decisions:
+            names = [o.name for o in self.options]
+            if name in names:
                 return self.set_option(name, value)
             else:
                 object.__setattr__(self, name, value)
