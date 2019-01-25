@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from .option import BaseOption
 from .option import OptionContainer
 
@@ -9,32 +11,50 @@ class LocalParamOption(BaseOption):
         self.set_value([default, low, high])
 
     def set_value(self, new_value):
+        assert len(new_value) == 3
         self.value = new_value
 
     def __str__(self):
-        return ("{:25s} | {:>12.4f} | {:>12.4f} | {:>12.4f}".format(
-            self.name, self.value[0], self.value[1], self.value[2]))
+        def _to_string(val):
+            too_small = val < 0.0001 and val != 0
+            too_big = val > 9999.99
+            if too_big or too_small:
+                return ('{:.1E}'.format(Decimal(val))
+                                .replace('e', 'd')
+                                .replace('E', 'd'))
+            else:
+                return '{:>12.4f}'.format(val)
+
+        return ("{:25s} | {:>12s} | {:>12s} | {:>12s}".format(
+            self.name, *map(_to_string, self.value)))
 
 
 class LocalParamInfo(OptionContainer):
+
+    fmt_strings = ["'(a25,1x,3(a1,1x,f12.4,1x))'",
+                   "'(a25,1x,a1,1x,3(f12.4,1x,a1,1x))'"]
 
     def __init__(self, path):
         super().__init__(path, LocalParamOption)
 
     def set_option(self, key, value):
-        o = self.get_option(key)
-        o.set_value(value)
+        if not isinstance(value, list):
+            value = [value] * 3
+        try:
+            o = self.get_option(key)
+            o.set_value(value)
+        except AttributeError as e:
+            self.options.append(LocalParamOption(key, value, value, value))
 
     def read(self, path):
         """Read the configuration and populate the options"""
-        fmt_string = "'(a25,1x,3(a1,1x,f12.4,1x))'"
         with open(path, 'r') as f:
             self.original_contents = f.readlines()
         for line in self.original_contents:
-            if line.startswith('!') and not self.opt_count:
+            if ((line.startswith('!') and not self.opt_count)
+                    or line.split('!')[0].strip() in self.fmt_strings):
                 self.header.append(line)
-            elif (not line.startswith('!') and
-                    not line.split('!')[0].startswith(fmt_string)):
+            elif not line.startswith('!'):
                 self.options.append(self.OptionType(
                     *self.get_constructor_args(line)))
                 self.opt_count += 1
