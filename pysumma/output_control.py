@@ -2,6 +2,7 @@ import pkg_resources
 from .option import BaseOption
 from .option import OptionContainer
 
+
 def read_master_file(master_file_filepath):
     """Get all varialbes from var_lookup file"""
     #TODO: This may be fragile, move this to utils and create a static
@@ -14,6 +15,7 @@ def read_master_file(master_file_filepath):
                 out.append(line.split('::')[1].split('=')[0].strip())
 
     return {'variables': out}
+
 
 METADATA_PATH = pkg_resources.resource_filename(
         __name__, 'meta/var_lookup.f90')
@@ -64,7 +66,7 @@ class OutputControlOption(BaseOption):
                  self.variance, self.min, self.max, self.mode]
         return [str(p) for p in plist]
 
-    def __str__(self):
+    def __repr__(self):
         return " | ".join(self.get_print_list())
 
 
