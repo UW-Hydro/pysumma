@@ -1,9 +1,9 @@
 from setuptools import setup, find_packages
 
 setup(name='pysumma',
-      version='0.1',
+      version='0.0.1',
       description='an Object-Oriented Python wrapper for SUMMA model',
-      url='https://github.com/DavidChoi76/pysumma.git',
+      url='https://github.com/uva-hydroinformatics/pysumma.git',
       author='YoungDon Choi',
       author_email='yc5ef@virginia.edu',
       license='BSD-3-Clause',
@@ -15,7 +15,6 @@ setup(name='pysumma',
           'ipyleaflet',
           'jupyterthemes==0.18.3',
           'geopandas',
-          'cartopy',
           'shapely',
           'seaborn==0.8.1'
           ],
