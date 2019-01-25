@@ -1,7 +1,12 @@
 import json
 import pkg_resources
+import xarray as xr
 
 from .option import BaseOption, OptionContainer
+from .decisions import Decisions
+from .output_control import OutputControl
+from .local_param_info import LocalParamInfo
+from .force_file_list import ForceFileList
 
 # Option names for the file manager, this is just a list,
 # as the order of these values matters. They may also not be
@@ -43,3 +48,44 @@ class FileManager(OptionContainer):
     def get_constructor_args(self, line):
         return (OPTION_NAMES[self.opt_count],
                 line.split('!')[0].replace("'", "").strip())
+
+    @property
+    def decisions(self):
+        p = self.get_value('settings_path') + self.get_value('decisions_path')
+        return Decisions(p)
+
+    @property
+    def output_control(self):
+        p = self.get_value('settings_path') + self.get_value('output_control')
+        return OutputControl(p)
+
+    @property
+    def local_param_info(self):
+        p = (self.get_value('settings_path')
+             + self.get_value('local_param_info'))
+        return LocalParamInfo(p)
+
+    @property
+    def basin_param_info(self):
+        p = (self.get_value('settings_path')
+             + self.get_value('basin_param_info'))
+        return LocalParamInfo(p)
+
+    @property
+    def force_file_list(self):
+        p1 = (self.get_value('settings_path')
+              + self.get_value('forcing_file_list'))
+        p2 = self.get_value('input_path')
+        return ForceFileList(p1, p2)
+
+    @property
+    def local_attributes(self):
+        p = (self.get_value('settings_path')
+             + self.get_value('local_attributes'))
+        return xr.open_dataset(p)
+
+    @property
+    def parameter_trial(self):
+        p = (self.get_value('settings_path')
+             + self.get_value('parameter_trial'))
+        return xr.open_dataset(p)
