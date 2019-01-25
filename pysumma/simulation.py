@@ -38,6 +38,39 @@ class Simulation(object):
         self.local_param_info = self.manager.local_param_info
         self.basin_param_info = self.manager.basin_param_info
         self.local_attributes = self.manager.local_attributes
+        self._status = 'Initialized'
+
+    def exec_local(self, run_suffix):
+        if self.summa_code is not None:
+            cmd = "{} -p never -s {} -m {}".format(
+                self.executable, run_suffix, self.manager_path)
+            # run shell script in python and print output
+            cmd = shlex.split(cmd)
+            p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+            output = p.communicate()[0].decode('utf-8')
+            print(output)
+            if 'FATAL ERROR' in output:
+                raise Exception("SUMMA failed to execute!")
+            # define output file name as sopron version of summa
+            out_file_path = (self.manager.output_path.value
+                             + self.manager.output_prefix.value + '_output_'
+                             + run_suffix + '_timestep.nc')
+        else:
+            self.executable = self.summa_code + '/bin/summa.exe'
+            cmd = "{} -p never -s {} -m {}".format(
+                self.executable, self.run_suffix, self.manager_path)
+            # run shell script in python and print output
+            cmd = shlex.split(cmd)
+            p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+            output = p.communicate()[0].decode('utf-8')
+            print(output)
+            if 'FATAL ERROR' in output:
+                raise Exception("SUMMA failed to execute!")
+            # define output file name as sopron version of summa
+            out_file_path = (self.manager.output_path.value
+                             + self.manager.output_prefix.value + '_output_'
+                             + run_suffix + '_timestep.nc')
+        return out_file_path
 
     def exec_hydroshare(self, run_suffix, specworker_img=None):
         #TODO: This needs to be updated
