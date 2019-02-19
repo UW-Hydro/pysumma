@@ -34,7 +34,7 @@ class DecisionOption(BaseOption):
                   'You gave a value of: {}'.format(new_value),
                   'Valid options include: {}'.format(self.available_options)]))
 
-    def __repr__(self):
+    def __str__(self):
         if self.name in ['simulStart', 'simulFinsh']:
             value = "'{}'".format(self.value)
         else:

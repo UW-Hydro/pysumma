@@ -9,6 +9,7 @@ class ForceFileListOption(BaseOption):
 
     def __init__(self, name):
         super().__init__(name)
+        print(name)
         self.set_value(xr.open_dataset(name))
 
     def set_value(self, new_value):
