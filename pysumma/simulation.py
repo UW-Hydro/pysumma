@@ -70,7 +70,6 @@ class Simulation(object):
         run_cmd = self.gen_summa_cmd(processes, prerun_cmds,
                                      startGRU, countGRU, iHRU, freq_restart,
                                      progress)
-        print(run_cmd)
         self.process = subprocess.Popen(run_cmd, stdout=subprocess.PIPE,
                                         stderr=subprocess.PIPE, shell=True)
         self._status = 'Running'
