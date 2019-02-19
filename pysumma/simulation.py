@@ -39,58 +39,6 @@ class Simulation(object):
         self.local_attributes = self.manager.local_attributes
         self._status = 'Initialized'
 
-    def exec_local(self, run_suffix):
-        if self.summa_code is not None:
-            cmd = "{} -p never -s {} -m {}".format(
-                self.executable, run_suffix, self.manager_path)
-            # run shell script in python and print output
-            cmd = shlex.split(cmd)
-            p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
-            output = p.communicate()[0].decode('utf-8')
-            print(output)
-            if 'FATAL ERROR' in output:
-                raise Exception("SUMMA failed to execute!")
-            # define output file name as sopron version of summa
-            out_file_path = (self.manager.output_path.value
-                             + self.manager.output_prefix.value + '_output_'
-                             + run_suffix + '_timestep.nc')
-        else:
-            self.executable = self.summa_code + '/bin/summa.exe'
-            cmd = "{} -p never -s {} -m {}".format(
-                self.executable, self.run_suffix, self.manager_path)
-            # run shell script in python and print output
-            cmd = shlex.split(cmd)
-            p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
-            output = p.communicate()[0].decode('utf-8')
-            print(output)
-            if 'FATAL ERROR' in output:
-                raise Exception("SUMMA failed to execute!")
-            # define output file name as sopron version of summa
-            out_file_path = (self.manager.output_path.value
-                             + self.manager.output_prefix.value + '_output_'
-                             + run_suffix + '_timestep.nc')
-        return out_file_path
-
-    def exec_hydroshare(self, run_suffix, specworker_img=None):
-        #TODO: This needs to be updated
-        raise NotImplementedError('This needs to be updated')
-        self.run_suffix = ""
-        #TODO: This should be up top
-        from specworker import jobs
-        # define the image that we want to execute
-        # save these paths in the env_vars dictionary
-        # which will be passed to the model
-        env_vars = {'LOCALBASEDIR': self.base_dir,
-                    'MASTERPATH': self.manager_path}
-        # define the location we want to mount these
-        # data in the container
-        vol_target = '/tmp/summa'
-        # define the base path of the input data for SUMMA
-        vol_source = self.base_dir
-        # run the container with the arguments specified above
-        res = jobs.run(specworker_img, '-x', vol_source,
-                       vol_target, env_vars)
-
     def gen_summa_cmd(self, processes=1, prerun_cmds=[],
                   startGRU=None, countGRU=None, iHRU=None, freq_restart=None,
                   progress='m'):
@@ -182,7 +130,8 @@ class Simulation(object):
     def execute(self, run_option, run_suffix=None,
                 preprocess_cmds=[], monitor=False):
         """Run a SUMMA simulation"""
-        self.start(run_option, run_suffix, preprocess_cmds)
+        self.start(run_option, run_suffix=run_suffix,
+                   prerun_cmds=preprocess_cmds)
         if monitor:
             result = self.monitor()
             self.process = result
