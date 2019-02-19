@@ -76,7 +76,7 @@ class OutputControlOption(BaseOption):
                  self.variance, self.min, self.max, self.mode]
         return [str(p) for p in plist]
 
-    def __repr__(self):
+    def __str__(self):
         return " | ".join(self.get_print_list())
 
 
