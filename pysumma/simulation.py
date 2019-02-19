@@ -1,5 +1,6 @@
 import os
 import subprocess
+import shlex
 import xarray as xr
 import glob
 
@@ -136,8 +137,6 @@ class Simulation(object):
             result = self.monitor()
             self.process = result
             return result
-        else:
-            return self.process
 
     def monitor(self):
         if self.process is None:
