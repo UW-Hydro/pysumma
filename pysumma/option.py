@@ -12,7 +12,7 @@ class BaseOption(object):
         self.name = name
         self.value = value
 
-    def __repr__(self):
+    def __str__(self):
         return "{} : {}".format(self.name, self.value)
 
 
@@ -50,8 +50,8 @@ class OptionContainer(object):
         """
         raise NotImplementedError()
 
-    def __repr__(self):
-        return os.linesep.join([repr(o) for o in self.options])
+    def __str__(self):
+        return os.linesep.join([str(o) for o in self.options])
 
     def read(self, path):
         """Read the configuration and populate the options"""
@@ -72,7 +72,7 @@ class OptionContainer(object):
             path = self.original_path
         with open(path, 'w') as f:
             f.writelines(self.header)
-            f.writelines((repr(o) + '\n' for o in self.options))
+            f.writelines((str(o) + '\n' for o in self.options))
 
     def get_option(self, name, strict=False):
         """Retrieve an option"""
