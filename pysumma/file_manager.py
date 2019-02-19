@@ -28,7 +28,7 @@ class FileManagerOption(BaseOption):
     def set_value(self, new_value):
         self.value = new_value
 
-    def __repr__(self):
+    def __str__(self):
         return "'{}'    ! {}".format(self.value, self.name)
 
 
