@@ -74,30 +74,30 @@ class Simulation(object):
                                         stderr=subprocess.PIPE, shell=True)
         self._status = 'Running'
 
-    def run_docker(self, docker_img, run_suffix=None, processes=1,
+    def run_docker(self, run_suffix=None, processes=1,
                    prerun_cmds=[], startGRU=None, countGRU=None, iHRU=None,
                    freq_restart=None, progress=None):
-        self.executable = docker_img
         run_cmd = self.gen_summa_cmd(processes, prerun_cmds,
                                      startGRU, countGRU, iHRU,
                                      freq_restart, progress)
 
-        fman_dir = os.path.dirname(self.manager_path.value)
+        fman_dir = os.path.dirname(self.manager_path)
         settings_path = self.manager.settings_path.value
         input_path = self.manager.input_path.value
         output_path = self.manager.output_path.value
-        cmd = "".join(["docker run -v {}:{}".format(fman_dir, fman_dir),
-                       " -v {}:{}".format(settings_path, settings_path),
-                       " -v {}:{}".format(input_path, input_path),
-                       " -v {}:{} ".format(output_path, output_path),
-                       run_cmd])
+        cmd = ''.join(['docker run -v {}:{}'.format(fman_dir, fman_dir),
+                       ' -v {}:{}'.format(settings_path, settings_path),
+                       ' -v {}:{}'.format(input_path, input_path),
+                       ' -v {}:{}'.format(output_path, output_path),
+                       '/bin/bash -c "',
+                       run_cmd, '"'])
         self.process = subprocess.Popen(cmd, stdout=subprocess.PIPE,
                                         stderr=subprocess.PIPE, shell=True)
         self._status = 'Running'
 
     def start(self, run_option,  run_suffix='pysumma_run', processes=1,
               prerun_cmds=[], startGRU=None, countGRU=None, iHRU=None,
-              freq_restart=None, progress=None, docker_img=None):
+              freq_restart=None, progress=None):
         """Run a SUMMA simulation"""
         #TODO: Implement running on hydroshare here
         self.run_suffix=run_suffix
@@ -106,8 +106,11 @@ class Simulation(object):
             self.run_local(run_suffix, processes, prerun_cmds,
                            startGRU, countGRU, iHRU, freq_restart, progress)
         elif run_option == 'docker':
-            self.run_docker(docker_img, run_suffix, processes, prerun_cmds,
+            self.run_docker(run_suffix, processes, prerun_cmds,
                             startGRU, countGRU, iHRU, freq_restart, progress)
+        else:
+            raise NotImplementedError('Invalid runtime given! '
+                                      'Valid options: local, docker')
 
     def _write_configuration(self):
         #TODO: Still need to update for all netcdf writing
