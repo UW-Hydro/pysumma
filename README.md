@@ -2,7 +2,6 @@
 
 The pySUMMA is an Object-Oriented Python wrapper for the manipulation, display and analysis of 
 SUMMA model (Structure for Unifying Multiple Modeling Alternatives)
-
 * [SUMMA web site at UCAR ](https://www.rap.ucar.edu/projects/summa)
 
 ## The pySUMMA is intended to provide
@@ -15,7 +14,17 @@ SUMMA model (Structure for Unifying Multiple Modeling Alternatives)
  - Create UserInterface of Decision and filemanager file for User (in progress)
  - Automate model calibration or sensitivity analysis (Future work)
 
-
+## How to run pySUMMA on HydroShare
+ 1) log in HydoShare(https://www.hydroshare.org)
+ 2) Start CUAHSI JupyterHub from APPS menu on HydroShare(https://www.hydroshare.org/apps/)
+ 3) Open "Welcome.ipynb" to download pySUMMA resources from HydroShare
+  - run the code "1.How to connect with HydroShare"
+  - change the code from "resid = os.environ['HS_RES_ID']" to "resid = 'c1bb4a12bff44bf08c5958cba7947348'". 
+ 4) You can see the list of Jupyter Notebooks and click one of Jupyter Notebook.
+ 5) Run one of Jupyter Notebooks.
+ 
+## How to run pySUMMA locally 
+ 
 ## Installation and Usage
 
 #### pySUMMA requires Python 3.6 and following packages :
