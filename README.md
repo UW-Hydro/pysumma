@@ -25,7 +25,7 @@ SUMMA model (Structure for Unifying Multiple Modeling Alternatives)
  
 ## How to run pySUMMA locally 
  
-## Installation and Usage
+### Installation and Usage
 
 #### pySUMMA requires Python 3.6 and following packages :
 
@@ -40,7 +40,7 @@ SUMMA model (Structure for Unifying Multiple Modeling Alternatives)
    - [lubuntu-16.10 executable](https://www.hydroshare.org/resource/a5dbd5b198c9468387f59f3fefc11e22/)
    - [lubuntu-16.04.4 executable](https://www.hydroshare.org/resource/041671fbc8a544cd8a979af6c2227f92/)        
 
-## Download and Install pySUMMA:
+### Download and Install pySUMMA:
 
 **1.)**  Download pySUMMA
 ```python
@@ -52,14 +52,14 @@ SUMMA model (Structure for Unifying Multiple Modeling Alternatives)
 ~/Downloads/pysumma$ pip install .
 ```
 
-## Examples of unit test :
+### Examples of unit test :
 
 **a unit test using unittest library**  
 
 ```python
 ~/Downloads/pysumma$ python setup.py test
 ```
-## Examples of manipulating and running pySUMMA :
+### Examples of manipulating and running pySUMMA :
 
 Refereed paper : Clark, M. P., B. Nijssen, J. D. Lundquist, D. Kavetski, D. E. Rupp, R. A. Woods, 
 J. E. Freer, E. D. Gutmann, A. W. Wood, D. J. Gochis, R. M. Rasmussen, D. G. Tarboton, V. Mahat, 
