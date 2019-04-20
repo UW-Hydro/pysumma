@@ -5,9 +5,9 @@ from .option import OptionContainer
 
 def read_master_file(master_file_filepath):
     """Get all varialbes from var_lookup file"""
-    #TODO: This may be fragile, move this to utils and create a static
-    #      version of this metadata. Then, we can use this function to
-    #      repopulate a new version of the metadata as necessary
+    # TODO: This may be fragile, move this to utils and create a static
+    #       version of this metadata. Then, we can use this function to
+    #       repopulate a new version of the metadata as necessary
     out = []
     with open(master_file_filepath, 'r') as file:
         for line in file:
@@ -36,6 +36,16 @@ class OutputControlOption(BaseOption):
         self.max = int(max)
         self.mode = int(mode)
         self.validate()
+
+    def set_option(self, key, value):
+        try:
+            o = self.get_option(key, strict=True)
+            o.set_value(value)
+        except ValueError:
+            if key in OUTPUT_META.keys():
+                self.options.append(OutputControlOption(key, value))
+            else:
+                raise
 
     @property
     def statistic(self):
@@ -66,7 +76,7 @@ class OutputControlOption(BaseOption):
                  self.variance, self.min, self.max, self.mode]
         return [str(p) for p in plist]
 
-    def __repr__(self):
+    def __str__(self):
         return " | ".join(self.get_print_list())
 
 
