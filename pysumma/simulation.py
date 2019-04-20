@@ -25,12 +25,11 @@ class Simulation(object):
     local_attributes: xr.Dataset = None
     parameter_trial: xr.Dataset = None
 
-    def __init__(self, executable, filemanager, run_suffix='_pysumma_run'):
+    def __init__(self, executable, filemanager):
         """Initialize a new simulation object"""
         self.executable = executable
         self.manager_path = filemanager
         self.manager = FileManager(filemanager)
-        self.run_suffix = run_suffix
         self._status = 'Initialized'
         self.decisions = self.manager.decisions
         self.output_control = self.manager.output_control
@@ -41,190 +40,77 @@ class Simulation(object):
         self.local_attributes = self.manager.local_attributes
         self._status = 'Initialized'
 
-    def exec_local(self, run_suffix):
-        if self.summa_code is not None:
-            cmd = "{} -p never -s {} -m {}".format(
-                self.executable, run_suffix, self.manager_path)
-            # run shell script in python and print output
-            cmd = shlex.split(cmd)
-            p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
-            output = p.communicate()[0].decode('utf-8')
-            print(output)
-            if 'FATAL ERROR' in output:
-                raise Exception("SUMMA failed to execute!")
-            # define output file name as sopron version of summa
-            out_file_path = (self.manager.output_path.value
-                             + self.manager.output_prefix.value + '_output_'
-                             + run_suffix + '_timestep.nc')
+    def gen_summa_cmd(self, processes=1, prerun_cmds=[],
+                  startGRU=None, countGRU=None, iHRU=None, freq_restart=None,
+                  progress='m'):
+        prerun_cmds.append('export OMP_NUM_THREADS={}'.format(processes))
+
+        summa_run_cmd = "{} -s {} -m {}".format(self.executable,
+                                                     self.run_suffix,
+                                                     self.manager_path)
+
+        if startGRU is not None and countGRU is not None:
+            summa_run_cmd += ' -g {} {}'.format(startGRU, countGRU)
+        if iHRU is not None:
+            summa_run_cmd += ' -h {}'.format(iHRU)
+        if freq_restart is not None:
+            summa_run_cmd += ' -r {}'.format(freq_restart)
+        if progress is not None:
+            summa_run_cmd += ' -p {}'.format(progress)
+        if len(prerun_cmds):
+            preprocess_cmd = " && ".join(prerun_cmds) + " && "
         else:
-            self.executable = self.summa_code + '/bin/summa.exe'
-            cmd = "{} -p never -s {} -m {}".format(
-                self.executable, self.run_suffix, self.manager_path)
-            # run shell script in python and print output
-            cmd = shlex.split(cmd)
-            p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
-            output = p.communicate()[0].decode('utf-8')
-            print(output)
-            if 'FATAL ERROR' in output:
-                raise Exception("SUMMA failed to execute!")
-            # define output file name as sopron version of summa
-            out_file_path = (self.manager.output_path.value
-                             + self.manager.output_prefix.value + '_output_'
-                             + run_suffix + '_timestep.nc')
-        return out_file_path
+            preprocess_cmd = ""
 
-    def exec_hydroshare(self, run_suffix, specworker_img=None):
-        #TODO: This needs to be updated
-        raise NotImplementedError('This needs to be updated')
-        self.run_suffix = ""
-        #TODO: This should be up top
-        from specworker import jobs
-        # define the image that we want to execute
-        # save these paths in the env_vars dictionary
-        # which will be passed to the model
-        env_vars = {'LOCALBASEDIR': self.base_dir,
-                    'MASTERPATH': self.manager_path}
-        # define the location we want to mount these
-        # data in the container
-        vol_target = '/tmp/summa'
-        # define the base path of the input data for SUMMA
-        vol_source = self.base_dir
-        # run the container with the arguments specified above
-        res = jobs.run(specworker_img, '-x', vol_source,
-                       vol_target, env_vars)
+        return preprocess_cmd + summa_run_cmd
 
-        if specworker_img == 'cuahsi/summa:master':
-            list = glob.glob(self.base_dir
-                             + self.output_path.value.split('>')[1]+"*.nc")
-            output_list = [x for x in list
-                           if self.output_prefix.value in x]
-            myoutput_list = ' '.join(output_list[1:])
-            if myoutput_list.count(self.output_prefix.value) > 1:
-                output_name = (
-                    self.base_dir + self.manager.output_path.value.split('>')[1]
-                    + self.output_prefix.value + '_'
-                    + self.decision_obj.simulStart.value[0:4] + '-'
-                    + self.decision_obj.simulFinsh.value[0:4] + '_'
-                    + self.run_suffix + '1.nc')
-                #TODO: This could be done via xarray - also eneralized
-                merge_netcdf = ('ncrcat ' + myoutput_list
-                                + ' -O ' + output_name)
-                subprocess.run(merge_netcdf, shell=True)
-                myList = ' '.join(output_list[:])
-                #TODO: This is a bad idea
-                delete_netcdf = 'rm -rf ' + myList
-                subprocess.run(delete_netcdf, shell=True)
+    def run_local(self, run_suffix=None, processes=1, prerun_cmds=[],
+                  startGRU=None, countGRU=None, iHRU=None, freq_restart=None,
+                  progress=None):
+        run_cmd = self.gen_summa_cmd(processes, prerun_cmds,
+                                     startGRU, countGRU, iHRU, freq_restart,
+                                     progress)
+        self.process = subprocess.Popen(run_cmd, stdout=subprocess.PIPE,
+                                        stderr=subprocess.PIPE, shell=True)
+        self._status = 'Running'
 
-            # define output file name as sopron version of summa
-            out_file_path = (
-                self.base_dir + self.output_path.value.split('>')[1]
-                + self.output_prefix.value + '_'
-                + self.decisions.simulStart.value[0:4] + '-'
-                + self.decisions.simulFinsh.value[0:4] + '_' + '1.nc')
+    def run_docker(self, run_suffix=None, processes=1,
+                   prerun_cmds=[], startGRU=None, countGRU=None, iHRU=None,
+                   freq_restart=None, progress=None):
+        run_cmd = self.gen_summa_cmd(processes, prerun_cmds,
+                                     startGRU, countGRU, iHRU,
+                                     freq_restart, progress)
 
-        elif specworker_img == 'cuahsi/summa:sopron':
-            out_file_path = (
-                self.base_dir + '/'
-                + self.output_path.filepath.split('/')[1] + '/'
-                + self.output_prefix.value + '_output_' + 'timestep.nc')
-            #TODO: WHy doesn't this run anything?
-        else:
-            #TODO: This error message isn't specific enough
-            raise ValueError('You need to deinfe the '
-                             'exact SUMMA_image_name')
-        return out_file_path
-
-    def exec_docker(self, run_suffix, docker_img='uwhydro/summa:sopron_2018'):
-
-        self.executable = docker_img
-        in_path = self.manager.input_path.value
-        out_path = self.manager.output_path.value
-        self.file_dir = os.path.dirname(self.manager_path)
-        base_cmd = "docker run -v {}:{}".format(
-            self.file_dir, self.file_dir)
-        if self.file_dir+'/' == self.manager.settings_path.value:
-            cmd = (base_cmd
-                   + " -v {}:{}".format(in_path, in_path)
-                   + " -v {}:{}".format(out_path, out_path)
-                   + " {} -p never -s {} -m {}".format(self.executable,
-                                                       run_suffix,
-                                                       self.manager_path))
-        else:
-            setting_path = self.manager.settings_path.value
-            cmd = (base_cmd
-                   + " -v {}:{}".format(setting_path, setting_path)
-                   + " -v {}:{}".format(in_path, in_path)
-                   + " -v {}:{}".format(out_path, out_path)
-                   + " {} -p never -s {} -m {}".format(self.executable,
-                                                       run_suffix,
-                                                       self.manager_path))
-        # run shell script in python and print output
-        cmd = shlex.split(cmd)
-        p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
-        output = p.communicate()[0].decode('utf-8')
-        print(output)
-        if 'FATAL ERROR' in output:
-            raise Exception("SUMMA failed to execute!")
-        # define output file name as sopron version of summa
-        if self.manager.output_path.value.split('/')[0] == '<BASEDIR>':
-            out_file_path = (
-                self.manager.output_path.value.split('<BASEDIR>')[1]
-                + self.manager.output_prefix.value + '_output_'
-                + run_suffix + '_timestep.nc')
-        else:
-            out_file_path = (
-                self.manager.output_path.value
-                + self.manager.output_prefix.value + '_output_'
-                + run_suffix + '_timestep.nc')
-        return out_file_path
-
-    def start(self, run_option, run_suffix=None, preprocess_cmds=[]):
-        """Run a SUMMA simulation"""
-        #TODO: Implement running on hydroshare here
-        errstring = ('No executable defined. Set as "executable" attribute'
-                     ' of Simulation or check run_option ')
-        self._write_configuration()
-        if run_suffix:
-            self.run_suffix = run_suffix
-        summa_run_cmd = "{} -p m -s {} -m {}".format(
-                self.executable, self.run_suffix, self.manager_path)
-
-        if run_option == 'local':
-            cmd = summa_run_cmd
-        elif run_option.startswith('docker'):
-
-            if run_option == 'docker_latest':
-                self.executable = 'bartnijssen/summa:latest'
-            elif run_option == 'docker_develop':
-                self.executable = 'bartnijssen/summa:develop'
-            else:
-                raise ValueError(errstring)
-
-            fman_dir = os.path.dirname(self.manager_path)
-            settings_path = self.manager.settings_path.value
-            input_path = self.manager.input_path.value
-            output_path = self.manager.output_path.value
-            cmd = "".join(["docker run -v {}:{}".format(fman_dir, fman_dir),
-                           " -v {}:{}".format(settings_path, settings_path),
-                           " -v {}:{}".format(input_path, input_path),
-                           " -v {}:{} ".format(output_path, output_path),
-                           summa_run_cmd])
-        else:
-            raise ValueError(errstring)
-
-        preprocess = []
-        if self.library_path:
-            preprocess = ['export LD_LIBRARY_PATH="{}" '.format(
-                self.library_path)]
-        if len(preprocess_cmds):
-            preprocess.append(' && '.join(preprocess_cmds))
-        preprocess = "".join(preprocess)
-        if len(preprocess):
-            cmd = preprocess + " && " + cmd
-
+        fman_dir = os.path.dirname(self.manager_path)
+        settings_path = self.manager.settings_path.value
+        input_path = self.manager.input_path.value
+        output_path = self.manager.output_path.value
+        cmd = ''.join(['docker run -v {}:{}'.format(fman_dir, fman_dir),
+                       ' -v {}:{}'.format(settings_path, settings_path),
+                       ' -v {}:{}'.format(input_path, input_path),
+                       ' -v {}:{}'.format(output_path, output_path),
+                       '/bin/bash -c "',
+                       run_cmd, '"'])
         self.process = subprocess.Popen(cmd, stdout=subprocess.PIPE,
                                         stderr=subprocess.PIPE, shell=True)
         self._status = 'Running'
+
+    def start(self, run_option,  run_suffix='pysumma_run', processes=1,
+              prerun_cmds=[], startGRU=None, countGRU=None, iHRU=None,
+              freq_restart=None, progress=None):
+        """Run a SUMMA simulation"""
+        #TODO: Implement running on hydroshare here
+        self.run_suffix=run_suffix
+        self._write_configuration()
+        if run_option == 'local':
+            self.run_local(run_suffix, processes, prerun_cmds,
+                           startGRU, countGRU, iHRU, freq_restart, progress)
+        elif run_option == 'docker':
+            self.run_docker(run_suffix, processes, prerun_cmds,
+                            startGRU, countGRU, iHRU, freq_restart, progress)
+        else:
+            raise NotImplementedError('Invalid runtime given! '
+                                      'Valid options: local, docker')
 
     def _write_configuration(self):
         #TODO: Still need to update for all netcdf writing
@@ -236,48 +122,23 @@ class Simulation(object):
         self.output_control.write()
 
     def _get_output(self):
-        output_files = set()
-        base_file = "".join(
-            [self.manager.output_path.value, self.manager.output_prefix.value,
-             'output_', self.run_suffix, '_{}.nc'])
-        for o in self.output_control.options:
-            if o.period == 1:
-                output_files.add(base_file.format('timestep'))
-            elif o.period > 1:
-                output_files.add(base_file.format(o.statistic))
-        return list(output_files)
+        new_file_text = 'Created output file:'
+        assert self._status == 'Success'
+        out_files = []
+        for l in self.stdout.split('\n'):
+            if new_file_text in l:
+                out_files.append(l.replace(new_file_text, ''))
+        return out_files
 
-    def execute(self, run_option, run_suffix=None, specworker_img=None):
+    def execute(self, run_option, run_suffix=None,
+                preprocess_cmds=[], monitor=False):
         """Run a SUMMA simulation"""
-        #self.start(run_option, run_suffix, preprocess_cmds)
-        #if monitor:
-        #    result = self.monitor()
-        #    self.process = result
-        #    return result
-        #else:
-        #    return self.process
-
-        # set run_suffix to distinguish the output name of summa
-        self.run_suffix = run_suffix
-        # 'local' run_option runs summa with summa execution
-        # file where is in a local computer.
-
-        if run_option == 'local':
-            out_data = self.exec_local(run_suffix)
-        # 'docker_sopron_2018' run_option runs summa with docker hub online,
-        # and the version name is "'uwhydro/summa:sopron_2018'.
-        elif run_option == "docker_sopron_2018":
-            out_data = self.exec_docker(run_suffix, docker_img='uwhydro/summa:sopron_2018')
-        # "specworker" run_option run summa with summa image
-        # in docker of HydroShare Jupyter Hub
-        elif run_option == "specworker":
-            out_data = self.exec_hydroshare(run_suffix,
-                                          specworker_img=specworker_img)
-        else:
-            raise ValueError('No executable defined. '
-                             'Set as "executable" attribute '
-                             'of Simulation or check run_option')
-        return xr.open_dataset(out_data), out_data
+        self.start(run_option, run_suffix=run_suffix,
+                   prerun_cmds=preprocess_cmds)
+        if monitor:
+            result = self.monitor()
+            self.process = result
+            return result
 
     def monitor(self):
         if self.process is None:

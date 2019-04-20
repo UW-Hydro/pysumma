@@ -33,7 +33,6 @@ class LocalParamInfo(OptionContainer):
 
     fmt_strings = ["'(a25,1x,3(a1,1x,f12.4,1x))'",
                    "'(a25,1x,a1,1x,3(f12.4,1x,a1,1x))'"]
-       #             '(a25,1x,a1,1x,3(f12.4,1x,a1,1x))'
 
     def __init__(self, path):
         super().__init__(path, LocalParamOption)
