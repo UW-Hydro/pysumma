@@ -9,14 +9,12 @@ setup(name='pysumma',
       license='BSD-3-Clause',
       packages=find_packages(),
       install_requires=[
-          'numpy==1.13.3',
-          'xarray==0.10.0',
-          'matplotlib==2.1.1',
-          'ipyleaflet',
-          'jupyterthemes==0.18.3',
+          'numpy',
+          'xarray>0.10.9',
+          'matplotlib',
           'geopandas',
           'shapely',
-          'seaborn==0.8.1'
+          'seaborn'
           ],
       include_package_data=True,
       test_suite='pysumma.tests')
