@@ -72,8 +72,8 @@ class OutputControlOption(BaseOption):
 
     def get_print_list(self):
         self.validate()
-        plist = [self.name, self.period, self.sum, self.instant, self.mean,
-                 self.variance, self.min, self.max, self.mode]
+        plist = [self.name.ljust(36), self.period, self.sum, self.instant,
+                 self.mean, self.variance, self.min, self.max, self.mode]
         return [str(p) for p in plist]
 
     def __str__(self):
@@ -103,6 +103,7 @@ class OutputControl(OptionContainer):
         """
         try:
             o = self.get_option(name, strict=True)
+            print(o)
             o.period = period
             o.sum = sum
             o.instant = instant
@@ -123,4 +124,4 @@ class OutputControl(OptionContainer):
                 raise
 
     def get_constructor_args(self, line):
-        return line.split('!')[0].split('|')
+        return [l.strip() for l in line.split('!')[0].split('|')]
