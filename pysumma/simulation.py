@@ -40,14 +40,14 @@ class Simulation(object):
         self.local_attributes = self.manager.local_attributes
         self._status = 'Initialized'
 
-    def gen_summa_cmd(self, processes=1, prerun_cmds=[],
+    def gen_summa_cmd(self, run_suffix, processes=1, prerun_cmds=[],
                   startGRU=None, countGRU=None, iHRU=None, freq_restart=None,
                   progress='m'):
         prerun_cmds.append('export OMP_NUM_THREADS={}'.format(processes))
 
         summa_run_cmd = "{} -s {} -m {}".format(self.executable,
-                                                     self.run_suffix,
-                                                     self.manager_path)
+                                                run_suffix,
+                                                self.manager_path)
 
         if startGRU is not None and countGRU is not None:
             summa_run_cmd += ' -g {} {}'.format(startGRU, countGRU)
@@ -64,20 +64,20 @@ class Simulation(object):
 
         return preprocess_cmd + summa_run_cmd
 
-    def run_local(self, run_suffix=None, processes=1, prerun_cmds=[],
+    def run_local(self, run_suffix, processes=1, prerun_cmds=[],
                   startGRU=None, countGRU=None, iHRU=None, freq_restart=None,
                   progress=None):
-        run_cmd = self.gen_summa_cmd(processes, prerun_cmds,
+        run_cmd = self.gen_summa_cmd(run_suffix, processes, prerun_cmds,
                                      startGRU, countGRU, iHRU, freq_restart,
                                      progress)
         self.process = subprocess.Popen(run_cmd, stdout=subprocess.PIPE,
                                         stderr=subprocess.PIPE, shell=True)
         self._status = 'Running'
 
-    def run_docker(self, run_suffix=None, processes=1,
+    def run_docker(self, run_suffix, processes=1,
                    prerun_cmds=[], startGRU=None, countGRU=None, iHRU=None,
                    freq_restart=None, progress=None):
-        run_cmd = self.gen_summa_cmd(processes, prerun_cmds,
+        run_cmd = self.gen_summa_cmd(run_suffix, processes, prerun_cmds,
                                      startGRU, countGRU, iHRU,
                                      freq_restart, progress)
 
@@ -155,16 +155,18 @@ class Simulation(object):
             self._stderr = self.process.stderr.read()
             self._stdout = self.process.stdout.read()
 
+        if self._result:
+            self._status = 'Error'
+        else:
+            self._status = 'Success'
+
         try:
             self._output = [xr.open_dataset(f) for f in self._get_output()]
             if len(self._output) == 1:
                 self._output = self._output[0]
         except Exception:
             self._output = None
-        if self._result:
-            self._status = 'Error'
-        else:
-            self._status = 'Success'
+
         return self._result
 
     @property
