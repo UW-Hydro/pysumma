@@ -103,7 +103,6 @@ class OutputControl(OptionContainer):
         """
         try:
             o = self.get_option(name, strict=True)
-            print(o)
             o.period = period
             o.sum = sum
             o.instant = instant
