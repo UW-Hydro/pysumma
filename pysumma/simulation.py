@@ -131,7 +131,7 @@ class Simulation(object):
         return out_files
 
     def execute(self, run_option, run_suffix=None,
-                preprocess_cmds=[], monitor=False):
+                preprocess_cmds=[], monitor=True):
         """Run a SUMMA simulation"""
         self.start(run_option, run_suffix=run_suffix,
                    prerun_cmds=preprocess_cmds)
