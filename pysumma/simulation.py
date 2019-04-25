@@ -80,6 +80,7 @@ class Simulation(object):
         run_cmd = self.gen_summa_cmd(run_suffix, processes, prerun_cmds,
                                      startGRU, countGRU, iHRU,
                                      freq_restart, progress)
+        run_cmd = run_cmd.replace(self.executable, '/code/bin/summa.exe')
 
         fman_dir = os.path.dirname(self.manager_path)
         settings_path = self.manager.settings_path.value
@@ -88,8 +89,10 @@ class Simulation(object):
         cmd = ''.join(['docker run -v {}:{}'.format(fman_dir, fman_dir),
                        ' -v {}:{}'.format(settings_path, settings_path),
                        ' -v {}:{}'.format(input_path, input_path),
-                       ' -v {}:{}'.format(output_path, output_path),
-                       '/bin/bash -c "',
+                       ' -v {}:{} '.format(output_path, output_path),
+                       " --entrypoint '/bin/bash' ",
+                       self.executable,
+                       '  -c "',
                        run_cmd, '"'])
         self.process = subprocess.Popen(cmd, stdout=subprocess.PIPE,
                                         stderr=subprocess.PIPE, shell=True)
