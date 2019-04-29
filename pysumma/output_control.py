@@ -37,16 +37,6 @@ class OutputControlOption(BaseOption):
         self.mode = int(mode)
         self.validate()
 
-    def set_option(self, key, value):
-        try:
-            o = self.get_option(key, strict=True)
-            o.set_value(value)
-        except ValueError:
-            if key in OUTPUT_META.keys():
-                self.options.append(OutputControlOption(key, value))
-            else:
-                raise
-
     @property
     def statistic(self):
         """This could be improved"""
@@ -113,9 +103,6 @@ class OutputControl(OptionContainer):
             o.max = max
             o.mode = mode
         except ValueError:
-            self.options.append(
-                    OutputControlOption(name, period, sum, instant,
-                                        mean, variance, min, max, mode))
             if name in OUTPUT_META['variables']:
                 self.options.append(OutputControlOption(
                         name, period, sum, instant, mean,
