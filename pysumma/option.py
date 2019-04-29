@@ -94,7 +94,7 @@ class OptionContainer(object):
 
     def remove_option(self, name, strict=False):
         """Remove an option"""
-        for i, o in self.options:
+        for i, o in enumerate(self.options):
             if name == o.name:
                 return self.options.pop(i)
         if strict:
