@@ -56,13 +56,13 @@ class OutputControlOption(BaseOption):
             return 'mode'
 
     def validate(self):
-        total = (self.sum + self.instant + self.mean + self.variance
+        total = (self.instant + self.sum + self.mean + self.variance
                  + self.min + self.max + self.mode)
         assert total == 1, "Only one output statistic is allowed!"
 
     def get_print_list(self):
         self.validate()
-        plist = [self.name.ljust(36), self.period, self.sum, self.instant,
+        plist = [self.name.ljust(36), self.period, self.instant, self.sum,
                  self.mean, self.variance, self.min, self.max, self.mode]
         return [str(p) for p in plist]
 
