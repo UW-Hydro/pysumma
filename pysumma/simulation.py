@@ -1,4 +1,5 @@
 import os
+import copy
 import subprocess
 import shlex
 import xarray as xr
@@ -38,7 +39,32 @@ class Simulation(object):
         self.local_param_info = self.manager.local_param_info
         self.basin_param_info = self.manager.basin_param_info
         self.local_attributes = self.manager.local_attributes
+        self.backup()
         self._status = 'Initialized'
+
+    def backup(self):
+        self.backup = {}
+        # Text
+        self.backup['manager'] = copy.deepcopy(self.manager)
+        self.backup['decisions'] = copy.deepcopy(self.decisions)
+        self.backup['output_control'] = copy.deepcopy(self.output_control)
+        self.backup['force_file_list'] = copy.deepcopy(self.force_file_list)
+        self.backup['local_param_info'] = copy.deepcopy(self.local_param_info)
+        self.backup['basin_param_info'] = copy.deepcopy(self.basin_param_info)
+        # NetCDF
+        self.backup['parameter_trial'] = copy.deepcopy(self.parameter_trial)
+        self.backup['local_attributes'] = copy.deepcopy(self.local_attributes)
+
+    def reset(self):
+        self.manager = copy.deepcopy(self.backup['manager'])
+        self.decisions = copy.deepcopy(self.backup['decisions'])
+        self.output_control = copy.deepcopy(self.backup['output_control'])
+        self.force_file_list = copy.deepcopy(self.backup['force_file_list'])
+        self.local_param_info = copy.deepcopy(self.backup['local_param_info'])
+        self.basin_param_info = copy.deepcopy(self.backup['basin_param_info'])
+
+        self.parameter_trial = copy.deepcopy(self.backup['parameter_trial'])
+        self.local_attributes = copy.deepcopy(self.backup['local_attributes'])
 
     def gen_summa_cmd(self, run_suffix, processes=1, prerun_cmds=[],
                   startGRU=None, countGRU=None, iHRU=None, freq_restart=None,
