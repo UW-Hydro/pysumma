@@ -109,7 +109,7 @@ class OptionContainer(object):
         names = [o.name for o in self.options]
         assert len(names) == len(set(names)), 'Duplicate options not allowed!'
 
-    def __getattr__(self, name):
+    def __getitem__(self, name):
         if name == 'options':
             object.__getattribute__(self, name)
 
@@ -117,14 +117,14 @@ class OptionContainer(object):
         if name in names:
             return self.get_option(name)
         else:
-            object.__getattribute__(self, name)
+            object.__getitem__(self, name)
 
-    def __setattr__(self, name, value):
+    def __setitem__(self, name, value):
         try:
             names = [o.name for o in self.options]
             if name in names:
                 return self.set_option(name, value)
             else:
-                object.__setattr__(self, name, value)
+                object.__setitem__(self, name, value)
         except AttributeError:
-            object.__setattr__(self, name, value)
+            object.__setitem__(self, name, value)
