@@ -69,7 +69,6 @@ class OutputControlOption(BaseOption):
     def __str__(self):
         return " | ".join(self.get_print_list())
 
-
 class OutputControl(OptionContainer):
     """
     The OutputControl object manages what output SUMMA will
@@ -86,7 +85,7 @@ class OutputControl(OptionContainer):
         """
         super().__init__(path, OutputControlOption)
 
-    def set_option(self, name=None, period=None, sum=0, instant=1,
+    def set_option(self, name=None, period=None, instant=1, sum=0,
                    mean=0, variance=0, min=0, max=0, mode=0):
         """
         Change or create a new entry in the output control
@@ -108,6 +107,28 @@ class OutputControl(OptionContainer):
                         variance, min, max, mode))
             else:
                 raise
+
+    def __setitem__(self, name, value):
+        names = [o.name for o in self.options]
+        if name in names:
+            if isinstance(value, list):
+                assert len(value) == 8
+                self.set_option(name, *value)
+            elif isinstance(value, dict):
+                self.set_option(name, **value)
+            else:
+                raise Exception(
+                    'To set output control options you need to provide'
+                    ' a dictionary or list in the respective formats:'
+                    '\n'
+                    '{"period": val1, "instant": val2, "sum": val3,'
+                    ' "mean": val4,' ' "variance": val5, "min": val6,'
+                    ' "max": val7, "mode": val8}'
+                    '\n or \n'
+                    '[val1, val2, val3, val4, val5, val6, val7, val8]')
+        else:
+            object.__setitem__(self, name, value)
+
 
     def get_constructor_args(self, line):
         return [l.strip() for l in line.split('!')[0].split('|')]
