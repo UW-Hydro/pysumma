@@ -104,7 +104,7 @@ class OutputControl(OptionContainer):
         except ValueError:
             if name in OUTPUT_META['variables']:
                 self.options.append(OutputControlOption(
-                        name, period, sum, instant, mean,
+                        name, period, instant, sum, mean,
                         variance, min, max, mode))
             else:
                 raise
