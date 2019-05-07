@@ -24,7 +24,7 @@ OUTPUT_META = read_master_file(METADATA_PATH)
 
 class OutputControlOption(BaseOption):
 
-    def __init__(self, var=None, period=None, sum=0, instant=1,
+    def __init__(self, var=None, period=None, sum=1, instant=0,
                  mean=0, variance=0, min=0, max=0, mode=0):
         self.name = var
         self.period = int(period)
@@ -62,12 +62,13 @@ class OutputControlOption(BaseOption):
 
     def get_print_list(self):
         self.validate()
-        plist = [self.name.ljust(36), self.period, self.instant, self.sum,
+        plist = [self.name.ljust(36), self.period, self.sum, self.instant,
                  self.mean, self.variance, self.min, self.max, self.mode]
         return [str(p) for p in plist]
 
     def __str__(self):
         return " | ".join(self.get_print_list())
+
 
 class OutputControl(OptionContainer):
     """
@@ -85,7 +86,7 @@ class OutputControl(OptionContainer):
         """
         super().__init__(path, OutputControlOption)
 
-    def set_option(self, name=None, period=None, instant=1, sum=0,
+    def set_option(self, name=None, period=None, sum=1, instant=0,
                    mean=0, variance=0, min=0, max=0, mode=0):
         """
         Change or create a new entry in the output control
@@ -103,7 +104,7 @@ class OutputControl(OptionContainer):
         except ValueError:
             if name in OUTPUT_META['variables']:
                 self.options.append(OutputControlOption(
-                        name, period, instant, sum, mean,
+                        name, period, sum, instant, mean,
                         variance, min, max, mode))
             else:
                 raise
@@ -121,7 +122,7 @@ class OutputControl(OptionContainer):
                     'To set output control options you need to provide'
                     ' a dictionary or list in the respective formats:'
                     '\n'
-                    '{"period": val1, "instant": val2, "sum": val3,'
+                    '{"period": val1, "sum": val2, "instant": val3,'
                     ' "mean": val4,' ' "variance": val5, "min": val6,'
                     ' "max": val7, "mode": val8}'
                     '\n or \n'
