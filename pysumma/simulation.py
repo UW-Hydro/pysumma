@@ -56,23 +56,17 @@ class Simulation():
 
     def create_backup(self):
         self.backup = {}
-        # Text
         self.backup['manager'] = copy.deepcopy(self.manager)
-        self.backup['decisions'] = copy.deepcopy(self.decisions)
-        self.backup['output_control'] = copy.deepcopy(self.output_control)
-        self.backup['force_file_list'] = copy.deepcopy(self.force_file_list)
-        self.backup['local_param_info'] = copy.deepcopy(self.local_param_info)
-        self.backup['basin_param_info'] = copy.deepcopy(self.basin_param_info)
 
     def reset(self):
         self.manager = copy.deepcopy(self.backup['manager'])
-        self.decisions = copy.deepcopy(self.backup['decisions'])
-        self.output_control = copy.deepcopy(self.backup['output_control'])
-        self.force_file_list = copy.deepcopy(self.backup['force_file_list'])
-        self.local_param_info = copy.deepcopy(self.backup['local_param_info'])
-        self.basin_param_info = copy.deepcopy(self.backup['basin_param_info'])
+        self.output_control = self.manager.output_control
         self.parameter_trial = self.manager.parameter_trial
+        self.force_file_list = self.manager.force_file_list
+        self.local_param_info = self.manager.local_param_info
+        self.basin_param_info = self.manager.basin_param_info
         self.local_attributes = self.manager.local_attributes
+
 
     def _gen_summa_cmd(self, run_suffix, processes=1, prerun_cmds=[],
                        startGRU=None, countGRU=None, iHRU=None,
@@ -160,34 +154,6 @@ class Simulation():
                    startGRU, countGRU, iHRU, freq_restart, progress)
         self.monitor()
 
-    def _write_configuration(self):
-        #TODO: Still need to update for all netcdf writing
-        self.manager.write()
-        self.decisions.write()
-        self.force_file_list.write()
-        self.local_param_info.write()
-        self.basin_param_info.write()
-        self.output_control.write()
-
-    def _get_output(self):
-        new_file_text = 'Created output file:'
-        assert self.status == 'Success'
-        out_files = []
-        for l in self.stdout.split('\n'):
-            if new_file_text in l:
-                out_files.append(l.replace(new_file_text, ''))
-        return out_files
-
-    def execute(self, run_option, run_suffix=None,
-                preprocess_cmds=[], monitor=True):
-        """Run a SUMMA simulation"""
-        self.start(run_option, run_suffix=run_suffix,
-                   prerun_cmds=preprocess_cmds)
-        if monitor:
-            result = self.monitor()
-            self.process = result
-            return result
-
     def monitor(self):
         # Simulation already run
         if self.status in ['Error', 'Success']:
@@ -218,6 +184,25 @@ class Simulation():
 
 
         return self.status
+
+    def _write_configuration(self):
+        #TODO: Still need to update for all netcdf writing
+        self.manager.write()
+        self.decisions.write()
+        self.force_file_list.write()
+        self.local_param_info.write()
+        self.basin_param_info.write()
+        self.output_control.write()
+
+    def _get_output(self):
+        new_file_text = 'Created output file:'
+        assert self.status == 'Success'
+        out_files = []
+        for l in self.stdout.split('\n'):
+            if new_file_text in l:
+                out_files.append(l.replace(new_file_text, ''))
+        return out_files
+
 
     @property
     def output(self):
