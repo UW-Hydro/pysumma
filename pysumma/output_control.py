@@ -104,32 +104,27 @@ class OutputControl(OptionContainer):
         except ValueError:
             if name in OUTPUT_META['variables']:
                 self.options.append(OutputControlOption(
-                        name, period, sum, instant, mean,
-                        variance, min, max, mode))
+                    name, period, sum, instant, mean,
+                    variance, min, max, mode))
             else:
                 raise
 
     def __setitem__(self, name, value):
-        names = [o.name for o in self.options]
-        if name in names:
-            if isinstance(value, list):
-                assert len(value) == 8
-                self.set_option(name, *value)
-            elif isinstance(value, dict):
-                self.set_option(name, **value)
-            else:
-                raise Exception(
-                    'To set output control options you need to provide'
-                    ' a dictionary or list in the respective formats:'
-                    '\n'
-                    '{"period": val1, "sum": val2, "instant": val3,'
-                    ' "mean": val4,' ' "variance": val5, "min": val6,'
-                    ' "max": val7, "mode": val8}'
-                    '\n or \n'
-                    '[val1, val2, val3, val4, val5, val6, val7, val8]')
+        if isinstance(value, list):
+            assert len(value) == 8
+            self.set_option(name, *value)
+        elif isinstance(value, dict):
+            self.set_option(name, **value)
         else:
-            object.__setitem__(self, name, value)
-
+            raise Exception(
+                'To set output control options you need to provide'
+                ' a dictionary or list in the respective formats:'
+                '\n'
+                '{"period": val1, "sum": val2, "instant": val3,'
+                ' "mean": val4,' ' "variance": val5, "min": val6,'
+                ' "max": val7, "mode": val8}'
+                '\n or \n'
+                '[val1, val2, val3, val4, val5, val6, val7, val8]')
 
     def get_constructor_args(self, line):
         return [l.strip() for l in line.split('!')[0].split('|')]
