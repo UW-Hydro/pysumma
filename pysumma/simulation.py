@@ -1,9 +1,7 @@
 import os
 import copy
 import subprocess
-import shlex
 import xarray as xr
-import glob
 
 from .decisions import Decisions
 from .file_manager import FileManager
@@ -12,10 +10,8 @@ from .local_param_info import LocalParamInfo
 from .force_file_list import ForceFileList
 
 
-class Simulation(object):
+class Simulation():
     """The simulation object provides a wrapper for SUMMA simulations"""
-    library_path = None
-    process = None
 
     manager: FileManager = None
     decisions: Decisions = None
@@ -26,12 +22,20 @@ class Simulation(object):
     local_attributes: xr.Dataset = None
     parameter_trial: xr.Dataset = None
 
-    def __init__(self, executable, filemanager):
+    def __init__(self, executable, filemanager, initialize=True):
         """Initialize a new simulation object"""
+        self.stdout = None
+        self.stderr = None
+        self.process = None
         self.executable = executable
         self.manager_path = filemanager
-        self.manager = FileManager(filemanager)
-        self._status = 'Initialized'
+        self.status = 'Uninitialized'
+        if initialize:
+            self.initialize()
+
+    def initialize(self):
+        self.manager = FileManager(self.manager_path)
+        self.status = 'Initialized'
         self.decisions = self.manager.decisions
         self.output_control = self.manager.output_control
         self.parameter_trial = self.manager.parameter_trial
@@ -39,10 +43,18 @@ class Simulation(object):
         self.local_param_info = self.manager.local_param_info
         self.basin_param_info = self.manager.basin_param_info
         self.local_attributes = self.manager.local_attributes
-        self.backup()
-        self._status = 'Initialized'
+        self.create_backup()
+        self.status = 'Initialized'
 
-    def backup(self):
+    def apply_config(self, config):
+        for k, v in config.get('file_manager', {}).items():
+            self.manager.set_option(k, v)
+        for k, v in config.get('decisions', {}).items():
+            self.decisions.set_option(k, v)
+        for k, v in config.get('parameters', {}).items():
+            self.local_param_info.set_option(k, v)
+
+    def create_backup(self):
         self.backup = {}
         # Text
         self.backup['manager'] = copy.deepcopy(self.manager)
@@ -51,9 +63,6 @@ class Simulation(object):
         self.backup['force_file_list'] = copy.deepcopy(self.force_file_list)
         self.backup['local_param_info'] = copy.deepcopy(self.local_param_info)
         self.backup['basin_param_info'] = copy.deepcopy(self.basin_param_info)
-        # NetCDF
-        self.backup['parameter_trial'] = copy.deepcopy(self.parameter_trial)
-        self.backup['local_attributes'] = copy.deepcopy(self.local_attributes)
 
     def reset(self):
         self.manager = copy.deepcopy(self.backup['manager'])
@@ -62,13 +71,12 @@ class Simulation(object):
         self.force_file_list = copy.deepcopy(self.backup['force_file_list'])
         self.local_param_info = copy.deepcopy(self.backup['local_param_info'])
         self.basin_param_info = copy.deepcopy(self.backup['basin_param_info'])
+        self.parameter_trial = self.manager.parameter_trial
+        self.local_attributes = self.manager.local_attributes
 
-        self.parameter_trial = copy.deepcopy(self.backup['parameter_trial'])
-        self.local_attributes = copy.deepcopy(self.backup['local_attributes'])
-
-    def gen_summa_cmd(self, run_suffix, processes=1, prerun_cmds=[],
-                  startGRU=None, countGRU=None, iHRU=None, freq_restart=None,
-                  progress='m'):
+    def _gen_summa_cmd(self, run_suffix, processes=1, prerun_cmds=[],
+                       startGRU=None, countGRU=None, iHRU=None,
+                       freq_restart=None, progress='m'):
         prerun_cmds.append('export OMP_NUM_THREADS={}'.format(processes))
 
         summa_run_cmd = "{} -s {} -m {}".format(self.executable,
@@ -90,22 +98,24 @@ class Simulation(object):
 
         return preprocess_cmd + summa_run_cmd
 
-    def run_local(self, run_suffix, processes=1, prerun_cmds=[],
-                  startGRU=None, countGRU=None, iHRU=None, freq_restart=None,
-                  progress=None):
-        run_cmd = self.gen_summa_cmd(run_suffix, processes, prerun_cmds,
-                                     startGRU, countGRU, iHRU, freq_restart,
-                                     progress)
+    def _run_local(self, run_suffix, processes=1, prerun_cmds=None,
+                   startGRU=None, countGRU=None, iHRU=None, freq_restart=None,
+                   progress=None):
+        """Start a local simulation"""
+        run_cmd = self._gen_summa_cmd(run_suffix, processes, prerun_cmds,
+                                      startGRU, countGRU, iHRU, freq_restart,
+                                      progress)
         self.process = subprocess.Popen(run_cmd, stdout=subprocess.PIPE,
                                         stderr=subprocess.PIPE, shell=True)
-        self._status = 'Running'
+        self.status = 'Running'
 
-    def run_docker(self, run_suffix, processes=1,
-                   prerun_cmds=[], startGRU=None, countGRU=None, iHRU=None,
-                   freq_restart=None, progress=None):
-        run_cmd = self.gen_summa_cmd(run_suffix, processes, prerun_cmds,
-                                     startGRU, countGRU, iHRU,
-                                     freq_restart, progress)
+    def _run_docker(self, run_suffix, processes=1,
+                    prerun_cmds=None, startGRU=None, countGRU=None, iHRU=None,
+                    freq_restart=None, progress=None):
+        """Start a docker simulation"""
+        run_cmd = self._gen_summa_cmd(run_suffix, processes, prerun_cmds,
+                                      startGRU, countGRU, iHRU,
+                                      freq_restart, progress)
         run_cmd = run_cmd.replace(self.executable, '/code/bin/summa.exe')
 
         fman_dir = os.path.dirname(self.manager_path)
@@ -122,24 +132,33 @@ class Simulation(object):
                        run_cmd, '"'])
         self.process = subprocess.Popen(cmd, stdout=subprocess.PIPE,
                                         stderr=subprocess.PIPE, shell=True)
-        self._status = 'Running'
+        self.status = 'Running'
 
     def start(self, run_option,  run_suffix='pysumma_run', processes=1,
               prerun_cmds=[], startGRU=None, countGRU=None, iHRU=None,
               freq_restart=None, progress=None):
         """Run a SUMMA simulation"""
         #TODO: Implement running on hydroshare here
-        self.run_suffix=run_suffix
+        if not prerun_cmds:
+            prerun_cmds = []
+        self.run_suffix = run_suffix
         self._write_configuration()
         if run_option == 'local':
-            self.run_local(run_suffix, processes, prerun_cmds,
-                           startGRU, countGRU, iHRU, freq_restart, progress)
-        elif run_option == 'docker':
-            self.run_docker(run_suffix, processes, prerun_cmds,
+            self._run_local(run_suffix, processes, prerun_cmds,
                             startGRU, countGRU, iHRU, freq_restart, progress)
+        elif run_option == 'docker':
+            self._run_docker(run_suffix, processes, prerun_cmds,
+                             startGRU, countGRU, iHRU, freq_restart, progress)
         else:
             raise NotImplementedError('Invalid runtime given! '
                                       'Valid options: local, docker')
+
+    def run(self, run_option,  run_suffix='pysumma_run', processes=1,
+            prerun_cmds=None, startGRU=None, countGRU=None, iHRU=None,
+            freq_restart=None, progress=None):
+        self.start(run_option, run_suffix, processes, prerun_cmds,
+                   startGRU, countGRU, iHRU, freq_restart, progress)
+        self.monitor()
 
     def _write_configuration(self):
         #TODO: Still need to update for all netcdf writing
@@ -152,7 +171,7 @@ class Simulation(object):
 
     def _get_output(self):
         new_file_text = 'Created output file:'
-        assert self._status == 'Success'
+        assert self.status == 'Success'
         out_files = []
         for l in self.stdout.split('\n'):
             if new_file_text in l:
@@ -170,24 +189,25 @@ class Simulation(object):
             return result
 
     def monitor(self):
+        # Simulation already run
+        if self.status in ['Error', 'Success']:
+            return self.status
+
         if self.process is None:
-            raise RuntimeError('No simulation running! Use simulation.start '
+            raise RuntimeError('No simulation started! Use simulation.start '
                                'or simulation.execute to begin a simulation!')
-        if self._status in ['Error', 'Success']:
-            return self._status == 'Success'
-        self._result = bool(self.process.wait())
+
+        if bool(self.process.wait()):
+            self.status = 'Error'
+        else:
+            self.status = 'Success'
 
         try:
-            self._stderr = self.process.stderr.read().decode('utf-8')
-            self._stdout = self.process.stdout.read().decode('utf-8')
+            self.stderr = self.process.stderr.read().decode('utf-8')
+            self.stdout = self.process.stdout.read().decode('utf-8')
         except UnicodeDecodeError:
-            self._stderr = self.process.stderr.read()
-            self._stdout = self.process.stdout.read()
-
-        if self._result:
-            self._status = 'Error'
-        else:
-            self._status = 'Success'
+            self.stderr = self.process.stderr.read()
+            self.stdout = self.process.stdout.read()
 
         try:
             self._output = [xr.open_dataset(f) for f in self._get_output()]
@@ -196,55 +216,21 @@ class Simulation(object):
         except Exception:
             self._output = None
 
-        return self._result
 
-    @property
-    def result(self):
-        if self.process is None:
-            raise RuntimeError('No simulation started! Use simulation.start '
-                               'or simulation.execute to begin a simulation!')
-        elif isinstance(self.process, str):
-            return self._status == 'Success'
-        else:
-            return self.monitor()
-
-    @property
-    def stdout(self):
-        if self.process is None:
-            raise RuntimeError('No simulation started! Use simulation.start '
-                               'or simulation.execute to begin a simulation!')
-        elif isinstance(self.process, str):
-            return self._stdout
-        else:
-            self.monitor()
-            return self._stdout
-
-    @property
-    def stderr(self):
-        if self.process is None:
-            raise RuntimeError('No simulation started! Use simulation.start '
-                               'or simulation.execute to begin a simulation!')
-        elif isinstance(self.process, str):
-            return self._stderr
-        else:
-            self.monitor()
-            return self._stderr
+        return self.status
 
     @property
     def output(self):
-        if self.process is None:
+        if self.stdout is None:
             raise RuntimeError('No simulation started! Use simulation.start '
                                'or simulation.execute to begin a simulation!')
         elif isinstance(self.process, str):
-            return self._output
-        else:
-            self.monitor()
             return self._output
 
     def __repr__(self):
         repr = []
         repr.append("Executable path: {}".format(self.executable))
-        repr.append("Simulation status: {}".format(self._status))
+        repr.append("Simulation status: {}".format(self.status))
         repr.append("File manager configuration:")
         repr.append(str(self.manager))
         return '\n'.join(repr)

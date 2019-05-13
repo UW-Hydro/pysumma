@@ -1,5 +1,5 @@
 from copy import deepcopy
-from distributed import Client, LocalCluster, get_client
+from distributed import Client, get_client
 import pandas as pd
 import time
 import xarray as xr
@@ -45,16 +45,8 @@ class Ensemble(object):
         Create a mapping of configurations to the simulation objects.
         """
         for name, config in self.configuration.items():
-            s = Simulation(self.executable, self.filemanager)
-            for k, v in config.get('decisions', {}).items():
-                s.decisions.set_option(k, v)
-            for k, v in config.get('file_manager', {}).items():
-                s.manager.set_option(k, v)
-            for k, v in config.get('force_files', {}).items():
-                s.manager.set_option(k, v)
-            for k, v in config.get('parameters', {}).items():
-                s.local_param_info.set_option(k, v)
-            self.simulations[name] = s
+            self.simulations[name] = Simulation(
+                self.executable, self.filemanager, False)
 
     def _generate_coords(self):
         """
@@ -102,7 +94,7 @@ class Ensemble(object):
         merged = merged.unstack('run_number')
         return merged
 
-    def start(self, run_option: str, arg_list: list=[], monitor: bool=False):
+    def start(self, run_option: str, prerun_cmds: list=None):
         """
         Start running the ensemble members.
 
@@ -110,19 +102,22 @@ class Ensemble(object):
         ----------
         run_option:
             The run type. Should be either 'local' or 'docker'
-        arg_list:
+        prerun_cmds:
             A list of preprocessing commands to run
-        monitor:
-            Whether or not to halt computation until the runs are complete
         """
         for n, s in self.simulations.items():
             # Sleep calls are to ensure writeout happens
-            time.sleep(1.5)
+            config = self.configuration[n]
             self.submissions.append(self._client.submit(
-                _submit, s, n, run_option, arg_list))
-            time.sleep(1.5)
+                _submit, s, n, run_option, prerun_cmds, config))
+            time.sleep(.5)
+
+    def run(self, run_option: str, prerun_cmds=None, monitor: bool=True):
+        self.start(run_option, prerun_cmds)
         if monitor:
             return self.monitor()
+        else:
+            return True
 
     def monitor(self):
         """
@@ -133,9 +128,11 @@ class Ensemble(object):
             self.simulations[s.run_suffix] = s
 
 
-def _submit(s: Simulation, name: str, run_option: str, arg_list):
-    s.execute(run_option, run_suffix=name,
-              monitor=True, preprocess_cmds=arg_list)
+def _submit(s: Simulation, name: str, run_option: str, prerun_cmds, config):
+    s.initialize()
+    s.apply_config(config)
+    s.run(run_option, run_suffix=name, prerun_cmds=prerun_cmds)
+    s.process = None
     return s
 
 
