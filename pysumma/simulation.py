@@ -196,21 +196,23 @@ class Simulation():
 
     def _get_output(self):
         new_file_text = 'Created output file:'
-        assert self.status == 'Success'
         out_files = []
         for l in self.stdout.split('\n'):
             if new_file_text in l:
                 out_files.append(l.replace(new_file_text, ''))
         return out_files
 
-
     @property
     def output(self):
-        if self.stdout is None:
+        if self.status == 'Success':
+            return self._output
+        elif self.status == 'Error':
+            raise RuntimeError('There was an error during the simulation!'
+                               ' Print the `stdout` and `stderr` for more'
+                               ' information.')
+        else:
             raise RuntimeError('No simulation started! Use simulation.start '
                                'or simulation.execute to begin a simulation!')
-        elif isinstance(self.process, str):
-            return self._output
 
     def __repr__(self):
         repr = []
