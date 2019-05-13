@@ -60,6 +60,7 @@ class Simulation():
 
     def reset(self):
         self.manager = copy.deepcopy(self.backup['manager'])
+        self.decisions = self.manager.decisions
         self.output_control = self.manager.output_control
         self.parameter_trial = self.manager.parameter_trial
         self.force_file_list = self.manager.force_file_list
