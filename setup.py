@@ -17,7 +17,8 @@ setup(name='pysumma',
           'geopandas==0.4.0',
           'pandas==0.24.1',
           'seaborn==0.9.0',
-          'netCDF4==1.4.2'
+          'netCDF4==1.4.2',
+          'hs_restclient==1.3.3'
           ],
       include_package_data=True,
       dat_files=[('pysumma', 'pysumma/var_lookup.f90')],
