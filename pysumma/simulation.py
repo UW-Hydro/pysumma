@@ -114,9 +114,9 @@ class Simulation():
         run_cmd = run_cmd.replace(self.executable, '/code/bin/summa.exe')
 
         fman_dir = os.path.dirname(self.manager_path)
-        settings_path = self.manager.settings_path.value
-        input_path = self.manager.input_path.value
-        output_path = self.manager.output_path.value
+        settings_path = self.manager['settings_path'].value
+        input_path = self.manager['input_path'].value
+        output_path = self.manager['output_path'].value
         cmd = ''.join(['docker run -v {}:{}'.format(fman_dir, fman_dir),
                        ' -v {}:{}'.format(settings_path, settings_path),
                        ' -v {}:{}'.format(input_path, input_path),
