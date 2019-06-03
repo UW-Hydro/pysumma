@@ -24,7 +24,7 @@ OUTPUT_META = read_master_file(METADATA_PATH)
 
 class OutputControlOption(BaseOption):
 
-    def __init__(self, var=None, period=None, sum=0, instant=1,
+    def __init__(self, var=None, period=None, sum=1, instant=0,
                  mean=0, variance=0, min=0, max=0, mode=0):
         self.name = var
         self.period = int(period)
@@ -36,16 +36,6 @@ class OutputControlOption(BaseOption):
         self.max = int(max)
         self.mode = int(mode)
         self.validate()
-
-    def set_option(self, key, value):
-        try:
-            o = self.get_option(key, strict=True)
-            o.set_value(value)
-        except ValueError:
-            if key in OUTPUT_META.keys():
-                self.options.append(OutputControlOption(key, value))
-            else:
-                raise
 
     @property
     def statistic(self):
@@ -66,14 +56,14 @@ class OutputControlOption(BaseOption):
             return 'mode'
 
     def validate(self):
-        total = (self.sum + self.instant + self.mean + self.variance
+        total = (self.instant + self.sum + self.mean + self.variance
                  + self.min + self.max + self.mode)
         assert total == 1, "Only one output statistic is allowed!"
 
     def get_print_list(self):
         self.validate()
-        plist = [self.name, self.period, self.sum, self.instant, self.mean,
-                 self.variance, self.min, self.max, self.mode]
+        plist = [self.name.ljust(36), self.period, self.sum, self.instant,
+                 self.mean, self.variance, self.min, self.max, self.mode]
         return [str(p) for p in plist]
 
     def __str__(self):
@@ -96,7 +86,7 @@ class OutputControl(OptionContainer):
         """
         super().__init__(path, OutputControlOption)
 
-    def set_option(self, name=None, period=None, sum=0, instant=1,
+    def set_option(self, name=None, period=None, sum=1, instant=0,
                    mean=0, variance=0, min=0, max=0, mode=0):
         """
         Change or create a new entry in the output control
@@ -112,15 +102,29 @@ class OutputControl(OptionContainer):
             o.max = max
             o.mode = mode
         except ValueError:
-            self.options.append(
-                    OutputControlOption(name, period, sum, instant,
-                                        mean, variance, min, max, mode))
             if name in OUTPUT_META['variables']:
                 self.options.append(OutputControlOption(
-                        name, period, sum, instant, mean,
-                        variance, min, max, mode))
+                    name, period, sum, instant, mean,
+                    variance, min, max, mode))
             else:
                 raise
 
+    def __setitem__(self, name, value):
+        if isinstance(value, list):
+            assert len(value) == 8
+            self.set_option(name, *value)
+        elif isinstance(value, dict):
+            self.set_option(name, **value)
+        else:
+            raise Exception(
+                'To set output control options you need to provide'
+                ' a dictionary or list in the respective formats:'
+                '\n'
+                '{"period": val1, "sum": val2, "instant": val3,'
+                ' "mean": val4,' ' "variance": val5, "min": val6,'
+                ' "max": val7, "mode": val8}'
+                '\n or \n'
+                '[val1, val2, val3, val4, val5, val6, val7, val8]')
+
     def get_constructor_args(self, line):
-        return line.split('!')[0].split('|')
+        return [l.strip() for l in line.split('!')[0].split('|')]
