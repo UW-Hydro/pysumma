@@ -86,7 +86,7 @@ Part 2. Model implementation and case studies. Water Resources Research,
 ```
 
 #### The UML of pySUMMA
-![Image of UML](UML.jpg)
+![Image of UML](UML.png)
 
 ## Reference of SUMMA
 
