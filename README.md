@@ -21,13 +21,7 @@ SUMMA model (Structure for Unifying Multiple Modeling Alternatives)
   - change the code from "resid = os.environ['HS_RES_ID']" to "resid = 'c1bb4a12bff44bf08c5958cba7947348'". 
  4) You can see the list of Jupyter Notebooks and click one of Jupyter Notebook.
  5) Run one of Jupyter Notebooks.
- <object width="425" height="350">
-  <param name="movie" value="https://www.youtube.com/watch?v=pL-LNd474Tw" />
-  <param name="wmode" value="transparent" />
-  <embed src="https://www.youtube.com/watch?v=pL-LNd474Tw"
-         type="application/x-shockwave-flash"
-         wmode="transparent" width="425" height="350" />
-</object>
+ [![Watch the video](https://i.imgur.com/vKb2F1B.png)](https://www.youtube.com/watch?v=pL-LNd474Tw)
   
 ## How to run pySUMMA locally 
  
