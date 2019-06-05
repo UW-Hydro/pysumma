@@ -21,7 +21,7 @@ SUMMA model (Structure for Unifying Multiple Modeling Alternatives)
   - change the code from "resid = os.environ['HS_RES_ID']" to "resid = 'c1bb4a12bff44bf08c5958cba7947348'". 
  4) You can see the list of Jupyter Notebooks and click one of Jupyter Notebook.
  5) Run one of Jupyter Notebooks.
- [![Watch the video](https://i.imgur.com/vKb2F1B.png)](https://www.youtube.com/watch?v=pL-LNd474Tw)
+ [![Watch the video](https://github.com/uva-hydroinformatics/pysumma/blob/master/HydroShare.PNG)](https://www.youtube.com/watch?v=pL-LNd474Tw)
   
 ## How to run pySUMMA locally 
  
