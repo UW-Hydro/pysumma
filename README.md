@@ -13,7 +13,7 @@ SUMMA model (Structure for Unifying Multiple Modeling Alternatives)
  - Interact Hydorshare to download SUMMA TestCases and post the output of SUMMA 
  - Automate model calibration or sensitivity analysis (Future work)
 
-## How to run pySUMMA on HydroShare
+## How to run pySUMMA on HydroShare (Link YouTube: https://www.youtube.com/watch?v=pL-LNd474Tw)
  1) log in HydoShare(https://www.hydroshare.org)
  2) Start CUAHSI JupyterHub from APPS menu on HydroShare(https://www.hydroshare.org/apps/)
  3) Open "Welcome.ipynb" to download pySUMMA resources from HydroShare
@@ -21,7 +21,7 @@ SUMMA model (Structure for Unifying Multiple Modeling Alternatives)
   - change the code from "resid = os.environ['HS_RES_ID']" to "resid = 'c1bb4a12bff44bf08c5958cba7947348'". 
  4) You can see the list of Jupyter Notebooks and click one of Jupyter Notebook.
  5) Run one of Jupyter Notebooks.
- [![Watch the video](https://github.com/uva-hydroinformatics/pysumma/blob/master/HydroShare.PNG)](https://www.youtube.com/watch?v=pL-LNd474Tw)
+
   
 ## How to run pySUMMA locally 
  
@@ -29,13 +29,13 @@ SUMMA model (Structure for Unifying Multiple Modeling Alternatives)
 
 #### pySUMMA requires Python 3.6 and following packages :
 
- - xarray 0.10.0 : N-D labeled arrays and datasets in python
- - numpy 1.13.3 : the fundamental package for scientific computing with Python
- - matplotlib 2.1.1 : a Python 2D plotting library 
- - seaborn 0.8.1 : statistical data visualization 
- - jupyterthemes 0.18.3 : select and install a Jupyter notebook theme
- - hs-restclient 1.2.12 : HydroShare REST API python client library
- - ipyleaflet 0.7.1 : A jupyter widget for dynamic Leaflet maps 
+ - xarray 0.10.7 : N-D labeled arrays and datasets in python
+ - numpy 1.16.1 : the fundamental package for scientific computing with Python
+ - matplotlib 3.0.2 : a Python 2D plotting library 
+ - seaborn 0.9.0 : statistical data visualization 
+ - jupyterthemes 0.20.0 : select and install a Jupyter notebook theme
+ - hs-restclient 1.3.3 : HydroShare REST API python client library
+ - ipyleaflet 0.9.2 : A jupyter widget for dynamic Leaflet maps 
  - Linux Environment (VirtualBox 5.2.8)
    - [lubuntu-16.10 executable](https://www.hydroshare.org/resource/a5dbd5b198c9468387f59f3fefc11e22/)
    - [lubuntu-16.04.4 executable](https://www.hydroshare.org/resource/041671fbc8a544cd8a979af6c2227f92/)        
