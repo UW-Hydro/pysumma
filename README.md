@@ -11,7 +11,6 @@ SUMMA model (Structure for Unifying Multiple Modeling Alternatives)
  - Visualize netcdf of SUMMA outputs
  - Operate pySUMMA with jupyter notebook environment 
  - Interact Hydorshare to download SUMMA TestCases and post the output of SUMMA 
- - Create UserInterface of Decision and filemanager file for User (in progress)
  - Automate model calibration or sensitivity analysis (Future work)
 
 ## How to run pySUMMA on HydroShare
@@ -22,7 +21,14 @@ SUMMA model (Structure for Unifying Multiple Modeling Alternatives)
   - change the code from "resid = os.environ['HS_RES_ID']" to "resid = 'c1bb4a12bff44bf08c5958cba7947348'". 
  4) You can see the list of Jupyter Notebooks and click one of Jupyter Notebook.
  5) Run one of Jupyter Notebooks.
- 
+ <object width="425" height="350">
+  <param name="movie" value="https://www.youtube.com/watch?v=pL-LNd474Tw" />
+  <param name="wmode" value="transparent" />
+  <embed src="https://www.youtube.com/watch?v=pL-LNd474Tw"
+         type="application/x-shockwave-flash"
+         wmode="transparent" width="425" height="350" />
+</object>
+  
 ## How to run pySUMMA locally 
  
 ### Installation and Usage
