@@ -1,4 +1,0 @@
-b46d758bb11647edf1b64e2277975732    data/resourcemap.xml
-8ba21e79bcc1436ad7cdf1fdeb98e742    data/resourcemetadata.xml
-813efb5cb58c012c68a0d7a6629107fa    data/contents/summa-sopron.zip
-813efb5cb58c012c68a0d7a6629107fa    data/contents/summa-sopron.zip
