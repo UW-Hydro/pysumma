@@ -11,7 +11,7 @@ setup(name='pysumma',
       install_requires=[
           'numpy==1.16.1',
           'xarray==0.10.7',
-          'matplotlib==3.0.2',
+          'matplotlib==2.2.4',
           'ipyleaflet==0.9.2',
           'jupyterthemes==0.20.0',
           'geopandas==0.4.0',

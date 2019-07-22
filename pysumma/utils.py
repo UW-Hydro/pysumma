@@ -28,15 +28,14 @@ class utils():
         return  os.path.dirname(testcase_filepath)
 
     # This method is necessary, when user wants to run SUMMA with local execution file.
-    def download_executable_lubuntu_hs(save_filepath):
-        resource_id = 'a5dbd5b198c9468387f59f3fefc11e22'
+    def download_executable_lubuntu_hs(resource_id, save_filepath):
         hs = HydroShare()
         hs.getResource(resource_id, destination = save_filepath, unzip = True)
-        resource_name = 'summa-master.zip'
+        resource_name = 'summa-sopron.zip'
         executable_filepath = save_filepath + '/' + resource_id + '/' + resource_id + '/data/contents/' + resource_name
         shutil.unpack_archive(executable_filepath, extract_dir=os.path.dirname(executable_filepath))
         executable = save_filepath + '/' + resource_id + '/' + resource_id + '/data/contents/summa-master/bin'
-        return  os.path.dirname(executable)
+        return  executable
 
 
     def download_model_instance_sopron(resource_id):
