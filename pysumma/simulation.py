@@ -177,7 +177,7 @@ class Simulation():
             self.stdout = self.process.stdout.read()
 
         try:
-            self._output = [xr.open_dataset(f) for f in self._get_output()]
+            self._output = [xr.open_dataset(f) for f in self.get_output()]
             if len(self._output) == 1:
                 self._output = self._output[0]
         except Exception:
@@ -195,12 +195,13 @@ class Simulation():
         self.basin_param_info.write()
         self.output_control.write()
 
-    def _get_output(self):
+    def get_output(self):
         new_file_text = 'Created output file:'
         out_files = []
         for l in self.stdout.split('\n'):
             if new_file_text in l:
-                out_files.append(l.replace(new_file_text, ''))
+                out_files.append(
+                    l.split(';')[0].replace(new_file_text, '').strip())
         return out_files
 
     @property
