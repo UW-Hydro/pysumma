@@ -24,7 +24,7 @@ OUTPUT_META = read_master_file(METADATA_PATH)
 
 class OutputControlOption(BaseOption):
 
-    def __init__(self, var=None, period=None, sum=1, instant=0,
+    def __init__(self, var=None, period=None, sum=0, instant=1,
                  mean=0, variance=0, min=0, max=0, mode=0):
         self.name = var
         self.period = int(period)
@@ -86,7 +86,7 @@ class OutputControl(OptionContainer):
         """
         super().__init__(path, OutputControlOption)
 
-    def set_option(self, name=None, period=None, sum=1, instant=0,
+    def set_option(self, name=None, period=None, sum=0, instant=1,
                    mean=0, variance=0, min=0, max=0, mode=0):
         """
         Change or create a new entry in the output control
