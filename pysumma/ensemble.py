@@ -31,13 +31,14 @@ class Ensemble(object):
         self.num_workers = num_workers
         # Try to get a client, and if none exists then start a new one
         try:
+            client = Client()
             self._client = get_client()
             # Start more workers if necessary
             workers = len(self._client.get_worker_logs())
-            if workers < self.num_workers:
-                self._client.cluster.scale_up(self.num_workers)
+            if workers <= self.num_workers:
+                self._client.cluster.scale(workers)
         except ValueError:
-            self._client = Client(n_workers=num_workers, threads_per_worker=1)
+            self._client = Client(n_workers=workers, threads_per_worker=1)
         self._generate_simulation_objects()
 
     def _generate_simulation_objects(self):
