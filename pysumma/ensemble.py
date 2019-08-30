@@ -111,7 +111,7 @@ class Ensemble(object):
             config = self.configuration[n]
             self.submissions.append(self._client.submit(
                 _submit, s, n, run_option, prerun_cmds, config))
-            time.sleep(0.5)
+            time.sleep(2.0)
 
     def run(self, run_option: str, prerun_cmds=None, monitor: bool=True):
         self.start(run_option, prerun_cmds)
