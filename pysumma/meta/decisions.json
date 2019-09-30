@@ -8,6 +8,10 @@
             "options": ["YYYY-MM-DD hh:mm"],
             "description": "simulation end time"
         },
+        "tmZoneInfo": {
+            "options": ["localTime", "ncTime", "utcTime"],
+            "description": "time zone information"
+        },
         "soilCatTbl": {
             "options": ["STAS", "STAS-RUC", "ROSETTA"],
             "description": "soil-category dataset"

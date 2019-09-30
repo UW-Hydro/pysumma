@@ -53,6 +53,8 @@ class Simulation():
             self.decisions.set_option(k, v)
         for k, v in config.get('parameters', {}).items():
             self.local_param_info.set_option(k, v)
+        for k, v in config.get('output_control', {}).items():
+            self.output_control.set_option(k, **v)
 
     def create_backup(self):
         self.backup = {}
@@ -164,17 +166,20 @@ class Simulation():
             raise RuntimeError('No simulation started! Use simulation.start '
                                'or simulation.execute to begin a simulation!')
 
-        if bool(self.process.wait()):
+        #if bool(self.process.wait()):
+        #    self.status = 'Error'
+        #else:
+        #    self.status = 'Success'
+        self.stdout, self.stderr = self.process.communicate()
+        if isinstance(self.stdout, bytes):
+            self.stderr = self.stderr.decode('utf-8')
+            self.stdout = self.stdout.decode('utf-8')
+
+        SUCCESS_MSG = 'FORTRAN STOP: finished simulation successfully.'
+        if SUCCESS_MSG not in self.stdout:
             self.status = 'Error'
         else:
             self.status = 'Success'
-
-        try:
-            self.stderr = self.process.stderr.read().decode('utf-8')
-            self.stdout = self.process.stdout.read().decode('utf-8')
-        except UnicodeDecodeError:
-            self.stderr = self.process.stderr.read()
-            self.stdout = self.process.stdout.read()
 
         try:
             self._output = [xr.open_dataset(f) for f in self.get_output()]
