@@ -82,6 +82,10 @@ class Ensemble(object):
                                         if '=' in l else l for l in t))
         decision_names = ['++'.join(tuple(n.split('++')[1:-1]))
                           for n in self.configuration.keys()]
+        if sum([len(dt) for dt in decision_tuples]) == 0:
+            raise NameError("Simulations in the ensemble do not share all"
+                            " common decisions! Please use `open_output`"
+                            " to retrieve the output of this Ensemble")
         for i, t in enumerate(decision_names):
             decision_names[i] = '++'.join(l.split('=')[0] for l in t)
         new_idx = pd.MultiIndex.from_tuples(
