@@ -24,7 +24,7 @@ OUTPUT_META = read_master_file(METADATA_PATH)
 
 class OutputControlOption(BaseOption):
 
-    def __init__(self, var=None, period=None, sum=1, instant=0,
+    def __init__(self, var=None, period=None, instant=1, sum=0,
                  mean=0, variance=0, min=0, max=0, mode=0):
         self.name = var
         self.period = int(period)
@@ -62,7 +62,7 @@ class OutputControlOption(BaseOption):
 
     def get_print_list(self):
         self.validate()
-        plist = [self.name.ljust(36), self.period, self.sum, self.instant,
+        plist = [self.name.ljust(36), self.period, self.instant, self.sum,
                  self.mean, self.variance, self.min, self.max, self.mode]
         return [str(p) for p in plist]
 
