@@ -23,6 +23,16 @@ class OptionContainer(object):
     used directly.
     """
 
+    def __init__(self, optiontype):
+        """
+        Instantiate a blank option container
+        """
+        self.OptionType = optiontype
+        self.opt_count = 0
+        self.original_path = '.'
+        self.header = []
+        self.options = []
+
     def __init__(self, path, optiontype):
         """
         Instantiate the object and populate the
