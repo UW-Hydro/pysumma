@@ -1,11 +1,14 @@
 from copy import deepcopy
 from distributed import Client, get_client
+import os
 import pandas as pd
 import time
 import xarray as xr
 
 from .simulation import Simulation
 from .utils import ChainDict, product_dict
+
+OMP_NUM_THREADS = os.environ.get('OMP_NUM_THREADS', 1)
 
 
 class Ensemble(object):
@@ -18,8 +21,10 @@ class Ensemble(object):
     simulations: dict = {}
     submissions: list = []
 
-    def __init__(self, executable: str, filemanager: str,
-                 configuration: dict, num_workers: int=1):
+    def __init__(self, executable: str,configuration: dict,
+                 filemanager: str=None, num_workers: int=1,
+                 threads_per_worker: int=OMP_NUM_THREADS,
+                 scheduler: str=None):
         """
         Create a new Ensemble object. The API mirrors that of the
         Simulation object.
@@ -33,21 +38,29 @@ class Ensemble(object):
         try:
             client = Client()
             self._client = get_client()
-            # Start more workers if necessary
+            # Start more workers if necessary:
             workers = len(self._client.get_worker_logs())
             if workers <= self.num_workers:
                 self._client.cluster.scale(workers)
         except ValueError:
-            self._client = Client(n_workers=workers, threads_per_worker=1)
+            self._client = Client(n_workers=workers,
+                                  threads_per_worker=threads_per_worker)
         self._generate_simulation_objects()
 
     def _generate_simulation_objects(self):
         """
         Create a mapping of configurations to the simulation objects.
         """
-        for name, config in self.configuration.items():
-            self.simulations[name] = Simulation(
-                self.executable, self.filemanager, False)
+        if self.filemanager:
+            for name, config in self.configuration.items():
+                self.simulations[name] = Simulation(
+                    self.executable, self.filemanager, False)
+        else:
+            for name, config in self.configuration.items():
+                assert config['file_manager'] is not None, \
+                    "No filemanager found in configuration or Ensemble!"
+                self.simulations[name] = Simulation(
+                    self.executable, config['file_manager'], False)
 
     def _generate_coords(self):
         """
