@@ -42,7 +42,7 @@ def layers(var, depth, ax=None, colormap='viridis',
         for l in lo_depth.ifcToto.values[:-1][::-1]:
             y = lo_depth[l]
             y[np.isnan(y)] = 0
-            ax.vlines(time, ymin=-y, ymax=0, color=rgba[l])
+            ax.vlines(time, ymin=-y, ymax=0, color=rgba[l], **kwargs)
 
     # Plot snow layers - plot top down
     if plot_snow:
@@ -50,7 +50,7 @@ def layers(var, depth, ax=None, colormap='viridis',
             y = hi_depth[l]
             y[np.isnan(y)] = 0
             if (y != 0).any():
-                ax.vlines(time, ymin=0, ymax=-y, color=rgba[l])
+                ax.vlines(time, ymin=0, ymax=-y, color=rgba[l], **kwargs)
 
     # Add the colorbar
     mappable = cm.ScalarMappable(norm=norm, cmap=cmap)
