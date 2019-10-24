@@ -47,8 +47,8 @@ class Simulation():
         self.status = 'Initialized'
 
     def apply_config(self, config):
-        for k, v in config.get('file_manager', {}).items():
-            self.manager.set_option(k, v)
+        if 'file_manager' in config:
+            self.manager_path = config['file_manager']
         for k, v in config.get('decisions', {}).items():
             self.decisions.set_option(k, v)
         for k, v in config.get('parameters', {}).items():
@@ -77,8 +77,7 @@ class Simulation():
         prerun_cmds.append('export OMP_NUM_THREADS={}'.format(processes))
 
         summa_run_cmd = "{} -s {} -m {}".format(self.executable,
-                                                run_suffix,
-                                                self.manager_path)
+                                                run_suffix, self.manager_path)
 
         if startGRU is not None and countGRU is not None:
             summa_run_cmd += ' -g {} {}'.format(startGRU, countGRU)
@@ -166,10 +165,6 @@ class Simulation():
             raise RuntimeError('No simulation started! Use simulation.start '
                                'or simulation.execute to begin a simulation!')
 
-        #if bool(self.process.wait()):
-        #    self.status = 'Error'
-        #else:
-        #    self.status = 'Success'
         self.stdout, self.stderr = self.process.communicate()
         if isinstance(self.stdout, bytes):
             self.stderr = self.stderr.decode('utf-8')
