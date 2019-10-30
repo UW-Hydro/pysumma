@@ -1,3 +1,6 @@
+.. image:: https://mybinder.org/badge_logo.svg
+ :target: https://mybinder.org/v2/gh/DavidChoi76/pysumma_binder_test.git/master
+
 # pySUMMA                                        
 
 The pySUMMA is an Object-Oriented Python wrapper for the manipulation, display and analysis of 
