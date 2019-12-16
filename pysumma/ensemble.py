@@ -8,7 +8,7 @@ import xarray as xr
 from .simulation import Simulation
 from .utils import ChainDict, product_dict
 
-OMP_NUM_THREADS = os.environ.get('OMP_NUM_THREADS', 1)
+OMP_NUM_THREADS = int(os.environ.get('OMP_NUM_THREADS', 1))
 
 
 class Ensemble(object):
@@ -36,14 +36,13 @@ class Ensemble(object):
         self.num_workers = num_workers
         # Try to get a client, and if none exists then start a new one
         try:
-            client = Client()
             self._client = get_client()
             # Start more workers if necessary:
             workers = len(self._client.get_worker_logs())
             if workers <= self.num_workers:
                 self._client.cluster.scale(workers)
         except ValueError:
-            self._client = Client(n_workers=workers,
+            self._client = Client(n_workers=self.num_workers,
                                   threads_per_worker=threads_per_worker)
         self._generate_simulation_objects()
 
