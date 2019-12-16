@@ -55,6 +55,8 @@ class Simulation():
             self.local_param_info.set_option(k, v)
         for k, v in config.get('output_control', {}).items():
             self.output_control.set_option(k, **v)
+        if self.decisions['snowLayers'] == 'CLM_2010':
+            self.validate_layer_params(self.local_param_info)
 
     def create_backup(self):
         self.backup = {}
@@ -70,6 +72,11 @@ class Simulation():
         self.basin_param_info = self.manager.basin_param_info
         self.local_attributes = self.manager.local_attributes
 
+    def validate_layer_params(self, params):
+        for i in range(1, 5):
+            assert params[f'zmaxLayer{i}_upper'] <= params[f'zmaxLayer{i}_lower'], i
+            assert params[f'zmaxLayer{i}_upper'] / params[f'zminLayer{i}'] >= 2.5, i
+            assert params[f'zmaxLayer{i}_upper'] / params[f'zminLayer{i+1}'] >= 2.5, i
 
     def _gen_summa_cmd(self, run_suffix, processes=1, prerun_cmds=[],
                        startGRU=None, countGRU=None, iHRU=None,
@@ -167,8 +174,8 @@ class Simulation():
 
         self.stdout, self.stderr = self.process.communicate()
         if isinstance(self.stdout, bytes):
-            self.stderr = self.stderr.decode('utf-8')
-            self.stdout = self.stdout.decode('utf-8')
+            self.stderr = self.stderr.decode('utf-8', 'ignore')
+            self.stdout = self.stdout.decode('utf-8', 'ignore')
 
         SUCCESS_MSG = 'FORTRAN STOP: finished simulation successfully.'
         if SUCCESS_MSG not in self.stdout:
