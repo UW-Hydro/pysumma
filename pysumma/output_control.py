@@ -79,12 +79,8 @@ class OutputControl(OptionContainer):
     added or modified through the `set_option` method.
     """
 
-    def __init__(self, path):
-        """
-        Instantiate the object and populate the
-        values from the given filepath.
-        """
-        super().__init__(path, OutputControlOption)
+    def __init__(self, dirpath, filepath):
+        super().__init__(OutputControlOption, dirpath, filepath)
 
     def set_option(self, name=None, period=None, instant=1, sum=1,
                    mean=0, variance=0, min=0, max=0, mode=0):
