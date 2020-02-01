@@ -1,7 +1,10 @@
 import os
 import copy
+import shutil
 import subprocess
 import xarray as xr
+from pathlib import Path
+from typing import List
 
 from .decisions import Decisions
 from .file_manager import FileManager
@@ -13,6 +16,7 @@ from .force_file_list import ForceFileList
 class Simulation():
     """The simulation object provides a wrapper for SUMMA simulations"""
 
+    config_path: str = None
     manager: FileManager = None
     decisions: Decisions = None
     output_control: OutputControl = None
@@ -28,13 +32,14 @@ class Simulation():
         self.stderr = None
         self.process = None
         self.executable = executable
-        self.manager_path = filemanager
+        self.manager_path = Path(os.path.abspath(filemanager))
+        self.config_path = self.manager_path.parent / '.pysumma'
         self.status = 'Uninitialized'
         if initialize:
             self.initialize()
 
     def initialize(self):
-        self.manager = FileManager(self.manager_path)
+        self.manager = FileManager(self.manager_path.parent, self.manager_path.name)
         self.status = 'Initialized'
         self.decisions = self.manager.decisions
         self.output_control = self.manager.output_control
@@ -145,7 +150,7 @@ class Simulation():
         if not prerun_cmds:
             prerun_cmds = []
         self.run_suffix = run_suffix
-        self._write_configuration()
+        self._write_configuration(name=run_suffix)
         if run_option == 'local':
             self._run_local(run_suffix, processes, prerun_cmds,
                             startGRU, countGRU, iHRU, freq_restart, progress)
@@ -193,16 +198,22 @@ class Simulation():
 
         return self.status
 
-    def _write_configuration(self):
+    def _write_configuration(self, name, write_netcdf: str=False):
         #TODO: Still need to update for all netcdf writing
-        self.manager.write()
-        self.decisions.write()
-        self.force_file_list.write()
-        self.local_param_info.write()
-        self.basin_param_info.write()
-        self.output_control.write()
+        self.config_path = self.config_path / name
+        self.config_path.mkdir(parents=True, exist_ok=True)
+        manager_path = str(self.manager_path.parent)
+        settings_path = str(self.manager['settings_path'].value)
+        settings_path = Path(settings_path.replace(manager_path, str(self.config_path)))
+        self.manager['settings_path'] = settings_path
+        self.manager.write(path=self.config_path)
+        self.decisions.write(path=settings_path)
+        self.force_file_list.write(path=settings_path)
+        self.local_param_info.write(path=settings_path)
+        self.basin_param_info.write(path=settings_path)
+        self.output_control.write(path=settings_path)
 
-    def get_output(self):
+    def get_output(self) -> List[str]:
         new_file_text = 'Created output file:'
         out_files = []
         for l in self.stdout.split('\n'):
