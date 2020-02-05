@@ -1,7 +1,9 @@
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 import math
 
-class validation():
+
+class Validation(object):
+
     def analysis(observation, simulation):
         MAE_B = mean_absolute_error(observation, simulation)
         MSE_B = mean_squared_error(observation, simulation)

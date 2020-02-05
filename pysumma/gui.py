@@ -36,9 +36,9 @@ class userinterface(object):
         for i_row in range(0, 3, 1):
             item = QtWidgets.QTableWidgetItem()
             self.tableWidget.setHorizontalHeaderItem(i_row, item)
-            self.tableWidget.setColumnWidth(0,550)
-            self.tableWidget.setColumnWidth(1,350)
-            self.tableWidget.setColumnWidth(2,150)
+            self.tableWidget.setColumnWidth(0, 550)
+            self.tableWidget.setColumnWidth(1, 350)
+            self.tableWidget.setColumnWidth(2, 150)
 
         for i_col_cell in range(0, 21, 1):
             i_row_cell = 0
@@ -60,7 +60,8 @@ class userinterface(object):
         self.dateTimeEdit.setGeometry(QtCore.QRect(180, 20, 181, 22))
         self.dateTimeEdit.setObjectName("dateTimeEdit")
         simulStart_str = self.S.decision_obj.simulStart.value
-        simulStart_dt = datetime.datetime.strptime(simulStart_str, "%Y-%m-%d %H:%M")
+        simulStart_dt = datetime.datetime.strptime(simulStart_str,
+                                                   "%Y-%m-%d %H:%M")
         simulStart1 = QtCore.QDateTime(simulStart_dt.year,
                                        simulStart_dt.month,
                                        simulStart_dt.day,
@@ -73,7 +74,8 @@ class userinterface(object):
         self.dateTimeEdit_2.setGeometry(QtCore.QRect(180, 50, 181, 22))
         self.dateTimeEdit_2.setObjectName("dateTimeEdit_2")
         simulFinsh_str = self.S.decision_obj.simulFinsh.value
-        simulFinsh_dt = datetime.datetime.strptime(simulFinsh_str, "%Y-%m-%d %H:%M")
+        simulFinsh_dt = datetime.datetime.strptime(simulFinsh_str,
+                                                   "%Y-%m-%d %H:%M")
         simulFinsh1 = QtCore.QDateTime(simulFinsh_dt.year,
                                        simulFinsh_dt.month,
                                        simulFinsh_dt.day,
@@ -398,212 +400,254 @@ class userinterface(object):
 
         item = self.tableWidget.item(0, 0)
         item.setText(_translate("Form", ""))
-        item = self.tableWidget.item(0, 0).setBackground(QtGui.QColor(250, 250, 170))
+        item = self.tableWidget.item(0, 0).setBackground(
+            QtGui.QColor(250, 250, 170))
         item = self.tableWidget.item(0, 1)
         item.setText(_translate("Form", self.S.fman_ver.filename))
         item = self.tableWidget.item(0, 2)
         item.setText(_translate("Form", self.S.fman_ver.name))
-        item = self.tableWidget.item(0, 2).setBackground(QtGui.QColor(250, 250, 170))
+        item = self.tableWidget.item(0, 2).setBackground(
+            QtGui.QColor(250, 250, 170))
 
         item = self.tableWidget.item(1, 0)
         item.setText(_translate("Form", self.S.setting_path.filepath))
-        item = self.tableWidget.item(1, 0).setBackground(QtGui.QColor(250, 250, 170))
+        item = self.tableWidget.item(1, 0).setBackground(
+            QtGui.QColor(250, 250, 170))
 
         item = self.tableWidget.item(1, 1)
         item.setText(_translate("Form", self.S.setting_path.filename))
         item = self.tableWidget.item(1, 2)
         item.setText(_translate("Form", self.S.setting_path.name))
-        item = self.tableWidget.item(1, 2).setBackground(QtGui.QColor(250, 250, 170))
+        item = self.tableWidget.item(1, 2).setBackground(
+            QtGui.QColor(250, 250, 170))
 
         item = self.tableWidget.item(2, 0)
         item.setText(_translate("Form", self.S.input_path.filepath))
-        item = self.tableWidget.item(2, 0).setBackground(QtGui.QColor(250, 250, 170))
+        item = self.tableWidget.item(2, 0).setBackground(
+            QtGui.QColor(250, 250, 170))
 
         item = self.tableWidget.item(2, 1)
         item.setText(_translate("Form", self.S.input_path.filename))
         item = self.tableWidget.item(2, 2)
         item.setText(_translate("Form", self.S.input_path.name))
-        item = self.tableWidget.item(2, 2).setBackground(QtGui.QColor(250, 250, 170))
+        item = self.tableWidget.item(2, 2).setBackground(
+            QtGui.QColor(250, 250, 170))
 
         item = self.tableWidget.item(3, 0)
         item.setText(_translate("Form", self.S.output_path.filepath))
-        item = self.tableWidget.item(3, 0).setBackground(QtGui.QColor(250, 250, 170))
+        item = self.tableWidget.item(3, 0).setBackground(
+            QtGui.QColor(250, 250, 170))
 
         item = self.tableWidget.item(3, 1)
         item.setText(_translate("Form", self.S.output_path.filename))
         item = self.tableWidget.item(3, 2)
         item.setText(_translate("Form", self.S.output_path.name))
-        item = self.tableWidget.item(3, 2).setBackground(QtGui.QColor(250, 250, 170))
+        item = self.tableWidget.item(3, 2).setBackground(
+            QtGui.QColor(250, 250, 170))
 
         item = self.tableWidget.item(4, 0)
         item.setText(_translate("Form", self.S.decision_path.filepath))
-        item = self.tableWidget.item(4, 0).setBackground(QtGui.QColor(250, 250, 170))
+        item = self.tableWidget.item(4, 0).setBackground(
+            QtGui.QColor(250, 250, 170))
 
         item = self.tableWidget.item(4, 1)
         item.setText(_translate("Form", self.S.decision_path.filename))
         item = self.tableWidget.item(4, 2)
         item.setText(_translate("Form", self.S.decision_path.name))
-        item = self.tableWidget.item(4, 2).setBackground(QtGui.QColor(250, 250, 170))
+        item = self.tableWidget.item(4, 2).setBackground(
+            QtGui.QColor(250, 250, 170))
 
         item = self.tableWidget.item(5, 0)
         item.setText(_translate("Form", self.S.meta_time.filepath))
-        item = self.tableWidget.item(5, 0).setBackground(QtGui.QColor(250, 250, 170))
+        item = self.tableWidget.item(5, 0).setBackground(
+            QtGui.QColor(250, 250, 170))
 
         item = self.tableWidget.item(5, 1)
         item.setText(_translate("Form", self.S.meta_time.filename))
         item = self.tableWidget.item(5, 2)
         item.setText(_translate("Form", self.S.meta_time.name))
-        item = self.tableWidget.item(5, 2).setBackground(QtGui.QColor(250, 250, 170))
+        item = self.tableWidget.item(5, 2).setBackground(
+            QtGui.QColor(250, 250, 170))
 
         item = self.tableWidget.item(6, 0)
         item.setText(_translate("Form", self.S.meta_attr.filepath))
-        item = self.tableWidget.item(6, 0).setBackground(QtGui.QColor(250, 250, 170))
+        item = self.tableWidget.item(6, 0).setBackground(
+            QtGui.QColor(250, 250, 170))
 
         item = self.tableWidget.item(6, 1)
         item.setText(_translate("Form", self.S.meta_attr.filename))
         item = self.tableWidget.item(6, 2)
         item.setText(_translate("Form", self.S.meta_attr.name))
-        item = self.tableWidget.item(6, 2).setBackground(QtGui.QColor(250, 250, 170))
+        item = self.tableWidget.item(6, 2).setBackground(
+            QtGui.QColor(250, 250, 170))
 
         item = self.tableWidget.item(7, 0)
         item.setText(_translate("Form", self.S.meta_type.filepath))
-        item = self.tableWidget.item(7, 0).setBackground(QtGui.QColor(250, 250, 170))
+        item = self.tableWidget.item(7, 0).setBackground(
+            QtGui.QColor(250, 250, 170))
 
         item = self.tableWidget.item(7, 1)
         item.setText(_translate("Form", self.S.meta_type.filename))
         item = self.tableWidget.item(7, 2)
         item.setText(_translate("Form", self.S.meta_type.name))
-        item = self.tableWidget.item(7, 2).setBackground(QtGui.QColor(250, 250, 170))
+        item = self.tableWidget.item(7, 2).setBackground(
+            QtGui.QColor(250, 250, 170))
 
         item = self.tableWidget.item(8, 0)
         item.setText(_translate("Form", self.S.meta_force.filepath))
-        item = self.tableWidget.item(8, 0).setBackground(QtGui.QColor(250, 250, 170))
+        item = self.tableWidget.item(8, 0).setBackground(
+            QtGui.QColor(250, 250, 170))
 
         item = self.tableWidget.item(8, 1)
         item.setText(_translate("Form", self.S.meta_force.filename))
         item = self.tableWidget.item(8, 2)
         item.setText(_translate("Form", self.S.meta_force.name))
-        item = self.tableWidget.item(8, 2).setBackground(QtGui.QColor(250, 250, 170))
+        item = self.tableWidget.item(8, 2).setBackground(
+            QtGui.QColor(250, 250, 170))
 
         item = self.tableWidget.item(9, 0)
         item.setText(_translate("Form", self.S.meta_localpar.filepath))
-        item = self.tableWidget.item(9, 0).setBackground(QtGui.QColor(250, 250, 170))
+        item = self.tableWidget.item(9, 0).setBackground(
+            QtGui.QColor(250, 250, 170))
 
         item = self.tableWidget.item(9, 1)
         item.setText(_translate("Form", self.S.meta_localpar.filename))
         item = self.tableWidget.item(9, 2)
         item.setText(_translate("Form", self.S.meta_localpar.name))
-        item = self.tableWidget.item(9, 2).setBackground(QtGui.QColor(250, 250, 170))
+        item = self.tableWidget.item(9, 2).setBackground(
+            QtGui.QColor(250, 250, 170))
 
         item = self.tableWidget.item(10, 0)
         item.setText(_translate("Form", self.S.OUTPUT_CONTROL.filepath))
-        item = self.tableWidget.item(10, 0).setBackground(QtGui.QColor(250, 250, 170))
+        item = self.tableWidget.item(10, 0).setBackground(
+            QtGui.QColor(250, 250, 170))
 
         item = self.tableWidget.item(10, 1)
         item.setText(_translate("Form", self.S.OUTPUT_CONTROL.filename))
         item = self.tableWidget.item(10, 2)
         item.setText(_translate("Form", self.S.OUTPUT_CONTROL.name))
-        item = self.tableWidget.item(10, 2).setBackground(QtGui.QColor(250, 250, 170))
+        item = self.tableWidget.item(10, 2).setBackground(
+            QtGui.QColor(250, 250, 170))
 
         item = self.tableWidget.item(11, 0)
         item.setText(_translate("Form", self.S.meta_index.filepath))
-        item = self.tableWidget.item(11, 0).setBackground(QtGui.QColor(250, 250, 170))
+        item = self.tableWidget.item(11, 0).setBackground(
+            QtGui.QColor(250, 250, 170))
 
         item = self.tableWidget.item(11, 1)
         item.setText(_translate("Form", self.S.meta_index.filename))
         item = self.tableWidget.item(11, 2)
         item.setText(_translate("Form", self.S.meta_index.name))
-        item = self.tableWidget.item(11, 2).setBackground(QtGui.QColor(250, 250, 170))
+        item = self.tableWidget.item(11, 2).setBackground(
+            QtGui.QColor(250, 250, 170))
 
         item = self.tableWidget.item(12, 0)
         item.setText(_translate("Form", self.S.meta_basinpar.filepath))
-        item = self.tableWidget.item(12, 0).setBackground(QtGui.QColor(250, 250, 170))
+        item = self.tableWidget.item(12, 0).setBackground(
+            QtGui.QColor(250, 250, 170))
 
         item = self.tableWidget.item(12, 1)
         item.setText(_translate("Form", self.S.meta_basinpar.filename))
         item = self.tableWidget.item(12, 2)
         item.setText(_translate("Form", self.S.meta_basinpar.name))
-        item = self.tableWidget.item(12, 2).setBackground(QtGui.QColor(250, 250, 170))
+        item = self.tableWidget.item(12, 2).setBackground(
+            QtGui.QColor(250, 250, 170))
 
         item = self.tableWidget.item(13, 0)
         item.setText(_translate("Form", self.S.meta_basinvar.filepath))
-        item = self.tableWidget.item(13, 0).setBackground(QtGui.QColor(250, 250, 170))
+        item = self.tableWidget.item(13, 0).setBackground(
+            QtGui.QColor(250, 250, 170))
 
         item = self.tableWidget.item(13, 1)
         item.setText(_translate("Form", self.S.meta_basinvar.filename))
         item = self.tableWidget.item(13, 2)
         item.setText(_translate("Form", self.S.meta_basinvar.name))
-        item = self.tableWidget.item(13, 2).setBackground(QtGui.QColor(250, 250, 170))
+        item = self.tableWidget.item(13, 2).setBackground(
+            QtGui.QColor(250, 250, 170))
 
         item = self.tableWidget.item(14, 0)
         item.setText(_translate("Form", self.S.local_attr.filepath))
-        item = self.tableWidget.item(14, 0).setBackground(QtGui.QColor(250, 250, 170))
+        item = self.tableWidget.item(14, 0).setBackground(
+            QtGui.QColor(250, 250, 170))
 
         item = self.tableWidget.item(14, 1)
         item.setText(_translate("Form", self.S.local_attr.filename))
         item = self.tableWidget.item(14, 2)
         item.setText(_translate("Form", self.S.local_attr.name))
-        item = self.tableWidget.item(14, 2).setBackground(QtGui.QColor(250, 250, 170))
+        item = self.tableWidget.item(14, 2).setBackground(
+            QtGui.QColor(250, 250, 170))
 
         item = self.tableWidget.item(15, 0)
         item.setText(_translate("Form", self.S.local_par.filepath))
-        item = self.tableWidget.item(15, 0).setBackground(QtGui.QColor(250, 250, 170))
+        item = self.tableWidget.item(15, 0).setBackground(
+            QtGui.QColor(250, 250, 170))
 
         item = self.tableWidget.item(15, 1)
         item.setText(_translate("Form", self.S.local_par.filename))
         item = self.tableWidget.item(15, 2)
         item.setText(_translate("Form", self.S.local_par.name))
-        item = self.tableWidget.item(15, 2).setBackground(QtGui.QColor(250, 250, 170))
+        item = self.tableWidget.item(15, 2).setBackground(
+            QtGui.QColor(250, 250, 170))
 
         item = self.tableWidget.item(16, 0)
         item.setText(_translate("Form", self.S.basin_par.filepath))
-        item = self.tableWidget.item(16, 0).setBackground(QtGui.QColor(250, 250, 170))
+        item = self.tableWidget.item(16, 0).setBackground(
+            QtGui.QColor(250, 250, 170))
 
         item = self.tableWidget.item(16, 1)
         item.setText(_translate("Form", self.S.basin_par.filename))
         item = self.tableWidget.item(16, 2)
         item.setText(_translate("Form", self.S.basin_par.name))
-        item = self.tableWidget.item(16, 2).setBackground(QtGui.QColor(250, 250, 170))
+        item = self.tableWidget.item(16, 2).setBackground(
+            QtGui.QColor(250, 250, 170))
 
         item = self.tableWidget.item(17, 0)
         item.setText(_translate("Form", self.S.forcing_list.filepath))
-        item = self.tableWidget.item(17, 0).setBackground(QtGui.QColor(250, 250, 170))
+        item = self.tableWidget.item(17, 0).setBackground(
+            QtGui.QColor(250, 250, 170))
 
         item = self.tableWidget.item(17, 1)
         item.setText(_translate("Form", self.S.forcing_list.filename))
         item = self.tableWidget.item(17, 2)
         item.setText(_translate("Form", self.S.forcing_list.name))
-        item = self.tableWidget.item(17, 2).setBackground(QtGui.QColor(250, 250, 170))
+        item = self.tableWidget.item(17, 2).setBackground(
+            QtGui.QColor(250, 250, 170))
 
         item = self.tableWidget.item(18, 0)
         item.setText(_translate("Form", self.S.initial_cond.filepath))
-        item = self.tableWidget.item(18, 0).setBackground(QtGui.QColor(250, 250, 170))
+        item = self.tableWidget.item(18, 0).setBackground(
+            QtGui.QColor(250, 250, 170))
 
         item = self.tableWidget.item(18, 1)
         item.setText(_translate("Form", self.S.initial_cond.filename))
         item = self.tableWidget.item(18, 2)
         item.setText(_translate("Form", self.S.initial_cond.name))
-        item = self.tableWidget.item(18, 2).setBackground(QtGui.QColor(250, 250, 170))
+        item = self.tableWidget.item(18, 2).setBackground(
+            QtGui.QColor(250, 250, 170))
 
         item = self.tableWidget.item(19, 0)
         item.setText(_translate("Form", self.S.para_trial.filepath))
-        item = self.tableWidget.item(19, 0).setBackground(QtGui.QColor(250, 250, 170))
+        item = self.tableWidget.item(19, 0).setBackground(
+            QtGui.QColor(250, 250, 170))
 
         item = self.tableWidget.item(19, 1)
         item.setText(_translate("Form", self.S.para_trial.filename))
         item = self.tableWidget.item(19, 2)
         item.setText(_translate("Form", self.S.para_trial.name))
-        item = self.tableWidget.item(19, 2).setBackground(QtGui.QColor(250, 250, 170))
+        item = self.tableWidget.item(19, 2).setBackground(
+            QtGui.QColor(250, 250, 170))
 
         item = self.tableWidget.item(20, 0)
         item.setText(_translate("Form", ""))
-        item = self.tableWidget.item(20, 0).setBackground(QtGui.QColor(250, 250, 170))
+        item = self.tableWidget.item(20, 0).setBackground(
+            QtGui.QColor(250, 250, 170))
 
         item = self.tableWidget.item(20, 1)
         item.setText(_translate("Form", self.S.output_prefix.filename))
         item = self.tableWidget.item(20, 2)
         item.setText(_translate("Form", self.S.output_prefix.name))
-        item = self.tableWidget.item(20, 2).setBackground(QtGui.QColor(250, 250, 170))
+        item = self.tableWidget.item(20, 2).setBackground(
+            QtGui.QColor(250, 250, 170))
 
         self.lineEdit.setText(_translate("Form", "simulStart"))
         self.lineEdit_2.setText(_translate("Form", "simulFinsh"))
@@ -636,8 +680,10 @@ class userinterface(object):
         self.lineEdit_47.setText(_translate("Form", "windPrfile"))
 
         self.tableWidget.setSortingEnabled(__sortingEnabled)
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("Form", "File Manager"))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), _translate("Form", "Decision File"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab),
+                                  _translate("Form", "File Manager"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3),
+                                  _translate("Form", "Decision File"))
 
     def edit_Decision(self):
 
