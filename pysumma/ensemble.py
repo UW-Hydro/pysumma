@@ -17,10 +17,6 @@ class Ensemble(object):
     changing the decisions or parameters of a given run.
     '''
 
-    executable: str = None
-    simulations: dict = {}
-    submissions: list = []
-
     def __init__(self, executable: str,configuration: dict,
                  filemanager: str=None, num_workers: int=1,
                  threads_per_worker: int=OMP_NUM_THREADS,
@@ -30,10 +26,12 @@ class Ensemble(object):
         Simulation object.
         """
         self._status = 'Initialized'
-        self.executable = executable
-        self.filemanager = filemanager
-        self.configuration = configuration
-        self.num_workers = num_workers
+        self.executable: str = executable
+        self.filemanager: str = filemanager
+        self.configuration: dict = configuration
+        self.num_workers: int = num_workers
+        self.simulations: dict = {}
+        self.submissions: list = []
         # Try to get a client, and if none exists then start a new one
         try:
             self._client = get_client()
