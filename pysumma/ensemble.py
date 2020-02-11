@@ -142,6 +142,35 @@ class Ensemble(object):
         for s in simulations:
             self.simulations[s.run_suffix] = s
 
+    def summary(self):
+        """
+        Show the user information about ensemble status
+        """
+        success, error, other = [], [], []
+        for n, s in self.simulations.items():
+            if s.status == 'Success':
+                success.append(n)
+            elif s.status == 'Error':
+                error.append(n)
+            else:
+                other.append(n)
+        return {'success': success, 'error': error, 'other': other}
+
+    def rerun_failed(self, run_option: str, prerun_cmds=None,
+                     monitor: bool=True):
+        run_summary = self.summary()
+        self.submissions = []
+        for n in run_summary['error']:
+            config = self.configuration[n]
+            s = self.simulations[n]
+            self.submissions.append(self._client.submit(
+                _submit, s, n, run_option, prerun_cmds, config))
+            time.sleep(2.0)
+        if monitor:
+            return self.monitor()
+        else:
+            return True
+
 
 def _submit(s: Simulation, name: str, run_option: str, prerun_cmds, config):
     s.initialize()
