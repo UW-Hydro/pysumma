@@ -1,4 +1,5 @@
 import os
+from numbers import Number
 
 
 class BaseOption(object):
@@ -8,12 +9,95 @@ class BaseOption(object):
     be extended rather than used directly.
     """
 
+    compare_err = 'Cannot compare LocalParamOption to {}'
+
     def __init__(self, name, value=None):
         self.name = name
         self.value = value
 
     def __str__(self):
         return "{} : {}".format(self.name, self.value)
+
+    def __eq__(self, other):
+        if isinstance(other, Number) or isinstance(other, str):
+            return self.value[0] == other
+        elif isinstance(other, type(self)):
+            return self.value[0] == other.value[0]
+        else:
+            raise TypeError(compare_err.format(type(other)))
+
+    def __lt__(self, other):
+        if isinstance(other, Number):
+            return self.value[0] < other
+        elif isinstance(other, type(self)):
+            return self.value[0] < other.value[0]
+        else:
+            raise TypeError(compare_err.format(type(other)))
+
+    def __le__(self, other):
+        if isinstance(other, Number):
+            return self.value[0] <= other
+        elif isinstance(other, type(self)):
+            return self.value[0] <= other.value[0]
+        else:
+            raise TypeError(compare_err.format(type(other)))
+
+    def __gt__(self, other):
+        if isinstance(other, Number):
+            return self.value[0] > other
+        elif isinstance(other, type(self)):
+            return self.value[0] > other.value[0]
+        else:
+            raise TypeError(compare_err.format(type(other)))
+
+    def __ge__(self, other):
+        if isinstance(other, Number):
+            return self.value[0] >= other
+        elif isinstance(other, type(self)):
+            return self.value[0] >= other.value[0]
+        else:
+            raise TypeError(compare_err.format(type(other)))
+
+    def __ne__(self, other):
+        if isinstance(other, Number) or isinstance(other, str):
+            return self.value[0] != other
+        elif isinstance(other, type(self)):
+            return self.value[0] != other.value[0]
+        else:
+            raise TypeError(compare_err.format(type(other)))
+
+    def __add__(self, other):
+        if isinstance(other, Number):
+            return self.value[0] + other
+        elif isinstance(other, type(self)):
+            return self.value[0] + other.value[0]
+        else:
+            raise TypeError(compare_err.format(type(other)))
+
+    def __sub__(self, other):
+        if isinstance(other, Number):
+            return self.value[0] - other
+        elif isinstance(other, type(self)):
+            return self.value[0] - other.value[0]
+        else:
+            raise TypeError(compare_err.format(type(other)))
+
+    def __mul__(self, other):
+        if isinstance(other, Number):
+            return self.value[0] * other
+        elif isinstance(other, type(self)):
+            return self.value[0] * other.value[0]
+        else:
+            raise TypeError(compare_err.format(type(other)))
+
+    def __truediv__(self, other):
+        if isinstance(other, Number):
+            return self.value[0] / other
+        elif isinstance(other, type(self)):
+            return self.value[0] / other.value[0]
+        else:
+            raise TypeError(compare_err.format(type(other)))
+
 
 
 class OptionContainer(object):
@@ -22,6 +106,16 @@ class OptionContainer(object):
     files for SUMMA. This class is meant to be extended rather than
     used directly.
     """
+
+    def __init__(self, optiontype):
+        """
+        Instantiate a blank option container
+        """
+        self.OptionType = optiontype
+        self.opt_count = 0
+        self.original_path = '.'
+        self.header = []
+        self.options = []
 
     def __init__(self, path, optiontype):
         """
