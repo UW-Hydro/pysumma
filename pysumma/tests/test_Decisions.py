@@ -5,7 +5,7 @@ from pysumma.Decisions import Decisions
 
 
 class test_decisions_class(unittest.TestCase):
-    my_path = os.path.abspath(os.path.dirname(__file__))
+    my_path = os.getcwd()
     filename = 'Decision.txt'
     filepath = os.path.join(my_path, filename)
     filename2 = 'tmp_{}'.format(filename)
@@ -83,36 +83,18 @@ class test_decisions_class(unittest.TestCase):
         new = self.get_value(lowbond_therm.name)
         self.assertEqual(new, new_val)
 
-    def test_validate_value(self):
-        validate_value2 = 'STAS1'
-        with self.assertRaises(ValueError):
-            self.Decisions_obj.soilCatTbl.value = validate_value2
-    # 
     def test_multiple_setting(self):
 
         soil_cat_dataset = self.Decisions_obj.soilCatTbl
-        # print(soil_cat_dataset.value)
-
         new_soil_cat_val = 'STAS'
-        # print(new_soil_cat_val)
-
         soil_cat_dataset.value = new_soil_cat_val
-        # self.assertEqual(new_soil_cat_val, soil_cat_dataset.value)
-
+        self.assertEqual(new_soil_cat_val, soil_cat_dataset.value)
         new_soil_cat = self.get_value(soil_cat_dataset.name)
-        # print(new_soil_cat)
-
         self.assertEqual(new_soil_cat, new_soil_cat_val)
 
         new_soil_cat_val = 'ROSETTA'
-        # print(new_soil_cat_val)
-
         soil_cat_dataset.value = new_soil_cat_val
-        # print(soil_cat_dataset.value)
-
         new_soil_cat = self.get_value(soil_cat_dataset.name)
-        # print(new_soil_cat)
-
         self.assertEqual(new_soil_cat, new_soil_cat_val)
 
         thConSnow = self.Decisions_obj.thCondSnow
