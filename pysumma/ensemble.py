@@ -128,6 +128,18 @@ class Ensemble(object):
             time.sleep(2.0)
 
     def run(self, run_option: str, prerun_cmds=None, monitor: bool=True):
+        """
+        Run the ensemble
+
+        Parameters
+        ----------
+        run_option:
+            Where to run the simulation. Can be ``local`` or ``docker``
+        prerun_cmds:
+            A list of shell commands to run before running SUMMA
+        monitor:
+            Whether to halt operation until runs are complete
+        """
         self.start(run_option, prerun_cmds)
         if monitor:
             return self.monitor()
@@ -158,6 +170,18 @@ class Ensemble(object):
 
     def rerun_failed(self, run_option: str, prerun_cmds=None,
                      monitor: bool=True):
+        """
+        Try to re-run failed simulations.
+
+        Parameters
+        ----------
+        run_option:
+            Where to run the simulation. Can be ``local`` or ``docker``
+        prerun_cmds:
+            A list of shell commands to run before running SUMMA
+        monitor:
+            Whether to halt operation until runs are complete
+        """
         run_summary = self.summary()
         self.submissions = []
         for n in run_summary['error']:
