@@ -14,6 +14,14 @@ class ForceFileListOption(BaseOption):
     def set_value(self, new_value):
         self.value = new_value
 
+    @property
+    def path(self):
+        return self.name.replace("'", "")
+
+    @path.setter
+    def path(self, value):
+        self.set_value(value)
+
     def __str__(self):
         return "'{}'".format(self.name.split('/')[-1])
 
@@ -21,6 +29,10 @@ class ForceFileListOption(BaseOption):
 class ForceFileList(OptionContainer):
 
     prefix: str = ''
+
+    def __init__(self):
+        self.prefix = '.'
+        super().__init__(ForceFileListOption)
 
     def __init__(self, file_list_path, force_file_prefix_path):
         self.prefix = force_file_prefix_path
@@ -35,5 +47,9 @@ class ForceFileList(OptionContainer):
         return (os.path.join(self.prefix, file_name.strip()), )
 
     @property
-    def forcing_list(self):
+    def forcing_paths(self):
+        return [o.path for o in self.options]
+
+    @property
+    def forcing_data(self):
         return [o.value for o in self.options]

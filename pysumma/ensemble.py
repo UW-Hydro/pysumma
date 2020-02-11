@@ -1,11 +1,14 @@
 from copy import deepcopy
 from distributed import Client, get_client
+import os
 import pandas as pd
 import time
 import xarray as xr
 
 from .simulation import Simulation
 from .utils import ChainDict, product_dict
+
+OMP_NUM_THREADS = int(os.environ.get('OMP_NUM_THREADS', 1))
 
 
 class Ensemble(object):
@@ -14,40 +17,47 @@ class Ensemble(object):
     changing the decisions or parameters of a given run.
     '''
 
-    executable: str = None
-    simulations: dict = {}
-    submissions: list = []
-
-    def __init__(self, executable: str, filemanager: str,
-                 configuration: dict, num_workers: int=1):
+    def __init__(self, executable: str,configuration: dict,
+                 filemanager: str=None, num_workers: int=1,
+                 threads_per_worker: int=OMP_NUM_THREADS,
+                 scheduler: str=None):
         """
         Create a new Ensemble object. The API mirrors that of the
         Simulation object.
         """
         self._status = 'Initialized'
-        self.executable = executable
-        self.filemanager = filemanager
-        self.configuration = configuration
-        self.num_workers = num_workers
+        self.executable: str = executable
+        self.filemanager: str = filemanager
+        self.configuration: dict = configuration
+        self.num_workers: int = num_workers
+        self.simulations: dict = {}
+        self.submissions: list = []
         # Try to get a client, and if none exists then start a new one
         try:
-            client = Client()
             self._client = get_client()
-            # Start more workers if necessary
+            # Start more workers if necessary:
             workers = len(self._client.get_worker_logs())
             if workers <= self.num_workers:
                 self._client.cluster.scale(workers)
         except ValueError:
-            self._client = Client(n_workers=workers, threads_per_worker=1)
+            self._client = Client(n_workers=self.num_workers,
+                                  threads_per_worker=threads_per_worker)
         self._generate_simulation_objects()
 
     def _generate_simulation_objects(self):
         """
         Create a mapping of configurations to the simulation objects.
         """
-        for name, config in self.configuration.items():
-            self.simulations[name] = Simulation(
-                self.executable, self.filemanager, False)
+        if self.filemanager:
+            for name, config in self.configuration.items():
+                self.simulations[name] = Simulation(
+                    self.executable, self.filemanager, False)
+        else:
+            for name, config in self.configuration.items():
+                assert config['file_manager'] is not None, \
+                    "No filemanager found in configuration or Ensemble!"
+                self.simulations[name] = Simulation(
+                    self.executable, config['file_manager'], False)
 
     def _generate_coords(self):
         """
@@ -83,6 +93,10 @@ class Ensemble(object):
                                         if '=' in l else l for l in t))
         decision_names = ['++'.join(tuple(n.split('++')[1:-1]))
                           for n in self.configuration.keys()]
+        if sum([len(dt) for dt in decision_tuples]) == 0:
+            raise NameError("Simulations in the ensemble do not share all"
+                            " common decisions! Please use `open_output`"
+                            " to retrieve the output of this Ensemble")
         for i, t in enumerate(decision_names):
             decision_names[i] = '++'.join(l.split('=')[0] for l in t)
         new_idx = pd.MultiIndex.from_tuples(
