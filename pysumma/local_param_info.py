@@ -24,7 +24,6 @@ class LocalParamOption(BaseOption):
                                 .replace('E', 'd'))
             else:
                 return '{:>12.4f}'.format(val)
-
         return ("{:25s} | {:>12s} | {:>12s} | {:>12s}".format(
             self.name, *map(_to_string, self.value)))
 
@@ -44,7 +43,7 @@ class LocalParamInfo(OptionContainer):
             o = self.get_option(key)
             o.set_value(value)
         except AttributeError as e:
-            self.options.append(LocalParamOption(key, value, value, value))
+            self.options.append(LocalParamOption(key, *value))
 
     def read(self, path):
         """Read the configuration and populate the options"""
