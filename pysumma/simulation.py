@@ -47,12 +47,16 @@ class Simulation():
         self.status = 'Initialized'
 
     def apply_config(self, config):
-        for k, v in config.get('file_manager', {}).items():
-            self.manager.set_option(k, v)
+        if 'file_manager' in config:
+            self.manager_path = config['file_manager']
         for k, v in config.get('decisions', {}).items():
             self.decisions.set_option(k, v)
         for k, v in config.get('parameters', {}).items():
             self.local_param_info.set_option(k, v)
+        for k, v in config.get('output_control', {}).items():
+            self.output_control.set_option(k, **v)
+        if self.decisions['snowLayers'] == 'CLM_2010':
+            self.validate_layer_params(self.local_param_info)
 
     def create_backup(self):
         self.backup = {}
@@ -68,6 +72,11 @@ class Simulation():
         self.basin_param_info = self.manager.basin_param_info
         self.local_attributes = self.manager.local_attributes
 
+    def validate_layer_params(self, params):
+        for i in range(1, 5):
+            assert params[f'zmaxLayer{i}_upper'] <= params[f'zmaxLayer{i}_lower'], i
+            assert params[f'zmaxLayer{i}_upper'] / params[f'zminLayer{i}'] >= 2.5, i
+            assert params[f'zmaxLayer{i}_upper'] / params[f'zminLayer{i+1}'] >= 2.5, i
 
     def _gen_summa_cmd(self, run_suffix, processes=1, prerun_cmds=[],
                        startGRU=None, countGRU=None, iHRU=None,
@@ -75,8 +84,7 @@ class Simulation():
         prerun_cmds.append('export OMP_NUM_THREADS={}'.format(processes))
 
         summa_run_cmd = "{} -s {} -m {}".format(self.executable,
-                                                run_suffix,
-                                                self.manager_path)
+                                                run_suffix, self.manager_path)
 
         if startGRU is not None and countGRU is not None:
             summa_run_cmd += ' -g {} {}'.format(startGRU, countGRU)
@@ -164,17 +172,16 @@ class Simulation():
             raise RuntimeError('No simulation started! Use simulation.start '
                                'or simulation.execute to begin a simulation!')
 
-        if bool(self.process.wait()):
+        self.stdout, self.stderr = self.process.communicate()
+        if isinstance(self.stdout, bytes):
+            self.stderr = self.stderr.decode('utf-8', 'ignore')
+            self.stdout = self.stdout.decode('utf-8', 'ignore')
+
+        SUCCESS_MSG = 'FORTRAN STOP: finished simulation successfully.'
+        if SUCCESS_MSG not in self.stdout:
             self.status = 'Error'
         else:
             self.status = 'Success'
-
-        try:
-            self.stderr = self.process.stderr.read().decode('utf-8')
-            self.stdout = self.process.stdout.read().decode('utf-8')
-        except UnicodeDecodeError:
-            self.stderr = self.process.stderr.read()
-            self.stdout = self.process.stdout.read()
 
         try:
             self._output = [xr.open_dataset(f) for f in self.get_output()]
