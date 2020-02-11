@@ -24,7 +24,7 @@ OUTPUT_META = read_master_file(METADATA_PATH)
 
 class OutputControlOption(BaseOption):
 
-    def __init__(self, var=None, period=None, instant=1, sum=1,
+    def __init__(self, var=None, period=None, sum=0, instant=1,
                  mean=0, variance=0, min=0, max=0, mode=0):
         self.name = var
         self.period = int(period)
@@ -62,7 +62,7 @@ class OutputControlOption(BaseOption):
 
     def get_print_list(self):
         self.validate()
-        plist = [self.name.ljust(36), self.period, self.instant, self.sum,
+        plist = [self.name.ljust(36), self.period, self.sum, self.instant,
                  self.mean, self.variance, self.min, self.max, self.mode]
         return [str(p) for p in plist]
 
@@ -82,7 +82,7 @@ class OutputControl(OptionContainer):
     def __init__(self, dirpath, filepath):
         super().__init__(OutputControlOption, dirpath, filepath)
 
-    def set_option(self, name=None, period=None, instant=1, sum=1,
+    def set_option(self, name=None, period=None, sum=0, instant=1,
                    mean=0, variance=0, min=0, max=0, mode=0):
         """
         Change or create a new entry in the output control
