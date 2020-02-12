@@ -30,9 +30,9 @@ class DecisionOption(BaseOption):
             self.value = new_value
         else:
             raise ValueError(os.linesep.join([
-                  'Invalid option given for decision: {}'.format(self.name),
-                  'You gave a value of: {}'.format(new_value),
-                  'Valid options include: {}'.format(self.available_options)]))
+                'Invalid option given for decision: {}'.format(self.name),
+                'You gave a value of: {}'.format(new_value),
+                'Valid options include: {}'.format(self.available_options)]))
 
     def __str__(self):
         if self.name in ['simulStart', 'simulFinsh']:
@@ -40,7 +40,7 @@ class DecisionOption(BaseOption):
         else:
             value = self.value
         return "{0}    {1: <20} ! {2}".format(
-                self.name, value, self.description)
+            self.name, value, self.description)
 
 
 class Decisions(OptionContainer):
@@ -49,8 +49,8 @@ class Decisions(OptionContainer):
     a SUMMA decisions file.
     """
 
-    def __init__(self, path):
-        super().__init__(path, DecisionOption)
+    def __init__(self, dirpath, filepath):
+        super().__init__(DecisionOption, dirpath, filepath)
 
     def set_option(self, key, value):
         try:

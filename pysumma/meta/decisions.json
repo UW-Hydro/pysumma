@@ -116,6 +116,10 @@
             "options": ["stickySnow", "lightSnow"],
             "description": "choice of parameterization for snow interception"
         },
+		"snowUnload": {
+            "options": ["meltDripUnload", "windUnload"],
+            "description": "choice of parameterization for snow unloading from canopy"
+        },
         "windPrfile": {
             "options": ["exponential", "logBelowCanopy"],
             "description": "choice of canopy wind profile"
