@@ -14,7 +14,7 @@ setup(name='pysumma',
           'matplotlib',
           'geopandas',
           'shapely',
-          'seaborn'
+          'seaborn',
           'pandas',
           'hs_restclient==1.3.4',
           'distributed',
