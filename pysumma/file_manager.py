@@ -93,3 +93,37 @@ class FileManager(OptionContainer):
         p1, p2 = self.get_value('settings_path'), self.get_value('parameter_trial')
         self._param_trial = xr.open_dataset(p1 + p2)
         return self._param_trial
+
+    @property
+    def initial_conditions(self):
+        p1, p2 = self.get_value('settings_path'), self.get_value('model_init_cond')
+        self._init_cond = xr.open_dataset(p1 + p2)
+        return self._init_cond
+
+    @property
+    def genparm(self):
+        p1, p2 = self.get_value('settings_path'), 'GENPARM.TBL'
+        with open(p1 + p2, 'r') as f:
+            self._genparm = f.readlines()
+        return self._genparm
+
+    @property
+    def mptable(self):
+        p1, p2 = self.get_value('settings_path'), 'MPTABLE.TBL'
+        with open(p1 + p2, 'r') as f:
+            self._mptable = f.readlines()
+        return self._mptable
+
+    @property
+    def soilparm(self):
+        p1, p2 = self.get_value('settings_path'), 'SOILPARM.TBL'
+        with open(p1 + p2, 'r') as f:
+            self._soilparm = f.readlines()
+        return self._soilparm
+
+    @property
+    def vegparm(self):
+        p1, p2 = self.get_value('settings_path'), 'VEGPARM.TBL'
+        with open(p1 + p2, 'r') as f:
+            self._vegparm = f.readlines()
+        return self._vegparm
