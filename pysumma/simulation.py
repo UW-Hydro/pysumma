@@ -16,16 +16,6 @@ from .force_file_list import ForceFileList
 class Simulation():
     """The simulation object provides a wrapper for SUMMA simulations"""
 
-    config_path: str = None
-    manager: FileManager = None
-    decisions: Decisions = None
-    output_control: OutputControl = None
-    local_param_info: LocalParamInfo = None
-    basin_param_info: LocalParamInfo = None
-    force_file_list: ForceFileList = None
-    local_attributes: xr.Dataset = None
-    parameter_trial: xr.Dataset = None
-
     def __init__(self, executable, filemanager, initialize=True):
         """Initialize a new simulation object"""
         self.stdout = None
@@ -48,6 +38,11 @@ class Simulation():
         self.local_param_info = self.manager.local_param_info
         self.basin_param_info = self.manager.basin_param_info
         self.local_attributes = self.manager.local_attributes
+        self.initial_conditions = self.manager.initial_conditions
+        self.genparm = self.manager.genparm
+        self.mptable = self.manager.mptable
+        self.soilparm = self.manager.soilparm
+        self.vegparm = self.manager.vegparm
         self.create_backup()
         self.status = 'Initialized'
 
@@ -76,6 +71,11 @@ class Simulation():
         self.local_param_info = self.manager.local_param_info
         self.basin_param_info = self.manager.basin_param_info
         self.local_attributes = self.manager.local_attributes
+        self.initial_conditions = self.manager.initial_conditions
+        self.genparm = self.manager.genparm
+        self.mptable = self.manager.mptable
+        self.soilparm = self.manager.soilparm
+        self.vegparm = self.manager.vegparm
 
     def validate_layer_params(self, params):
         for i in range(1, 5):
@@ -199,19 +199,30 @@ class Simulation():
         return self.status
 
     def _write_configuration(self, name, write_netcdf: str=False):
-        #TODO: Still need to update for all netcdf writing
         self.config_path = self.config_path / name
         self.config_path.mkdir(parents=True, exist_ok=True)
         manager_path = str(self.manager_path.parent)
         settings_path = str(self.manager['settings_path'].value)
         settings_path = Path(settings_path.replace(manager_path, str(self.config_path)))
-        self.manager['settings_path'] = settings_path
+        self.manager_path = self.config_path / self.manager.file_name
+        self.manager['settings_path'] = str(settings_path) + os.sep
         self.manager.write(path=self.config_path)
         self.decisions.write(path=settings_path)
         self.force_file_list.write(path=settings_path)
         self.local_param_info.write(path=settings_path)
         self.basin_param_info.write(path=settings_path)
         self.output_control.write(path=settings_path)
+        self.local_attributes.to_netcdf(settings_path / self.manager['local_attributes'].value)
+        self.parameter_trial.to_netcdf(settings_path / self.manager['parameter_trial'].value)
+        self.initial_conditions.to_netcdf(settings_path / self.manager['model_init_cond'].value)
+        with open(settings_path / 'GENPARM.TBL', 'w+') as f:
+            f.writelines(self.genparm)
+        with open(settings_path / 'MPTABLE.TBL', 'w+') as f:
+            f.writelines(self.mptable)
+        with open(settings_path / 'SOILPARM.TBL', 'w+') as f:
+            f.writelines(self.soilparm)
+        with open(settings_path / 'VEGPARM.TBL', 'w+') as f:
+            f.writelines(self.vegparm)
 
     def get_output(self) -> List[str]:
         new_file_text = 'Created output file:'
