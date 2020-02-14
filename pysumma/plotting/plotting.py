@@ -19,7 +19,7 @@ class Plotting:
 	def ts_plot(self, variable, hru_num=0):
 		x = self.ds.variables['time']
 		y = self.ds.variables[variable][:,hru_num]
-
+		name = self.ds.variables[variable].attrs['long_name']
 		plt.figure(figsize=(15, 5))
 		plt.plot(x, y, color='grey', linestyle='solid', markersize=0)
 
@@ -32,11 +32,12 @@ class Plotting:
 
 		# Set the title
 		hru_num = hru_num + 1
-		ax.set_title('SUMMA Plot' '  ' + '(' + 'hru=%s' ')' % hru_num)
+		ax.set_title("SUMMA %s Plot (hru=%s))" % (name, hru_num))
 
 	def ts_plot_layer(self, variable, layer_num, hru_num=0):
 		x = self.ds.variables['time']
 		y = self.ds.variables[variable][:,hru_num]
+		name = self.ds.variables[variable].attrs['long_name']
 
 		layer_variable = np.array(y)
 		col = layer_num-1
@@ -55,7 +56,7 @@ class Plotting:
 		# Set the title
 		hru_num = hru_num + 1
 		layer_num = layer_num + 1
-		ax.set_title('SUMMA Plot' '  ' + '(' + 'layer_num=%s' ')'  '('  'hru=%s' ')'  %(layer_num, hru_num))
+		ax.set_title("SUMMA %s Plot (layer_num=%s)(hru=%s))"  % (name, layer_num, hru_num))
 
 
 	def heatmap_plot(self, variable, layer_name, hru_num=0):
