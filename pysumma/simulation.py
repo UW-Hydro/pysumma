@@ -2,9 +2,11 @@ import os
 import copy
 import shutil
 import subprocess
+import numpy as np
 import xarray as xr
 from pathlib import Path
 from typing import List
+from collections.abc import Iterable
 
 from .decisions import Decisions
 from .file_manager import FileManager
@@ -29,7 +31,8 @@ class Simulation():
             self.initialize()
 
     def initialize(self):
-        self.manager = FileManager(self.manager_path.parent, self.manager_path.name)
+        self.manager = FileManager(
+            self.manager_path.parent, self.manager_path.name)
         self.status = 'Initialized'
         self.decisions = self.manager.decisions
         self.output_control = self.manager.output_control
@@ -48,22 +51,27 @@ class Simulation():
 
     def apply_config(self, config):
         if 'file_manager' in config:
-            self.manager_path = config['file_manager']
+            self.manager_path = Path(config['file_manager'])
         for k, v in config.get('decisions', {}).items():
             self.decisions.set_option(k, v)
         for k, v in config.get('parameters', {}).items():
             self.local_param_info.set_option(k, v)
         for k, v in config.get('output_control', {}).items():
             self.output_control.set_option(k, **v)
+        for k, v in config.get('attributes', {}).items():
+            self.assign_attributes(k, v)
         if self.decisions['snowLayers'] == 'CLM_2010':
             self.validate_layer_params(self.local_param_info)
 
     def create_backup(self):
         self.backup = {}
         self.backup['manager'] = copy.deepcopy(self.manager)
+        self.backup['manager_path'] = copy.deepcopy(self.manager_path)
 
     def reset(self):
         self.manager = copy.deepcopy(self.backup['manager'])
+        self.manager_path = copy.deepcopy(self.backup['manager_path'])
+        self.config_path = self.manager_path.parent / '.pysumma'
         self.decisions = self.manager.decisions
         self.output_control = self.manager.output_control
         self.parameter_trial = self.manager.parameter_trial
@@ -79,9 +87,12 @@ class Simulation():
 
     def validate_layer_params(self, params):
         for i in range(1, 5):
-            assert params[f'zmaxLayer{i}_upper'] <= params[f'zmaxLayer{i}_lower'], i
-            assert params[f'zmaxLayer{i}_upper'] / params[f'zminLayer{i}'] >= 2.5, i
-            assert params[f'zmaxLayer{i}_upper'] / params[f'zminLayer{i+1}'] >= 2.5, i
+            assert (params[f'zmaxLayer{i}_upper']
+                    <= params[f'zmaxLayer{i}_lower'], i)
+            assert (params[f'zmaxLayer{i}_upper'] / params[f'zminLayer{i}']
+                    >= 2.5, i)
+            assert (params[f'zmaxLayer{i}_upper'] / params[f'zminLayer{i+1}']
+                    >= 2.5, i)
 
     def _gen_summa_cmd(self, run_suffix, processes=1, prerun_cmds=[],
                        startGRU=None, countGRU=None, iHRU=None,
