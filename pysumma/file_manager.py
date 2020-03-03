@@ -53,50 +53,58 @@ class FileManager(OptionContainer):
 
     @property
     def decisions(self):
-        p1, p2 = self.get_value('settings_path'), self.get_value('decisions_path')
+        p1 = self.get_value('settings_path')
+        p2 = self.get_value('decisions_path')
         self._decisions = Decisions(p1, p2)
         return self._decisions
 
     @property
     def output_control(self):
-        p1, p2 = self.get_value('settings_path'), self.get_value('output_control')
+        p1 = self.get_value('settings_path')
+        p2 = self.get_value('output_control')
         self._output_control = OutputControl(p1, p2)
         return self._output_control
 
     @property
     def local_param_info(self):
-        p1, p2 = self.get_value('settings_path') , self.get_value('local_param_info')
+        p1 = self.get_value('settings_path')
+        p2 = self.get_value('local_param_info')
         self._local_param_info = LocalParamInfo(p1, p2)
         return self._local_param_info
 
     @property
     def basin_param_info(self):
-        p1, p2 = self.get_value('settings_path'), self.get_value('basin_param_info')
+        p1 = self.get_value('settings_path')
+        p2 = self.get_value('basin_param_info')
         self._basin_param_info = LocalParamInfo(p1, p2)
         return self._basin_param_info
 
     @property
     def force_file_list(self):
-        p1, p2 = self.get_value('settings_path'), self.get_value('forcing_file_list')
+        p1 = self.get_value('settings_path')
+        p2 = self.get_value('forcing_file_list')
         p3 = self.get_value('input_path')
         self._force_file_list = ForceFileList(p1, p2, p3)
         return self._force_file_list
 
     @property
     def local_attributes(self):
-        p1, p2 = self.get_value('settings_path'), self.get_value('local_attributes')
+        p1 = self.get_value('settings_path')
+        p2 = self.get_value('local_attributes')
         self._local_attrs = xr.open_dataset(p1 + p2)
         return self._local_attrs
 
     @property
     def parameter_trial(self):
-        p1, p2 = self.get_value('settings_path'), self.get_value('parameter_trial')
+        p1 = self.get_value('settings_path')
+        p2 = self.get_value('parameter_trial')
         self._param_trial = xr.open_dataset(p1 + p2)
         return self._param_trial
 
     @property
     def initial_conditions(self):
-        p1, p2 = self.get_value('settings_path'), self.get_value('model_init_cond')
+        p1 = self.get_value('settings_path')
+        p2 = self.get_value('model_init_cond')
         self._init_cond = xr.open_dataset(p1 + p2)
         return self._init_cond
 
