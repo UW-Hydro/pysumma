@@ -63,6 +63,19 @@ class Simulation():
         if self.decisions['snowLayers'] == 'CLM_2010':
             self.validate_layer_params(self.local_param_info)
 
+    def assign_attributes(self, name, data):
+        required_shape = self.local_attributes[name].shape
+        try:
+            self.local_attributes[name].values = np.array(data).reshape(required_shape)
+        except ValueError as e:
+            raise ValueError('The shape of the provided replacement data does',
+                             ' not match the shape of the original data.', e)
+        except KeyError as e:
+            raise KeyError(f'The key {name} does not exist in this attribute',
+                           'file. See the documentation at https://summa.readthedocs.',
+                           'io/en/latest/input_output/SUMMA_input/#attribute-and-',
+                           'parameter-files for more information', e)
+
     def create_backup(self):
         self.backup = {}
         self.backup['manager'] = copy.deepcopy(self.manager)
