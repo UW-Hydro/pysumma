@@ -186,9 +186,9 @@ class Ensemble(object):
         for n in run_summary['error']:
             config = self.configuration[n]
             s = self.simulations[n]
+            s.reset()
             self.submissions.append(self._client.submit(
                 _submit, s, n, run_option, prerun_cmds, config))
-            time.sleep(2.0)
         if monitor:
             return self.monitor()
         else:
@@ -213,19 +213,27 @@ def parameter_product(list_config):
             {'parameters': d} for d in product_dict(**list_config)}
 
 
-def total_product(dec_conf={}, param_conf={}):
+def attribute_product(list_config):
+    return {'++'+'++'.join('{}={}'.format(k, v) for k, v in d.items())+'++':
+            {'attributes': d} for d in product_dict(**list_config)}
+
+
+def total_product(dec_conf={}, param_conf={}, attr_conf={}):
     full_conf = deepcopy(dec_conf)
     full_conf.update(param_conf)
+    full_conf.update(attr_conf)
     prod_dict = product_dict(**full_conf)
     config = {}
     for d in prod_dict:
         name = '++' + '++'.join(
-            '{}={}'.format(k, v) if k in param_conf else v
+            '{}={}'.format(k, v) if k in param_conf or k in attr_conf else v
             for k, v in d.items()) + '++'
-        config[name] = {'decisions': {}, 'parameters': {}}
+        config[name] = {'decisions': {}, 'parameters': {}, 'attributes': {}}
         for k, v in d.items():
             if k in dec_conf:
                 config[name]['decisions'][k] = v
             elif k in param_conf:
                 config[name]['parameters'][k] = v
+            elif k in attr_conf:
+                config[name]['attributes'][k] = v
     return config

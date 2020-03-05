@@ -156,9 +156,7 @@ class OptionContainer(object):
         if not path:
             path = self.original_path
         filepath = Path(os.path.abspath(Path(path / self.file_name)))
-        print(filepath)
         filepath.parent.mkdir(parents=True, exist_ok=True)
-        print(filepath)
         with open(filepath, 'w') as f:
             f.writelines(self.header)
             f.writelines((str(o) + '\n' for o in self.options))
