@@ -51,7 +51,7 @@ class Simulation():
 
     def apply_config(self, config):
         if 'file_manager' in config:
-            self.manager_path = Path(config['file_manager'])
+            self.manager_path = Path(os.path.abspath(config['file_manager']))
         for k, v in config.get('decisions', {}).items():
             self.decisions.set_option(k, v)
         for k, v in config.get('parameters', {}).items():
@@ -62,6 +62,19 @@ class Simulation():
             self.assign_attributes(k, v)
         if self.decisions['snowLayers'] == 'CLM_2010':
             self.validate_layer_params(self.local_param_info)
+
+    def assign_attributes(self, name, data):
+        required_shape = self.local_attributes[name].shape
+        try:
+            self.local_attributes[name].values = np.array(data).reshape(required_shape)
+        except ValueError as e:
+            raise ValueError('The shape of the provided replacement data does',
+                             ' not match the shape of the original data.', e)
+        except KeyError as e:
+            raise KeyError(f'The key {name} does not exist in this attribute',
+                           'file. See the documentation at https://summa.readthedocs.',
+                           'io/en/latest/input_output/SUMMA_input/#attribute-and-',
+                           'parameter-files for more information', e)
 
     def create_backup(self):
         self.backup = {}
