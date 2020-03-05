@@ -1,3 +1,0 @@
-{
-    "option_names": ["filemanager_version", "settings_path", "input_path", "output_path", "decisions_path", "meta_time", "meta_attr", "meta_type", "meta_force", "meta_localparam", "output_control", "meta_localindex", "meta_basinparam", "meta_basinmvar", "local_attributes", "local_param_info", "basin_param_info", "forcing_file_list", "model_init_cond", "parameter_trial", "output_prefix"]
-}
