@@ -51,7 +51,7 @@ class Simulation():
 
     def apply_config(self, config):
         if 'file_manager' in config:
-            self.manager_path = Path(config['file_manager'])
+            self.manager_path = Path(os.path.abspath(config['file_manager']))
         for k, v in config.get('decisions', {}).items():
             self.decisions.set_option(k, v)
         for k, v in config.get('parameters', {}).items():
