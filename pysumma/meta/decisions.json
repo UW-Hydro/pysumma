@@ -8,6 +8,10 @@
             "options": ["YYYY-MM-DD hh:mm"],
             "description": "simulation end time"
         },
+        "tmZoneInfo": {
+            "options": ["localTime", "ncTime", "utcTime"],
+            "description": "time zone information"
+        },
         "soilCatTbl": {
             "options": ["STAS", "STAS-RUC", "ROSETTA"],
             "description": "soil-category dataset"
@@ -111,6 +115,10 @@
         "snowIncept": {
             "options": ["stickySnow", "lightSnow"],
             "description": "choice of parameterization for snow interception"
+        },
+		"snowUnload": {
+            "options": ["meltDripUnload", "windUnload"],
+            "description": "choice of parameterization for snow unloading from canopy"
         },
         "windPrfile": {
             "options": ["exponential", "logBelowCanopy"],

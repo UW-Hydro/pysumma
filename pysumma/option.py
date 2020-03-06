@@ -1,5 +1,6 @@
 import os
-
+from numbers import Number
+from pathlib import Path
 
 class BaseOption(object):
     """
@@ -8,12 +9,95 @@ class BaseOption(object):
     be extended rather than used directly.
     """
 
+    compare_err = 'Cannot compare LocalParamOption to {}'
+
     def __init__(self, name, value=None):
         self.name = name
         self.value = value
 
     def __str__(self):
         return "{} : {}".format(self.name, self.value)
+
+    def __eq__(self, other):
+        if isinstance(other, Number) or isinstance(other, str):
+            return self.value[0] == other
+        elif isinstance(other, type(self)):
+            return self.value[0] == other.value[0]
+        else:
+            raise TypeError(BaseOption.compare_err.format(type(other)))
+
+    def __lt__(self, other):
+        if isinstance(other, Number):
+            return self.value[0] < other
+        elif isinstance(other, type(self)):
+            return self.value[0] < other.value[0]
+        else:
+            raise TypeError(BaseOption.compare_err.format(type(other)))
+
+    def __le__(self, other):
+        if isinstance(other, Number):
+            return self.value[0] <= other
+        elif isinstance(other, type(self)):
+            return self.value[0] <= other.value[0]
+        else:
+            raise TypeError(BaseOption.compare_err.format(type(other)))
+
+    def __gt__(self, other):
+        if isinstance(other, Number):
+            return self.value[0] > other
+        elif isinstance(other, type(self)):
+            return self.value[0] > other.value[0]
+        else:
+            raise TypeError(BaseOption.compare_err.format(type(other)))
+
+    def __ge__(self, other):
+        if isinstance(other, Number):
+            return self.value[0] >= other
+        elif isinstance(other, type(self)):
+            return self.value[0] >= other.value[0]
+        else:
+            raise TypeError(BaseOption.compare_err.format(type(other)))
+
+    def __ne__(self, other):
+        if isinstance(other, Number) or isinstance(other, str):
+            return self.value[0] != other
+        elif isinstance(other, type(self)):
+            return self.value[0] != other.value[0]
+        else:
+            raise TypeError(BaseOption.compare_err.format(type(other)))
+
+    def __add__(self, other):
+        if isinstance(other, Number):
+            return self.value[0] + other
+        elif isinstance(other, type(self)):
+            return self.value[0] + other.value[0]
+        else:
+            raise TypeError(BaseOption.compare_err.format(type(other)))
+
+    def __sub__(self, other):
+        if isinstance(other, Number):
+            return self.value[0] - other
+        elif isinstance(other, type(self)):
+            return self.value[0] - other.value[0]
+        else:
+            raise TypeError(BaseOption.compare_err.format(type(other)))
+
+    def __mul__(self, other):
+        if isinstance(other, Number):
+            return self.value[0] * other
+        elif isinstance(other, type(self)):
+            return self.value[0] * other.value[0]
+        else:
+            raise TypeError(BaseOption.compare_err.format(type(other)))
+
+    def __truediv__(self, other):
+        if isinstance(other, Number):
+            return self.value[0] / other
+        elif isinstance(other, type(self)):
+            return self.value[0] / other.value[0]
+        else:
+            raise TypeError(BaseOption.compare_err.format(type(other)))
+
 
 
 class OptionContainer(object):
@@ -23,17 +107,18 @@ class OptionContainer(object):
     used directly.
     """
 
-    def __init__(self, path, optiontype):
+    def __init__(self, optiontype, dir='.', name='option'):
         """
         Instantiate the object and populate the
         values from the given filepath.
         """
         self.OptionType = optiontype
         self.opt_count = 0
-        self.original_path = path
+        self.original_path = Path(dir)
+        self.file_name = Path(name)
         self.header = []
         self.options = []
-        self.read(path)
+        self.read(os.path.abspath(self.original_path / self.file_name))
 
     def set_option(self):
         """This has to be implemented by subclasses"""
@@ -70,7 +155,9 @@ class OptionContainer(object):
         self.validate()
         if not path:
             path = self.original_path
-        with open(path, 'w') as f:
+        filepath = Path(os.path.abspath(Path(path / self.file_name)))
+        filepath.parent.mkdir(parents=True, exist_ok=True)
+        with open(filepath, 'w') as f:
             f.writelines(self.header)
             f.writelines((str(o) + '\n' for o in self.options))
 

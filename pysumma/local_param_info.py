@@ -24,7 +24,6 @@ class LocalParamOption(BaseOption):
                                 .replace('E', 'd'))
             else:
                 return '{:>12.4f}'.format(val)
-
         return ("{:25s} | {:>12s} | {:>12s} | {:>12s}".format(
             self.name, *map(_to_string, self.value)))
 
@@ -34,8 +33,8 @@ class LocalParamInfo(OptionContainer):
     fmt_strings = ["'(a25,1x,3(a1,1x,f12.4,1x))'",
                    "'(a25,1x,a1,1x,3(f12.4,1x,a1,1x))'"]
 
-    def __init__(self, path):
-        super().__init__(path, LocalParamOption)
+    def __init__(self, dirpath, filepath):
+        super().__init__(LocalParamOption, dirpath, filepath)
 
     def set_option(self, key, value):
         if not isinstance(value, list):
@@ -44,7 +43,7 @@ class LocalParamInfo(OptionContainer):
             o = self.get_option(key)
             o.set_value(value)
         except AttributeError as e:
-            self.options.append(LocalParamOption(key, value, value, value))
+            self.options.append(LocalParamOption(key, *value))
 
     def read(self, path):
         """Read the configuration and populate the options"""
