@@ -218,16 +218,26 @@ def attribute_product(list_config):
             {'attributes': d} for d in product_dict(**list_config)}
 
 
-def total_product(dec_conf={}, param_conf={}, attr_conf={}):
+def file_manager_product(list_config):
+    return {'++'+'++'.join('{}={}'.format(k, v) for k, v in d.items())+'++':
+            {'file_manager': d} for d in product_dict(**list_config)}
+
+
+def total_product(dec_conf={}, param_conf={}, attr_conf={}, fman_conf={},
+                  sequential_keys=False):
     full_conf = deepcopy(dec_conf)
     full_conf.update(param_conf)
     full_conf.update(attr_conf)
+    full_conf.update(fman_conf)
     prod_dict = product_dict(**full_conf)
     config = {}
-    for d in prod_dict:
+    for i, d in enumerate(prod_dict):
         name = '++' + '++'.join(
-            '{}={}'.format(k, v) if k in param_conf or k in attr_conf else v
+            '{}={}'.format(k, v) if k in param_conf or k in attr_conf
+            else v.replace('/', '_').replace('\\', '_')
             for k, v in d.items()) + '++'
+        if sequential_keys:
+            name = f'run_{i}'
         config[name] = {'decisions': {}, 'parameters': {}, 'attributes': {}}
         for k, v in d.items():
             if k in dec_conf:
@@ -236,4 +246,6 @@ def total_product(dec_conf={}, param_conf={}, attr_conf={}):
                 config[name]['parameters'][k] = v
             elif k in attr_conf:
                 config[name]['attributes'][k] = v
+            elif k in fman_conf:
+                config[name]['file_manager'] = v
     return config
