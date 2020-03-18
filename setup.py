@@ -1,14 +1,13 @@
 from setuptools import setup, find_packages
 
 setup(name='pysumma',
-      version='1.0.0',
+      version='2.0.0',
       description='an Object-Oriented Python wrapper for SUMMA model',
       url='https://github.com/uva-hydroinformatics/pysumma.git',
       author='YoungDon Choi',
-      author_email='yc5ef@virginia.edu',
-      license='BSD-3-Clause',
+      author_email='choiyd1115@gmail.com',
+      license='MIT',
       packages=find_packages(),
-      install_requires=[
       install_requires=[
           'numpy',
           'xarray>0.10.9',

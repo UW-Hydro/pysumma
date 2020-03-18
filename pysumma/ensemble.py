@@ -1,11 +1,14 @@
 from copy import deepcopy
 from distributed import Client, get_client
+import os
 import pandas as pd
 import time
 import xarray as xr
 
 from .simulation import Simulation
 from .utils import ChainDict, product_dict
+
+OMP_NUM_THREADS = int(os.environ.get('OMP_NUM_THREADS', 1))
 
 
 class Ensemble(object):
@@ -14,40 +17,47 @@ class Ensemble(object):
     changing the decisions or parameters of a given run.
     '''
 
-    executable: str = None
-    simulations: dict = {}
-    submissions: list = []
-
-    def __init__(self, executable: str, filemanager: str,
-                 configuration: dict, num_workers: int=1):
+    def __init__(self, executable: str,configuration: dict,
+                 filemanager: str=None, num_workers: int=1,
+                 threads_per_worker: int=OMP_NUM_THREADS,
+                 scheduler: str=None):
         """
         Create a new Ensemble object. The API mirrors that of the
         Simulation object.
         """
         self._status = 'Initialized'
-        self.executable = executable
-        self.filemanager = filemanager
-        self.configuration = configuration
-        self.num_workers = num_workers
+        self.executable: str = executable
+        self.filemanager: str = filemanager
+        self.configuration: dict = configuration
+        self.num_workers: int = num_workers
+        self.simulations: dict = {}
+        self.submissions: list = []
         # Try to get a client, and if none exists then start a new one
         try:
-            client = Client()
             self._client = get_client()
-            # Start more workers if necessary
+            # Start more workers if necessary:
             workers = len(self._client.get_worker_logs())
             if workers <= self.num_workers:
                 self._client.cluster.scale(workers)
         except ValueError:
-            self._client = Client(n_workers=workers, threads_per_worker=1)
+            self._client = Client(n_workers=self.num_workers,
+                                  threads_per_worker=threads_per_worker)
         self._generate_simulation_objects()
 
     def _generate_simulation_objects(self):
         """
         Create a mapping of configurations to the simulation objects.
         """
-        for name, config in self.configuration.items():
-            self.simulations[name] = Simulation(
-                self.executable, self.filemanager, False)
+        if self.filemanager:
+            for name, config in self.configuration.items():
+                self.simulations[name] = Simulation(
+                    self.executable, self.filemanager, False)
+        else:
+            for name, config in self.configuration.items():
+                assert config['file_manager'] is not None, \
+                    "No filemanager found in configuration or Ensemble!"
+                self.simulations[name] = Simulation(
+                    self.executable, config['file_manager'], False)
 
     def _generate_coords(self):
         """
@@ -83,6 +93,10 @@ class Ensemble(object):
                                         if '=' in l else l for l in t))
         decision_names = ['++'.join(tuple(n.split('++')[1:-1]))
                           for n in self.configuration.keys()]
+        if sum([len(dt) for dt in decision_tuples]) == 0:
+            raise NameError("Simulations in the ensemble do not share all"
+                            " common decisions! Please use `open_output`"
+                            " to retrieve the output of this Ensemble")
         for i, t in enumerate(decision_names):
             decision_names[i] = '++'.join(l.split('=')[0] for l in t)
         new_idx = pd.MultiIndex.from_tuples(
@@ -111,9 +125,20 @@ class Ensemble(object):
             config = self.configuration[n]
             self.submissions.append(self._client.submit(
                 _submit, s, n, run_option, prerun_cmds, config))
-            time.sleep(2.0)
 
     def run(self, run_option: str, prerun_cmds=None, monitor: bool=True):
+        """
+        Run the ensemble
+
+        Parameters
+        ----------
+        run_option:
+            Where to run the simulation. Can be ``local`` or ``docker``
+        prerun_cmds:
+            A list of shell commands to run before running SUMMA
+        monitor:
+            Whether to halt operation until runs are complete
+        """
         self.start(run_option, prerun_cmds)
         if monitor:
             return self.monitor()
@@ -127,6 +152,47 @@ class Ensemble(object):
         simulations = self._client.gather(self.submissions)
         for s in simulations:
             self.simulations[s.run_suffix] = s
+
+    def summary(self):
+        """
+        Show the user information about ensemble status
+        """
+        success, error, other = [], [], []
+        for n, s in self.simulations.items():
+            if s.status == 'Success':
+                success.append(n)
+            elif s.status == 'Error':
+                error.append(n)
+            else:
+                other.append(n)
+        return {'success': success, 'error': error, 'other': other}
+
+    def rerun_failed(self, run_option: str, prerun_cmds=None,
+                     monitor: bool=True):
+        """
+        Try to re-run failed simulations.
+
+        Parameters
+        ----------
+        run_option:
+            Where to run the simulation. Can be ``local`` or ``docker``
+        prerun_cmds:
+            A list of shell commands to run before running SUMMA
+        monitor:
+            Whether to halt operation until runs are complete
+        """
+        run_summary = self.summary()
+        self.submissions = []
+        for n in run_summary['error']:
+            config = self.configuration[n]
+            s = self.simulations[n]
+            s.reset()
+            self.submissions.append(self._client.submit(
+                _submit, s, n, run_option, prerun_cmds, config))
+        if monitor:
+            return self.monitor()
+        else:
+            return True
 
 
 def _submit(s: Simulation, name: str, run_option: str, prerun_cmds, config):
@@ -147,19 +213,27 @@ def parameter_product(list_config):
             {'parameters': d} for d in product_dict(**list_config)}
 
 
-def total_product(dec_conf={}, param_conf={}):
+def attribute_product(list_config):
+    return {'++'+'++'.join('{}={}'.format(k, v) for k, v in d.items())+'++':
+            {'attributes': d} for d in product_dict(**list_config)}
+
+
+def total_product(dec_conf={}, param_conf={}, attr_conf={}):
     full_conf = deepcopy(dec_conf)
     full_conf.update(param_conf)
+    full_conf.update(attr_conf)
     prod_dict = product_dict(**full_conf)
     config = {}
     for d in prod_dict:
         name = '++' + '++'.join(
-            '{}={}'.format(k, v) if k in param_conf else v
+            '{}={}'.format(k, v) if k in param_conf or k in attr_conf else v
             for k, v in d.items()) + '++'
-        config[name] = {'decisions': {}, 'parameters': {}}
+        config[name] = {'decisions': {}, 'parameters': {}, 'attributes': {}}
         for k, v in d.items():
             if k in dec_conf:
                 config[name]['decisions'][k] = v
             elif k in param_conf:
                 config[name]['parameters'][k] = v
+            elif k in attr_conf:
+                config[name]['attributes'][k] = v
     return config

@@ -1,7 +1,12 @@
 import os
 import copy
+import shutil
 import subprocess
+import numpy as np
 import xarray as xr
+from pathlib import Path
+from typing import List
+from collections.abc import Iterable
 
 from .decisions import Decisions
 from .file_manager import FileManager
@@ -13,28 +18,21 @@ from .force_file_list import ForceFileList
 class Simulation():
     """The simulation object provides a wrapper for SUMMA simulations"""
 
-    manager: FileManager = None
-    decisions: Decisions = None
-    output_control: OutputControl = None
-    local_param_info: LocalParamInfo = None
-    basin_param_info: LocalParamInfo = None
-    force_file_list: ForceFileList = None
-    local_attributes: xr.Dataset = None
-    parameter_trial: xr.Dataset = None
-
     def __init__(self, executable, filemanager, initialize=True):
         """Initialize a new simulation object"""
         self.stdout = None
         self.stderr = None
         self.process = None
         self.executable = executable
-        self.manager_path = filemanager
+        self.manager_path = Path(os.path.abspath(filemanager))
+        self.config_path = self.manager_path.parent / '.pysumma'
         self.status = 'Uninitialized'
         if initialize:
             self.initialize()
 
     def initialize(self):
-        self.manager = FileManager(self.manager_path)
+        self.manager = FileManager(
+            self.manager_path.parent, self.manager_path.name)
         self.status = 'Initialized'
         self.decisions = self.manager.decisions
         self.output_control = self.manager.output_control
@@ -43,23 +41,50 @@ class Simulation():
         self.local_param_info = self.manager.local_param_info
         self.basin_param_info = self.manager.basin_param_info
         self.local_attributes = self.manager.local_attributes
+        self.initial_conditions = self.manager.initial_conditions
+        self.genparm = self.manager.genparm
+        self.mptable = self.manager.mptable
+        self.soilparm = self.manager.soilparm
+        self.vegparm = self.manager.vegparm
         self.create_backup()
         self.status = 'Initialized'
 
     def apply_config(self, config):
-        for k, v in config.get('file_manager', {}).items():
-            self.manager.set_option(k, v)
+        if 'file_manager' in config:
+            self.manager_path = Path(os.path.abspath(config['file_manager']))
         for k, v in config.get('decisions', {}).items():
             self.decisions.set_option(k, v)
         for k, v in config.get('parameters', {}).items():
             self.local_param_info.set_option(k, v)
+        for k, v in config.get('output_control', {}).items():
+            self.output_control.set_option(k, **v)
+        for k, v in config.get('attributes', {}).items():
+            self.assign_attributes(k, v)
+        if self.decisions['snowLayers'] == 'CLM_2010':
+            self.validate_layer_params(self.local_param_info)
+
+    def assign_attributes(self, name, data):
+        required_shape = self.local_attributes[name].shape
+        try:
+            self.local_attributes[name].values = np.array(data).reshape(required_shape)
+        except ValueError as e:
+            raise ValueError('The shape of the provided replacement data does',
+                             ' not match the shape of the original data.', e)
+        except KeyError as e:
+            raise KeyError(f'The key {name} does not exist in this attribute',
+                           'file. See the documentation at https://summa.readthedocs.',
+                           'io/en/latest/input_output/SUMMA_input/#attribute-and-',
+                           'parameter-files for more information', e)
 
     def create_backup(self):
         self.backup = {}
         self.backup['manager'] = copy.deepcopy(self.manager)
+        self.backup['manager_path'] = copy.deepcopy(self.manager_path)
 
     def reset(self):
         self.manager = copy.deepcopy(self.backup['manager'])
+        self.manager_path = copy.deepcopy(self.backup['manager_path'])
+        self.config_path = self.manager_path.parent / '.pysumma'
         self.decisions = self.manager.decisions
         self.output_control = self.manager.output_control
         self.parameter_trial = self.manager.parameter_trial
@@ -67,7 +92,20 @@ class Simulation():
         self.local_param_info = self.manager.local_param_info
         self.basin_param_info = self.manager.basin_param_info
         self.local_attributes = self.manager.local_attributes
+        self.initial_conditions = self.manager.initial_conditions
+        self.genparm = self.manager.genparm
+        self.mptable = self.manager.mptable
+        self.soilparm = self.manager.soilparm
+        self.vegparm = self.manager.vegparm
 
+    def validate_layer_params(self, params):
+        for i in range(1, 5):
+            assert (params[f'zmaxLayer{i}_upper']
+                    <= params[f'zmaxLayer{i}_lower'], i)
+            assert (params[f'zmaxLayer{i}_upper'] / params[f'zminLayer{i}']
+                    >= 2.5, i)
+            assert (params[f'zmaxLayer{i}_upper'] / params[f'zminLayer{i+1}']
+                    >= 2.5, i)
 
     def _gen_summa_cmd(self, run_suffix, processes=1, prerun_cmds=[],
                        startGRU=None, countGRU=None, iHRU=None,
@@ -75,8 +113,7 @@ class Simulation():
         prerun_cmds.append('export OMP_NUM_THREADS={}'.format(processes))
 
         summa_run_cmd = "{} -s {} -m {}".format(self.executable,
-                                                run_suffix,
-                                                self.manager_path)
+                                                run_suffix, self.manager_path)
 
         if startGRU is not None and countGRU is not None:
             summa_run_cmd += ' -g {} {}'.format(startGRU, countGRU)
@@ -137,7 +174,7 @@ class Simulation():
         if not prerun_cmds:
             prerun_cmds = []
         self.run_suffix = run_suffix
-        self._write_configuration()
+        self._write_configuration(name=run_suffix)
         if run_option == 'local':
             self._run_local(run_suffix, processes, prerun_cmds,
                             startGRU, countGRU, iHRU, freq_restart, progress)
@@ -164,17 +201,16 @@ class Simulation():
             raise RuntimeError('No simulation started! Use simulation.start '
                                'or simulation.execute to begin a simulation!')
 
-        if bool(self.process.wait()):
+        self.stdout, self.stderr = self.process.communicate()
+        if isinstance(self.stdout, bytes):
+            self.stderr = self.stderr.decode('utf-8', 'ignore')
+            self.stdout = self.stdout.decode('utf-8', 'ignore')
+
+        SUCCESS_MSG = 'FORTRAN STOP: finished simulation successfully.'
+        if SUCCESS_MSG not in self.stdout:
             self.status = 'Error'
         else:
             self.status = 'Success'
-
-        try:
-            self.stderr = self.process.stderr.read().decode('utf-8')
-            self.stdout = self.process.stdout.read().decode('utf-8')
-        except UnicodeDecodeError:
-            self.stderr = self.process.stderr.read()
-            self.stdout = self.process.stdout.read()
 
         try:
             self._output = [xr.open_dataset(f) for f in self.get_output()]
@@ -186,16 +222,33 @@ class Simulation():
 
         return self.status
 
-    def _write_configuration(self):
-        #TODO: Still need to update for all netcdf writing
-        self.manager.write()
-        self.decisions.write()
-        self.force_file_list.write()
-        self.local_param_info.write()
-        self.basin_param_info.write()
-        self.output_control.write()
+    def _write_configuration(self, name, write_netcdf: str=False):
+        self.config_path = self.config_path / name
+        self.config_path.mkdir(parents=True, exist_ok=True)
+        manager_path = str(self.manager_path.parent)
+        settings_path = str(self.manager['settings_path'].value)
+        settings_path = Path(settings_path.replace(manager_path, str(self.config_path)))
+        self.manager_path = self.config_path / self.manager.file_name
+        self.manager['settings_path'] = str(settings_path) + os.sep
+        self.manager.write(path=self.config_path)
+        self.decisions.write(path=settings_path)
+        self.force_file_list.write(path=settings_path)
+        self.local_param_info.write(path=settings_path)
+        self.basin_param_info.write(path=settings_path)
+        self.output_control.write(path=settings_path)
+        self.local_attributes.to_netcdf(settings_path / self.manager['local_attributes'].value)
+        self.parameter_trial.to_netcdf(settings_path / self.manager['parameter_trial'].value)
+        self.initial_conditions.to_netcdf(settings_path / self.manager['model_init_cond'].value)
+        with open(settings_path / 'GENPARM.TBL', 'w+') as f:
+            f.writelines(self.genparm)
+        with open(settings_path / 'MPTABLE.TBL', 'w+') as f:
+            f.writelines(self.mptable)
+        with open(settings_path / 'SOILPARM.TBL', 'w+') as f:
+            f.writelines(self.soilparm)
+        with open(settings_path / 'VEGPARM.TBL', 'w+') as f:
+            f.writelines(self.vegparm)
 
-    def get_output(self):
+    def get_output(self) -> List[str]:
         new_file_text = 'Created output file:'
         out_files = []
         for l in self.stdout.split('\n'):
