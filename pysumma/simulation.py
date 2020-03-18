@@ -226,9 +226,6 @@ class Simulation():
         self.config_path.mkdir(parents=True, exist_ok=True)
         manager_path = str(self.manager_path.parent)
         settings_path = str(self.manager['settings_path'].value)
-        print(settings_path)
-        print(manager_path)
-        print(self.config_path)
         settings_path = Path(settings_path.replace(manager_path, str(self.config_path)))
         self.manager_path = self.config_path / self.manager.file_name
         self.manager['settings_path'] = str(settings_path) + os.sep
