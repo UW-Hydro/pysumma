@@ -54,7 +54,7 @@ class Distributed(object):
         """
         for argdict in self.chunk_args:
             start = argdict['startGRU']
-            stop = argdict['startGRU'] + argdict['countGRU']
+            stop = argdict['startGRU'] + argdict['countGRU'] - 1
             name = f"g{start}-{stop}"
             self.simulations[name] = Simulation(self.executable,
                                                 self.manager_path,
@@ -72,14 +72,14 @@ class Distributed(object):
         if not (chunk_size or num_chunks):
             chunk_size = 12
         if chunk_size:
-            sim_truncated = chunk_size * (sim_size // chunk_size)
-            starts = np.arange(1, sim_truncated, chunk_size).astype(int)
-            stops = np.append(starts[1:] + 1, sim_size)
+            sim_truncated = (chunk_size-1) * (sim_size // (chunk_size-1))
+            starts = np.arange(1, sim_truncated+1, chunk_size).astype(int)
+            stops = np.append(starts[1:], sim_size)
             chunks = np.vstack([starts, stops]).T
         elif num_chunks:
             chunk_size = np.ceil(sim_size / num_chunks).astype(int)
             starts = np.arange(1, sim_size, chunk_size)
-            stops = np.append(starts[1:] + 1, sim_size)
+            stops = np.append(starts[1:], sim_size+1)
             chunks = np.vstack([starts, stops]).T
         return [{'startGRU': start, 'countGRU': stop - start}
                 for start, stop in chunks]
@@ -127,6 +127,8 @@ class Distributed(object):
         for s in simulations:
             self.simulations[s.run_suffix] = s
 
+    def merge_output(self):
+        pass
 
 
 def _submit(s: Simulation, name: str, run_option: str,
