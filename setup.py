@@ -16,7 +16,6 @@ setup(name='pysumma',
           'shapely',
           'seaborn',
           'pandas>=0.25',
-          'hs_restclient==1.3.4',
           'distributed',
           'fiona',
           'netcdf4'
