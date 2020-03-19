@@ -1,12 +1,14 @@
 from copy import deepcopy
 from distributed import Client, get_client
-from typing import List
+from typing import List, Dict
 import os
+from pathlib import Path
 import pandas as pd
 import time
 import numpy as np
 import xarray as xr
 
+from .file_manager import FileManager
 from .simulation import Simulation
 from .utils import ChainDict, product_dict
 
@@ -26,9 +28,13 @@ class Distributed(object):
                  chunk_size: int=None, num_chunks: int=None, scheduler: str=None):
         """Initialize a new distributed object"""
         self._status = 'Initialized'
-        self.simulation = Simulation(executable, filemanager)
-        self.submissions: list = []
-        self.num_gru = self.count_gru()
+        self.executable = executable
+        self.manager_path = Path(os.path.abspath(filemanager))
+        self.manager = FileManager(
+            self.manager_path.parent, self.manager_path.name)
+        self.simulations: Dict[str, Simulation] = {}
+        self.submissions: List = []
+        self.num_workers: int = num_workers
         # Try to get a client, and if none exists then start a new one
         try:
             self._client = get_client()
@@ -39,9 +45,22 @@ class Distributed(object):
         except ValueError:
             self._client = Client(n_workers=self.num_workers,
                                   threads_per_worker=threads_per_worker)
-        self.chunks_args = self._gen_args(chunk_size, num_chunks)
+        self.chunk_args = self._generate_args(chunk_size, num_chunks)
+        self._generate_simulation_objects()
 
-    def _gen_args(self, chunk_size: int=None, num_chunks: int=None):
+    def _generate_simulation_objects(self):
+        """
+        Create each of the required simulation objects
+        """
+        for argdict in self.chunk_args:
+            start = argdict['startGRU']
+            stop = argdict['startGRU'] + argdict['countGRU']
+            name = f"g{start}-{stop}"
+            self.simulations[name] = Simulation(self.executable,
+                                                self.manager_path,
+                                                False)
+
+    def _generate_args(self, chunk_size: int=None, num_chunks: int=None):
         '''
         Generate the arguments that will be used to start multiple
         runs from the base ``self.simulation``
@@ -49,12 +68,12 @@ class Distributed(object):
         assert not (chunk_size and num_chunks), \
             "Only specify at most one of `chunk_size` or `num_chunks`!"
         start, stop = 0, 0
-        sim_size = len(self.simulation.local_attributes['gru'])
+        sim_size = len(self.manager.local_attributes['gru'])
         if not (chunk_size or num_chunks):
             chunk_size = 12
         if chunk_size:
             sim_truncated = chunk_size * (sim_size // chunk_size)
-            starts = np.linspace(1, sim_truncated, chunk_size).astype(int)
+            starts = np.arange(1, sim_truncated, chunk_size).astype(int)
             stops = np.append(starts[1:] + 1, sim_size)
             chunks = np.vstack([starts, stops]).T
         elif num_chunks:
@@ -65,7 +84,7 @@ class Distributed(object):
         return [{'startGRU': start, 'countGRU': stop - start}
                 for start, stop in chunks]
 
-    def start(self, run_option: str, prerun_cmds: list=None):
+    def start(self, run_option: str, prerun_cmds: List=None):
         """
         Start running the ensemble members.
 
@@ -76,11 +95,10 @@ class Distributed(object):
         prerun_cmds:
             A list of preprocessing commands to run
         """
-        for n, s in self.simulations.items():
-            # Sleep calls are to ensure writeout happens
-            config = self.configuration[n]
+        for idx, (name, sim) in enumerate(self.simulations.items()):
+            kwargs = self.chunk_args[idx]
             self.submissions.append(self._client.submit(
-                _submit, s, n, run_option, prerun_cmds, config))
+                _submit, sim, name, run_option, prerun_cmds, kwargs))
 
     def run(self, run_option: str, prerun_cmds=None, monitor: bool=True):
         """
@@ -114,7 +132,6 @@ class Distributed(object):
 def _submit(s: Simulation, name: str, run_option: str,
             prerun_cmds: List[str], run_args: dict, **kwargs):
     s.initialize()
-    s.apply_config(config)
     s.run(run_option, run_suffix=name, prerun_cmds=prerun_cmds, **run_args, **kwargs)
     s.process = None
     return s
