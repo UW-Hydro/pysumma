@@ -50,7 +50,7 @@ class Distributed(object):
         """
         self._status = 'Initialized'
         self.executable = executable
-        self.manager_path = Path(os.path.abspath(filemanager))
+        self.manager_path = Path(os.path.abspath(os.path.realpath(filemanager)))
         self.manager = FileManager(
             self.manager_path.parent, self.manager_path.name)
         self.simulations: Dict[str, Simulation] = {}
