@@ -15,23 +15,32 @@ from .force_file_list import ForceFileList
 
 
 class Simulation():
-    """The simulation object provides a wrapper for SUMMA simulations"""
+    """
+    The simulation object provides a wrapper for SUMMA simulations
+    :var stdout: Store standard output of the run
+    :var stderr: Handle to the process during runtime
+    :var manager_path: Path to the file manager
+    :var config_path: Path to where configuration will be written
+    :var status: Current status of the simulation
+    :var manager: File manager object (populated after calling ``initialize``)
+    :var decisions: Decisions object (populated after calling ``initialize``)
+    :var output_control: OutputControl object (populated after calling ``initialize``)
+    :var parameter_trial: Parameter trial object (populated after calling ``initialize``)
+    :var force_file_list: Forcing file list object (populated after calling ``initialize``)
+    :var local_param_info: LocalParamInfo object (populated after calling ``initialize``)
+    :var basin_param_info: BasinParamInfo object (populated after calling ``initialize``)
+    :var local_attributes: LocalAttributes object (populated after calling ``initialize``)
+    :var initial_conditions: InitialConditions object (populated after calling ``initialize``)
+    """
 
     def __init__(self, executable, filemanager, initialize=True):
         """Initialize a new simulation object"""
-        #: Store standard output of the run
         self.stdout = None
-        #: Store standard error of the run
         self.stderr = None
-        #: Handle to the process during runtime
         self.process = None
-        #: Path to the SUMMA executable
         self.executable = executable
-        #: Path to the file manager
         self.manager_path = Path(os.path.abspath(os.path.realpath(filemanager)))
-        #: Path to where configuration will be written
         self.config_path = self.manager_path.parent / '.pysumma'
-        #: Current status of the simulation
         self.status = 'Uninitialized'
         if initialize:
             self.initialize()
@@ -44,25 +53,16 @@ class Simulation():
         a backup of the configuration that can be restored via the
         ``reset`` method.
         """
-        #: File manager object (populated after calling ``initialize``)
         self.manager = FileManager(
             self.manager_path.parent, self.manager_path.name)
         self.status = 'Initialized'
-        #: Decisions object (populated after calling ``initialize``)
         self.decisions = self.manager.decisions
-        #: OutputControl object (populated after calling ``initialize``)
         self.output_control = self.manager.output_control
-        #: Parameter trial object (populated after calling ``initialize``)
         self.parameter_trial = self.manager.parameter_trial
-        #: Forcing file list object (populated after calling ``initialize``)
         self.force_file_list = self.manager.force_file_list
-        #: LocalParamInfo object (populated after calling ``initialize``)
         self.local_param_info = self.manager.local_param_info
-        #: BasinParamInfo object (populated after calling ``initialize``)
         self.basin_param_info = self.manager.basin_param_info
-        #: LocalAttributes object (populated after calling ``initialize``)
         self.local_attributes = self.manager.local_attributes
-        #: InitialConditions object (populated after calling ``initialize``)
         self.initial_conditions = self.manager.initial_conditions
         self.genparm = self.manager.genparm
         self.mptable = self.manager.mptable
@@ -318,10 +318,7 @@ class Simulation():
         self.config_path.mkdir(parents=True, exist_ok=True)
         manager_path = str(self.manager_path.parent)
         settings_path = os.path.abspath(os.path.realpath(str(self.manager['settings_path'].value)))
-        print(settings_path)
         settings_path = Path(settings_path.replace(manager_path, str(self.config_path)))
-        print(manager_path, self.config_path)
-        print(settings_path)
         self.manager_path = self.config_path / self.manager.file_name
         self.manager['settings_path'] = str(settings_path) + os.sep
         self.manager.write(path=self.config_path)

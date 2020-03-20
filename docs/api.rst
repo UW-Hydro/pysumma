@@ -9,31 +9,28 @@ This page provides an auto-generated summary of pysumma's API. For more details
 and examples, refer to the main documentation.
 
 Simulation
-=======
-.. autoclass:: pysumma.simulation.Simulation
+==========
+.. autoclass:: pysumma.Simulation
     :members:
-    .. autoattribute:: exectuable
-         :annotation:
-    .. autoattribute:: manager_path
-         :annotation:
+
 Attributes
 ----------
 .. autosummary::
-    Simulation.executable
-    Simulation.manager_path
-    Simulation.config_path
-    Simulation.status
-    Simulation.output
-    Simulation.stdout
-    Simulation.stderr
-    Simulation.manager
-    Simulation.decisions
-    Simulation.output_control
-    Simulation.local_param_info
-    Simulation.local_attributes
-    Simulation.param_trial
-    Simulation.basin_param_info
-    Simulation.initial_conditions
+    pysumma.Simulation.executable
+    pysumma.Simulation.manager_path
+    pysumma.Simulation.config_path
+    pysumma.Simulation.status
+    pysumma.Simulation.output
+    pysumma.Simulation.stdout
+    pysumma.Simulation.stderr
+    pysumma.Simulation.manager
+    pysumma.Simulation.decisions
+    pysumma.Simulation.output_control
+    pysumma.Simulation.local_param_info
+    pysumma.Simulation.local_attributes
+    pysumma.Simulation.param_trial
+    pysumma.Simulation.basin_param_info
+    pysumma.Simulation.initial_conditions
 
 Ensemble
 =======
