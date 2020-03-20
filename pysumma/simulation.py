@@ -67,14 +67,13 @@ class Simulation():
             the values represent the changes to be applied. A representative
             example might be:
 
-            ```
+            ::
             config = {
                 'file_manager': '/home/user/cool_setup/file_manager_new.txt',
                 'decisions': {'snowLayers': 'CLM_2010'},
                 'parameters': {'albedoDecayRate': 1e-6},
                 'attributes': {'mHeight': 15}
                 }
-            ```
         """
         if 'file_manager' in config:
             self.manager_path = Path(os.path.abspath(config['file_manager']))

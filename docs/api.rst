@@ -10,15 +10,40 @@ and examples, refer to the main documentation.
 
 Simulation
 =======
+.. autosummary::
+    Simulation
 
-.. automodule:: pysumma.simulation
-    :members:
+Methods
+-------
+.. autosummary::
+    Simulation.run
+    Simulation.start
+    Simulation.monitor
+    Simulation.initialize
+    Simulation.reset
+    Simulation.apply_config
+
+Attributes
+----------
+.. autosummary::
+    Simulation.filemanager
+    Simulation.executable
+    Simulation.status
+    Simulation.output
+    Simulation.stdout
+    Simulation.stderr
 
 Ensemble
 =======
 
-.. automodule:: pysumma.ensemble
-    :members:
+.. autosummary::
+    Ensemble
+    Ensemble.run
+    Ensemble.start
+    Ensemble.monitor
+    Ensemble.summary
+    Ensemble.rerun_failed
+    Ensemble.merge_output
 
 Distributed
 =======
