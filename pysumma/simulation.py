@@ -24,7 +24,7 @@ class Simulation():
         self.stderr = None
         self.process = None
         self.executable = executable
-        self.manager_path = Path(os.path.abspath(filemanager))
+        self.manager_path = Path(os.path.abspath(os.path.realpath(filemanager)))
         self.config_path = self.manager_path.parent / '.pysumma'
         self.status = 'Uninitialized'
         if initialize:
@@ -226,8 +226,11 @@ class Simulation():
         self.config_path = self.config_path / name
         self.config_path.mkdir(parents=True, exist_ok=True)
         manager_path = str(self.manager_path.parent)
-        settings_path = str(self.manager['settings_path'].value)
+        settings_path = os.path.abspath(os.path.realpath(str(self.manager['settings_path'].value)))
+        print(settings_path)
         settings_path = Path(settings_path.replace(manager_path, str(self.config_path)))
+        print(manager_path, self.config_path)
+        print(settings_path)
         self.manager_path = self.config_path / self.manager.file_name
         self.manager['settings_path'] = str(settings_path) + os.sep
         self.manager.write(path=self.config_path)
