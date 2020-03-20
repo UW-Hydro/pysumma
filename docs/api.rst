@@ -15,7 +15,7 @@ Simulation
 
 Methods
 -------
-.. autosummary::
+.. automodule::
     Simulation.run
     Simulation.start
     Simulation.monitor
@@ -26,17 +26,26 @@ Methods
 Attributes
 ----------
 .. autosummary::
-    Simulation.filemanager
     Simulation.executable
+    Simulation.manager_path
+    Simulation.config_path
     Simulation.status
     Simulation.output
     Simulation.stdout
     Simulation.stderr
+    Simulation.manager
+    Simulation.decisions
+    Simulation.output_control
+    Simulation.local_param_info
+    Simulation.local_attributes
+    Simulation.param_trial
+    Simulation.basin_param_info
+    Simulation.initial_conditions
 
 Ensemble
 =======
 
-.. autosummary::
+.. automodule::
     Ensemble
     Ensemble.run
     Ensemble.start

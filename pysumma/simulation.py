@@ -19,12 +19,19 @@ class Simulation():
 
     def __init__(self, executable, filemanager, initialize=True):
         """Initialize a new simulation object"""
+        #: Store standard output of the run
         self.stdout = None
+        #: Store standard error of the run
         self.stderr = None
+        #: Handle to the process during runtime
         self.process = None
+        #: Path to the SUMMA executable
         self.executable = executable
+        #: Path to the file manager
         self.manager_path = Path(os.path.abspath(os.path.realpath(filemanager)))
+        #: Path to where configuration will be written
         self.config_path = self.manager_path.parent / '.pysumma'
+        #: Current status of the simulation
         self.status = 'Uninitialized'
         if initialize:
             self.initialize()
@@ -37,16 +44,25 @@ class Simulation():
         a backup of the configuration that can be restored via the
         ``reset`` method.
         """
+        #: File manager object (populated after calling ``initialize``)
         self.manager = FileManager(
             self.manager_path.parent, self.manager_path.name)
         self.status = 'Initialized'
+        #: Decisions object (populated after calling ``initialize``)
         self.decisions = self.manager.decisions
+        #: OutputControl object (populated after calling ``initialize``)
         self.output_control = self.manager.output_control
+        #: Parameter trial object (populated after calling ``initialize``)
         self.parameter_trial = self.manager.parameter_trial
+        #: Forcing file list object (populated after calling ``initialize``)
         self.force_file_list = self.manager.force_file_list
+        #: LocalParamInfo object (populated after calling ``initialize``)
         self.local_param_info = self.manager.local_param_info
+        #: BasinParamInfo object (populated after calling ``initialize``)
         self.basin_param_info = self.manager.basin_param_info
+        #: LocalAttributes object (populated after calling ``initialize``)
         self.local_attributes = self.manager.local_attributes
+        #: InitialConditions object (populated after calling ``initialize``)
         self.initial_conditions = self.manager.initial_conditions
         self.genparm = self.manager.genparm
         self.mptable = self.manager.mptable
