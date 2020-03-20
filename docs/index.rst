@@ -19,7 +19,7 @@ Installation
 Currently we only support building pysumma from source. This can be accomplished by
 running:
 
-.. code-block::
+::
 
     git clone https://github.com/UW-Hydro/pysumma.git
     cd pysumma
@@ -27,7 +27,7 @@ running:
 
 If you plan on helping to develop pysumma you may wish to use the following to install
 
-.. code-block::
+::
 
     git clone https://github.com/UW-Hydro/pysumma.git
     cd pysumma
