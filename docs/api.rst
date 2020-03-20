@@ -1,4 +1,4 @@
-.. currentmodule:: pysumma.pysumma
+.. currentmodule:: pysumma
 .. _api:
 
 #############
@@ -11,6 +11,7 @@ and examples, refer to the main documentation.
 Simulation
 =======
 .. automodule:: Simulation
+    :members:
 
 Attributes
 ----------
