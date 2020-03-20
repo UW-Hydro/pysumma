@@ -1,5 +1,6 @@
 from .simulation import Simulation
 from .ensemble import Ensemble
+from .distributed import Distributed
 from .file_manager import FileManager
 from .decisions import Decisions
 from .output_control import OutputControl
