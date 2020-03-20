@@ -18,7 +18,6 @@ setup(name='pysumma',
           'pandas>=0.25',
           'hs_restclient',
           'distributed',
-          'cartopy',
           'fiona',
           'netcdf4'
           ],
