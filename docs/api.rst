@@ -10,7 +10,7 @@ and examples, refer to the main documentation.
 
 Simulation
 =======
-.. autoclass:: pysumma.Simulation
+.. autoclass:: pysumma.simulation.Simulation
     :members:
     .. autoattribute:: exectuable
          :annotation:
