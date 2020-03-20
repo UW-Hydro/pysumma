@@ -17,20 +17,23 @@ from .force_file_list import ForceFileList
 class Simulation():
     """
     The simulation object provides a wrapper for SUMMA simulations
-    :var stdout: Store standard output of the run
-    :var stderr: Handle to the process during runtime
-    :var manager_path: Path to the file manager
-    :var config_path: Path to where configuration will be written
-    :var status: Current status of the simulation
-    :var manager: File manager object (populated after calling ``initialize``)
-    :var decisions: Decisions object (populated after calling ``initialize``)
-    :var output_control: OutputControl object (populated after calling ``initialize``)
-    :var parameter_trial: Parameter trial object (populated after calling ``initialize``)
-    :var force_file_list: Forcing file list object (populated after calling ``initialize``)
-    :var local_param_info: LocalParamInfo object (populated after calling ``initialize``)
-    :var basin_param_info: BasinParamInfo object (populated after calling ``initialize``)
-    :var local_attributes: LocalAttributes object (populated after calling ``initialize``)
-    :var initial_conditions: InitialConditions object (populated after calling ``initialize``)
+
+    Attributes
+    ----------
+    stdout: Store standard output of the run
+    stderr: Handle to the process during runtime
+    manager_path: Path to the file manager
+    config_path: Path to where configuration will be written
+    status: Current status of the simulation
+    manager: File manager object (populated after calling ``initialize``)
+    decisions: Decisions object (populated after calling ``initialize``)
+    output_control: OutputControl object (populated after calling ``initialize``)
+    parameter_trial: Parameter trial object (populated after calling ``initialize``)
+    force_file_list: Forcing file list object (populated after calling ``initialize``)
+    local_param_info: LocalParamInfo object (populated after calling ``initialize``)
+    basin_param_info: BasinParamInfo object (populated after calling ``initialize``)
+    local_attributes: LocalAttributes object (populated after calling ``initialize``)
+    initial_conditions: InitialConditions object (populated after calling ``initialize``)
     """
 
     def __init__(self, executable, filemanager, initialize=True):
