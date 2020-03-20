@@ -10,18 +10,7 @@ and examples, refer to the main documentation.
 
 Simulation
 =======
-.. autosummary::
-    Simulation
-
-Methods
--------
-.. automodule::
-    Simulation.run
-    Simulation.start
-    Simulation.monitor
-    Simulation.initialize
-    Simulation.reset
-    Simulation.apply_config
+.. automodule:: Simulation
 
 Attributes
 ----------
