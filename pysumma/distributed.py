@@ -21,6 +21,19 @@ class Distributed(object):
     in parallel.
 
     Currently only supports GRU based parallelization.
+
+    Attributes
+    ----------
+    executable:
+        Path to the SUMMA executable
+    manager:
+        FileManager object
+    num_workers:
+        Number of parallel workers to use
+    chunk_args:
+        List of dictionaries containing ``startGRU`` and ``countGRU`` values
+    simulations:
+        Dictionary of run names and Simulation objects
     '''
 
     def __init__(self, executable: str, filemanager: str,
