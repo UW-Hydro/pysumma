@@ -7,8 +7,9 @@ from matplotlib import cm
 from .utils import justify
 
 
-def layers(var, depth, ax=None, colormap='viridis',
-           plot_soil=False, plot_snow=True, variable_range=None, **kwargs):
+def layers(var, depth, ax=None, colormap='viridis', plot_soil=False,
+           plot_snow=True, variable_range=None, add_colorbar=True,
+           line_kwargs={}, cbar_kwargs={}):
     # Preprocess the data
     vmask = var != -9999
     dmask = depth != -9999
@@ -42,7 +43,7 @@ def layers(var, depth, ax=None, colormap='viridis',
         for l in lo_depth.ifcToto.values[:-1][::-1]:
             y = lo_depth[l]
             y[np.isnan(y)] = 0
-            ax.vlines(time, ymin=-y, ymax=0, color=rgba[l], **kwargs)
+            ax.vlines(time, ymin=-y, ymax=0, color=rgba[l], **line_kwargs)
 
     # Plot snow layers - plot top down
     if plot_snow:
@@ -50,10 +51,15 @@ def layers(var, depth, ax=None, colormap='viridis',
             y = hi_depth[l]
             y[np.isnan(y)] = 0
             if (y != 0).any():
-                ax.vlines(time, ymin=0, ymax=-y, color=rgba[l], **kwargs)
+                ax.vlines(time, ymin=0, ymax=-y, color=rgba[l], **line_kwargs)
 
     # Add the colorbar
     mappable = cm.ScalarMappable(norm=norm, cmap=cmap)
     mappable.set_array(var.values.flatten())
-    plt.gcf().colorbar(mappable, label=var.long_name, ax=ax)
-    return ax
+    try:
+        label = var.long_name
+    except:
+        label = var.name
+    if add_colorbar:
+        plt.gcf().colorbar(mappable, label=label, ax=ax, **cbar_kwargs)
+    return ax, mappable

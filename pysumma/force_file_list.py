@@ -9,7 +9,7 @@ class ForceFileListOption(BaseOption):
 
     def __init__(self, name):
         super().__init__(name)
-        self.set_value(xr.open_dataset(name))
+        self.set_value(name)
 
     def set_value(self, new_value):
         self.value = new_value
@@ -49,3 +49,6 @@ class ForceFileList(OptionContainer):
     @property
     def forcing_data(self):
         return [o.value for o in self.options]
+
+    def open_forcing_data(self):
+        return [xr.open_dataset(o) for o in self.forcing_data]
