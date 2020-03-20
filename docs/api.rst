@@ -10,9 +10,12 @@ and examples, refer to the main documentation.
 
 Simulation
 =======
-.. automodule:: Simulation
+.. autoclass:: Simulation
     :members:
-
+    .. autoattribute:: exectuable
+         :annotation:
+    .. autoattribute:: manager_path
+         :annotation:
 Attributes
 ----------
 .. autosummary::
