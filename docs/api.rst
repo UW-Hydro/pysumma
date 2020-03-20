@@ -1,4 +1,4 @@
-.. currentmodule:: pysumma
+.. currentmodule:: pysumma.pysumma
 .. _api:
 
 #############
