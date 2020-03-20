@@ -6,7 +6,6 @@ import numpy as np
 import xarray as xr
 from pathlib import Path
 from typing import List
-from collections.abc import Iterable
 
 from .decisions import Decisions
 from .file_manager import FileManager

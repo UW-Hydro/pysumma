@@ -26,7 +26,28 @@ class Distributed(object):
     def __init__(self, executable: str, filemanager: str,
                  num_workers: int=1, threads_per_worker: int=OMP_NUM_THREADS,
                  chunk_size: int=None, num_chunks: int=None, scheduler: str=None):
-        """Initialize a new distributed object"""
+        """
+        Initialize a new distributed object
+
+        Parameters
+        ----------
+        executable:
+            Path to the SUMMA executable
+        filemanager:
+            Path to the file manager
+        num_workers:
+            Number of workers to use for parallel runs
+        threads_per_worker:
+            Number of threads each worker has
+        chunk_size:
+            Number of GRU per job
+            (cannot be used with num_chunks)
+        num_chunks:
+            How many jobs to split the run into
+            (Cannot be used with chunk_size)
+        scheduler:
+            Not used currently
+        """
         self._status = 'Initialized'
         self.executable = executable
         self.manager_path = Path(os.path.abspath(filemanager))
