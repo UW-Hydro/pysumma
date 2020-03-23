@@ -16,6 +16,27 @@ pysumma provides methods for:
 
 Installation
 ============
+
+Dependencies
+------------
+
+A conda environment is available for management of pysumma's dependencies.
+You can create your own environment from this file by running:
+
+::
+    conda env create -f environment.yml
+
+Then, you can activate this environment with ``conda activate pysumma``.
+Before installing pysumma into this environment you may also wish to install it as a kernel in your Jupyter environments.
+This can be accomplished by running:
+
+::
+    python -m ipykernel install --user --name=pysumma
+
+With this environment active you can install pysumma this environment with the instructions below.
+
+Installing pysumma
+------------------
 Currently we only support building pysumma from source. This can be accomplished by
 running:
 
