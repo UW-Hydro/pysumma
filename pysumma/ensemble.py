@@ -15,6 +15,19 @@ class Ensemble(object):
     '''
     Ensembles represent an multiple SUMMA configurations based on
     changing the decisions or parameters of a given run.
+
+    Attributes
+    ----------
+    executable:
+        Path to the SUMMA executable
+    filemanager: (optional)
+        Path to the file manager
+    configuration:
+        Dictionary of runs, along with settings
+    num_workers:
+        Number of parallel workers to use
+    simulations:
+        Dictionary of run names and Simulation objects
     '''
 
     def __init__(self, executable: str,configuration: dict,

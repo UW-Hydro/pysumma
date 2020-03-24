@@ -15,7 +15,40 @@ from .force_file_list import ForceFileList
 
 
 class Simulation():
-    """The simulation object provides a wrapper for SUMMA simulations"""
+    """
+    The simulation object provides a wrapper for SUMMA simulations
+
+    Attributes
+    ----------
+    stdout:
+        Store standard output of the run
+    stderr:
+        Handle to the process during runtime
+    manager_path:
+        Path to the file manager
+    config_path:
+        Path to where configuration will be written
+    status:
+        Current status of the simulation
+    manager:
+        File manager object (populated after calling ``initialize``)
+    decisions:
+        Decisions object (populated after calling ``initialize``)
+    output_control:
+        OutputControl object (populated after calling ``initialize``)
+    parameter_trial:
+        Parameter trial object (populated after calling ``initialize``)
+    force_file_list:
+        Forcing file list object (populated after calling ``initialize``)
+    local_param_info:
+        LocalParamInfo object (populated after calling ``initialize``)
+    basin_param_info:
+        BasinParamInfo object (populated after calling ``initialize``)
+    local_attributes:
+        LocalAttributes object (populated after calling ``initialize``)
+    initial_conditions:
+        InitialConditions object (populated after calling ``initialize``)
+    """
 
     def __init__(self, executable, filemanager, initialize=True):
         """Initialize a new simulation object"""
@@ -30,6 +63,13 @@ class Simulation():
             self.initialize()
 
     def initialize(self):
+        """
+        Initialize reads in all of the relevant files. This may not
+        be desired on instantiation, so the ``initialize`` parameter
+        can be set in the constructor. Calling this will also create
+        a backup of the configuration that can be restored via the
+        ``reset`` method.
+        """
         self.manager = FileManager(
             self.manager_path.parent, self.manager_path.name)
         self.status = 'Initialized'
@@ -48,7 +88,26 @@ class Simulation():
         self.create_backup()
         self.status = 'Initialized'
 
-    def apply_config(self, config):
+    def apply_config(self, config: dict):
+        """
+        Change the settings of the simulation based on a configuration
+        dictionary.
+
+        Parameters
+        ----------
+        config:
+            A dictionary where keys represent the type of change and
+            the values represent the changes to be applied. A representative
+            example might be:
+
+            ::
+            config = {
+                'file_manager': '/home/user/cool_setup/file_manager_new.txt',
+                'decisions': {'snowLayers': 'CLM_2010'},
+                'parameters': {'albedoDecayRate': 1e-6},
+                'attributes': {'mHeight': 15}
+                }
+        """
         if 'file_manager' in config:
             self.manager_path = Path(os.path.abspath(config['file_manager']))
         for k, v in config.get('decisions', {}).items():
@@ -63,6 +122,17 @@ class Simulation():
             self.validate_layer_params(self.local_param_info)
 
     def assign_attributes(self, name, data):
+        """
+        Assign new data to the ``local_attributes`` dataset.
+
+        Parameters
+        ----------
+        name:
+            The name (or key) of the attribute to modify
+        data:
+            The data to change the attribute to. The shape
+            must match the shape in the local attributes file
+        """
         required_shape = self.local_attributes[name].shape
         try:
             self.local_attributes[name].values = np.array(data).reshape(required_shape)
@@ -81,6 +151,7 @@ class Simulation():
         self.backup['manager_path'] = copy.deepcopy(self.manager_path)
 
     def reset(self):
+        """Restores the original settings of the Simulation"""
         self.manager = copy.deepcopy(self.backup['manager'])
         self.manager_path = copy.deepcopy(self.backup['manager_path'])
         self.config_path = self.manager_path.parent / '.pysumma'
@@ -98,6 +169,7 @@ class Simulation():
         self.vegparm = self.manager.vegparm
 
     def validate_layer_params(self, params):
+        """Ensure that the layer parameters are valid"""
         for i in range(1, 5):
             assert (params[f'zmaxLayer{i}_upper']
                     <= params[f'zmaxLayer{i}_lower'], i)
@@ -168,7 +240,10 @@ class Simulation():
     def start(self, run_option,  run_suffix='pysumma_run', processes=1,
               prerun_cmds=[], startGRU=None, countGRU=None, iHRU=None,
               freq_restart=None, progress=None):
-        """Run a SUMMA simulation"""
+        """
+        Run a SUMMA simulation without halting. Most likely this should
+        not be used. Use the ``run`` method for most common use cases.
+        """
         #TODO: Implement running on hydroshare here
         if not prerun_cmds:
             prerun_cmds = []
@@ -187,11 +262,46 @@ class Simulation():
     def run(self, run_option,  run_suffix='pysumma_run', processes=1,
             prerun_cmds=None, startGRU=None, countGRU=None, iHRU=None,
             freq_restart=None, progress=None):
+        """
+        Run a SUMMA simulation and halt until completion or error.
+
+        Parameters
+        ----------
+        run_option:
+            Method to run SUMMA, must be one of either local or docker
+        run_suffix:
+            Name to append to the output files for this SUMMA run
+        processes:
+            Number of openmp processes to use for this run. For this
+            to do anything SUMMA must be compiled with openmp support
+        prerun_cmds:
+            A list of commands to execute before running SUMMA. May be
+            necessary to set environment variables or do any preprocessing
+        startGRU:
+            GRU index to start the simulation on (must also set ``countGRU``
+            if this argument is set)
+        countGRU:
+            Number of GRU to run, starting at ``startGRU`` (must also set
+            ``startGRU`` if this argument is set)
+        iHRU:
+            Index of HRU to run (cannot be used with ``startGRU`` and
+            ``countGRU``)
+        freq_restart:
+            Frequency to write restart files. Options include
+            ``[y, m, d, never]`` for yearly, monthly, and daily restart
+            files. Defaults to ``never``
+        progress:
+            Frequency to write stdout progress. Note this is not printed
+            during runtime via pysumma, but can be checked after completion.
+            Options include ``[m, d, h, never]`` for monthly, daily, and
+            hourly output.
+        """
         self.start(run_option, run_suffix, processes, prerun_cmds,
                    startGRU, countGRU, iHRU, freq_restart, progress)
         self.monitor()
 
     def monitor(self):
+        '''Halt execution until Simulation either finishes or errors'''
         # Simulation already run
         if self.status in ['Error', 'Success']:
             return self.status
@@ -218,7 +328,6 @@ class Simulation():
         except Exception:
             self._output = None
 
-
         return self.status
 
     def _write_configuration(self, name, write_netcdf: str=False):
@@ -226,10 +335,7 @@ class Simulation():
         self.config_path.mkdir(parents=True, exist_ok=True)
         manager_path = str(self.manager_path.parent)
         settings_path = os.path.abspath(os.path.realpath(str(self.manager['settings_path'].value)))
-        print(settings_path)
         settings_path = Path(settings_path.replace(manager_path, str(self.config_path)))
-        print(manager_path, self.config_path)
-        print(settings_path)
         self.manager_path = self.config_path / self.manager.file_name
         self.manager['settings_path'] = str(settings_path) + os.sep
         self.manager.write(path=self.config_path)
@@ -250,7 +356,8 @@ class Simulation():
         with open(settings_path / 'VEGPARM.TBL', 'w+') as f:
             f.writelines(self.vegparm)
 
-    def get_output(self) -> List[str]:
+    def get_output_files(self) -> List[str]:
+        """Find output files given the ``stdout`` generated from a run"""
         new_file_text = 'Created output file:'
         out_files = []
         for l in self.stdout.split('\n'):
@@ -261,6 +368,7 @@ class Simulation():
 
     @property
     def output(self):
+        """Get the output as an xarray dataset"""
         if self.status == 'Success':
             return self._output
         elif self.status == 'Error':
@@ -275,6 +383,10 @@ class Simulation():
         repr = []
         repr.append("Executable path: {}".format(self.executable))
         repr.append("Simulation status: {}".format(self.status))
-        repr.append("File manager configuration:")
-        repr.append(str(self.manager))
+        try:
+            repr.append("File manager configuration:")
+            repr.append(str(self.manager))
+        except:
+            repr.append("Use Simulation.initialize() to "
+                        "read input files for more information")
         return '\n'.join(repr)
