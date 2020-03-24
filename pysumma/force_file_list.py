@@ -31,7 +31,7 @@ class ForceFileList(OptionContainer):
     prefix: str = ''
 
     def __init__(self, dirpath, filepath, force_file_prefix_path):
-        self.prefix = force_file_prefix_path
+        self.prefix = str(force_file_prefix_path)
         super().__init__(ForceFileListOption, dirpath, filepath)
 
     def set_option(self, key, value):
