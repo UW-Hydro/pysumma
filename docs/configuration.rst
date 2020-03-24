@@ -1,10 +1,13 @@
 .. _configuration.rst:
 
+Interfaces to configuration files
+*********************************
+
 SUMMA model setups require a number of configuration files and data sources to run.
 pysumma provides interfaces to each of these files in a standardized fashion, allowing you to quickly manipulate existing SUMMA configurations.
 For more information about the in depth details of each of the required inputs for SUMMA see the `SUMMA documentation on input <https://summa.readthedocs.io/en/latest/input_output/SUMMA_input/>`_
 This page shows some basic examples of how you can interact with these configuration objects as well as extremely concise descriptions of what each object does.
-For more detailed information about each of the objects you can browse our API documentation :here:`./api.rst`.
+For more detailed information about each of the objects you can browse our API documentation `here <api.rst>`_.
 
 
 Text based files
@@ -26,6 +29,8 @@ It can be thought of the entry point to a SUMMA simulation.
 The pysumma ``FileManager`` object stores each of these paths as well as provides an interface to the datastructres for easier manipulation.
 
 ``FileManager`` objects are instantiated by providing the path to them as well as the file name as separate arguments.
+The ``FileManager`` contains references to all of the other configuration files through the various attributes.
+See the `API documentation <api.rst>`_ for more information about what attributes are available.
 
 ::
 
@@ -90,6 +95,7 @@ This can be used to inspect the values of each option as well as modify their va
 
     > 'tutorial'    ! output_prefix
 
+
 Decisions
 ---------
 The decisions file contains the specification of the various physics options to use.
@@ -100,6 +106,7 @@ Instantiation of ``Decisions`` objects is similar to that of the other ``ObjectC
 Once instantiated you can inspect the available decisions and the options available for each of them as follows.
 
 ::
+
     dec = ps.Decisions('.', 'decisions.txt')
     print(dec['snowLayers'])
 
@@ -141,29 +148,60 @@ Once instantiated you can also use the `ForceFileList` object to inspect the for
 
     print(ff.open_forcing_data())
 
-    [
-     <xarray.Dataset>
-     Dimensions:    (hru: 671, time: 744)
-     Coordinates:
-       * time       (time) datetime64[ns] 1980-01-01 ... 1980-01-31T23:00:00
-     Dimensions without coordinates: hru
-     Data variables:
-         LWRadAtm   (time, hru) float32 ...
-         SWRadAtm   (time, hru) float32 ...
-         airpres    (time, hru) float32 ...
-         airtemp    (time, hru) float32 ...
-         data_step  timedelta64[ns] ...
-         hruId      (hru) int64 ...
-         pptrate    (time, hru) float32 ...
-         spechum    (time, hru) float32 ...
-         windspd    (time, hru) float32 ...
-    ]
+    >> [
+    >>  <xarray.Dataset>
+    >>  Dimensions:    (hru: 671, time: 744)
+    >>  Coordinates:
+    >>    * time       (time) datetime64[ns] 1980-01-01 ... 1980-01-31T23:00:00
+    >>  Dimensions without coordinates: hru
+    >>  Data variables:
+    >>      LWRadAtm   (time, hru) float32 ...
+    >>      SWRadAtm   (time, hru) float32 ...
+    >>      airpres    (time, hru) float32 ...
+    >>      airtemp    (time, hru) float32 ...
+    >>      data_step  timedelta64[ns] ...
+    >>      hruId      (hru) int64 ...
+    >>      pptrate    (time, hru) float32 ...
+    >>      spechum    (time, hru) float32 ...
+    >>      windspd    (time, hru) float32 ...
+    >> ]
 
 Output control
 --------------
 The output control file contains a listing of all of the variables desired to be written to output,
 along with how often and whether any aggregation needs to be done before writeout.
 Because there are many available output variables that you can choose from we do not exhaustively list them.
+The format of the output control file mirrors the way that it is described in the
+`SUMMA docs <https://summa.readthedocs.io/en/latest/input_output/SUMMA_input/#output-control-file>`_.
+
+::
+
+    oc = ps.OutputControl('.', 'output_control.txt')
+    print(oc)
+
+    >> ! varName             | outFreq | sum | inst | mean | var | min | max | mode
+    >> pptrate               | 1       | 0   | 1    | 0    | 0   | 0   | 0   | 0
+    >> airtemp               | 1       | 0   | 1    | 0    | 0   | 0   | 0   | 0
+    >> scalarSWE             | 1       | 0   | 1    | 0    | 0   | 0   | 0   | 0
+    >> scalarRainPlusMelt    | 1       | 0   | 1    | 0    | 0   | 0   | 0   | 0
+    >> scalarTotalET         | 1       | 0   | 1    | 0    | 0   | 0   | 0   | 0
+    >> scalarTotalRunoff     | 1       | 0   | 1    | 0    | 0   | 0   | 0   | 0
+    >> scalarSurfaceRunoff   | 1       | 0   | 1    | 0    | 0   | 0   | 0   | 0
+    >> scalarTotalSoilWat    | 1       | 0   | 1    | 0    | 0   | 0   | 0   | 0
+    >> scalarAquiferStorage  | 1       | 0   | 1    | 0    | 0   | 0   | 0   | 0
+    >> scalarAquiferBaseflow | 1       | 0   | 1    | 0    | 0   | 0   | 0   | 0
+    >> scalarNetRadiation    | 1       | 0   | 1    | 0    | 0   | 0   | 0   | 0
+    >> scalarLatHeatTotal    | 1       | 0   | 1    | 0    | 0   | 0   | 0   | 0
+    >> scalarSenHeatTotal    | 1       | 0   | 1    | 0    | 0   | 0   | 0   | 0
+
+    print(oc['scalarTotalRunoff'].statistic)
+
+    >> instant
+
+    oc['scalarTotalRunoff'] = [24, 1, 0, 0, 0, 0, 0, 0]
+    print(oc['scalarTotalRunoff'].statistic)
+
+    >> sum
 
 
 Local parameter info
@@ -172,7 +210,21 @@ The local parameter info file contains a listing of global parameters. Spatially
 in the parameter trial NetCDF file. Values which are specified in the local parameter info file will be overwritten
 by those specified in the parameter trial file.
 As with the output control file, there are many parameters which can be specified, so we omit them for brevity.
+Additionally, we currently do not have descriptions of what each of the parameters represent - the best way to figure
+this out currently is by looking at the SUMMA source code directly.
 
+::
+
+    lpi = ps.LocalParamInfo('.', 'local_param_info.txt')
+    print(lpi.list_options())
+
+    >> ['upperBoundHead', 'lowerBoundHead', 'upperBoundTheta', 'lowerBoundTheta',
+    >>  'upperBoundTemp', 'lowerBoundTemp', 'tempCritRain', 'tempRangeTimestep',
+    >>  ...
+    >>  'zmaxLayer1_lower', 'zmaxLayer2_lower', 'zmaxLayer3_lower', 'zmaxLayer4_lower',
+    >>  'zmaxLayer1_upper', 'zmaxLayer2_upper', 'zmaxLayer3_upper', 'zmaxLayer4_upper']
+
+    lpi['tempCritRain'] = 273.3
 
 NetCDF based files
 ==================
