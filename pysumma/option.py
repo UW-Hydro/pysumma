@@ -188,6 +188,10 @@ class OptionContainer(object):
             raise ValueError("Could not find option {}!".format(name))
         return None
 
+    def list_options(self):
+        """Return a list of all available option keys"""
+        return [o.name for o in self.options]
+
     def clear(self):
         self.options = []
 
