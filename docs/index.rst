@@ -85,3 +85,4 @@ Sitemap
     :maxdepth: 3
 
     api
+    configuration
