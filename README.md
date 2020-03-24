@@ -43,7 +43,6 @@ cd pysumma
 python setup.py develop
 ```
 
-
 # Additional SUMMA References
  - [Document](http://summa.readthedocs.io/en/latest/) : SUMMA documentation is available online and remains a work in progress.
  - [Source Code](https://github.com/NCAR/summa) : NCAR github
