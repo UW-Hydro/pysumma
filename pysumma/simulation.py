@@ -322,7 +322,7 @@ class Simulation():
             self.status = 'Success'
 
         try:
-            self._output = [xr.open_dataset(f) for f in self.get_output()]
+            self._output = [xr.open_dataset(f) for f in self.get_output_files()]
             if len(self._output) == 1:
                 self._output = self._output[0]
         except Exception:

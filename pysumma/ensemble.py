@@ -33,7 +33,7 @@ class Ensemble(object):
     def __init__(self, executable: str,configuration: dict,
                  filemanager: str=None, num_workers: int=1,
                  threads_per_worker: int=OMP_NUM_THREADS,
-                 scheduler: str=None):
+                 scheduler: str=None, client: Client=None):
         """
         Create a new Ensemble object. The API mirrors that of the
         Simulation object.
@@ -46,15 +46,21 @@ class Ensemble(object):
         self.simulations: dict = {}
         self.submissions: list = []
         # Try to get a client, and if none exists then start a new one
-        try:
-            self._client = get_client()
-            # Start more workers if necessary:
+        if client:
+            self._client = client
             workers = len(self._client.get_worker_logs())
             if workers <= self.num_workers:
                 self._client.cluster.scale(workers)
-        except ValueError:
-            self._client = Client(n_workers=self.num_workers,
-                                  threads_per_worker=threads_per_worker)
+        else:
+            try:
+                self._client = get_client()
+                # Start more workers if necessary:
+                workers = len(self._client.get_worker_logs())
+                if workers <= self.num_workers:
+                    self._client.cluster.scale(workers)
+            except ValueError:
+                self._client = Client(n_workers=self.num_workers,
+                                      threads_per_worker=threads_per_worker)
         self._generate_simulation_objects()
 
     def _generate_simulation_objects(self):
