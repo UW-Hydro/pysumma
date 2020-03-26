@@ -38,7 +38,8 @@ class Distributed(object):
 
     def __init__(self, executable: str, filemanager: str,
                  num_workers: int=1, threads_per_worker: int=OMP_NUM_THREADS,
-                 chunk_size: int=None, num_chunks: int=None, scheduler: str=None):
+                 chunk_size: int=None, num_chunks: int=None, scheduler: str=None,
+                 client: Client=None):
         """
         Initialize a new distributed object
 
@@ -70,15 +71,21 @@ class Distributed(object):
         self.submissions: List = []
         self.num_workers: int = num_workers
         # Try to get a client, and if none exists then start a new one
-        try:
-            self._client = get_client()
-            # Start more workers if necessary:
+        if client:
+            self._client = client
             workers = len(self._client.get_worker_logs())
             if workers <= self.num_workers:
                 self._client.cluster.scale(workers)
-        except ValueError:
-            self._client = Client(n_workers=self.num_workers,
-                                  threads_per_worker=threads_per_worker)
+        else:
+            try:
+                self._client = get_client()
+                # Start more workers if necessary:
+                workers = len(self._client.get_worker_logs())
+                if workers <= self.num_workers:
+                    self._client.cluster.scale(workers)
+            except ValueError:
+                self._client = Client(n_workers=self.num_workers,
+                                      threads_per_worker=threads_per_worker)
         self.chunk_args = self._generate_args(chunk_size, num_chunks)
         self._generate_simulation_objects()
 
