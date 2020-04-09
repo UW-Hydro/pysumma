@@ -315,7 +315,7 @@ def file_manager_product(list_config):
 
 
 def total_product(dec_conf={}, param_conf={}, attr_conf={}, fman_conf={},
-                  sequential_keys=False):
+                  param_trial_conf={}, sequential_keys=False):
     """
     Combines multiple types of model changes into a single configuration
     for the Ensemble object.
@@ -323,17 +323,18 @@ def total_product(dec_conf={}, param_conf={}, attr_conf={}, fman_conf={},
     full_conf = deepcopy(dec_conf)
     full_conf.update(param_conf)
     full_conf.update(attr_conf)
+    full_conf.update(param_trial_conf)
     full_conf.update(fman_conf)
     prod_dict = product_dict(**full_conf)
     config = {}
     for i, d in enumerate(prod_dict):
         name = '++' + '++'.join(
-            '{}={}'.format(k, v) if k in param_conf or k in attr_conf
+            '{}={}'.format(k, v) if k in param_conf or k in attr_conf or k in param_trial_conf
             else v.replace('/', '_').replace('\\', '_')
             for k, v in d.items()) + '++'
         if sequential_keys:
             name = f'run_{i}'
-        config[name] = {'decisions': {}, 'parameters': {}, 'attributes': {}}
+        config[name] = {'decisions': {}, 'parameters': {}, 'attributes': {}, 'trial_parameters': {}}
         for k, v in d.items():
             if k in dec_conf:
                 config[name]['decisions'][k] = v
@@ -341,6 +342,8 @@ def total_product(dec_conf={}, param_conf={}, attr_conf={}, fman_conf={},
                 config[name]['parameters'][k] = v
             elif k in attr_conf:
                 config[name]['attributes'][k] = v
+            elif k in param_trial_conf:
+                config[name]['trial_parameters'][k] = v
             elif k in fman_conf:
                 config[name]['file_manager'] = v
     return config

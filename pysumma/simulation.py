@@ -118,6 +118,8 @@ class Simulation():
             self.output_control.set_option(k, **v)
         for k, v in config.get('attributes', {}).items():
             self.assign_attributes(k, v)
+        for k, v in config.get('trial_parameters', {}).items():
+            self.assign_trial_params(k, v)
         if self.decisions['snowLayers'] == 'CLM_2010':
             self.validate_layer_params(self.local_param_info)
 
@@ -144,6 +146,36 @@ class Simulation():
                            'file. See the documentation at https://summa.readthedocs.',
                            'io/en/latest/input_output/SUMMA_input/#attribute-and-',
                            'parameter-files for more information', e)
+
+    def assign_trial_params(self, name, data, dim='hru', create=True):
+        """
+        Assign new data to the ``parameter_trial`` dataset.
+
+        Parameters
+        ----------
+        name:
+            The name (or key) of the attribute to modify
+        data:
+            The data to change the parameter to. The shape
+            must match the shape in the parameter trial file
+        """
+        # Create the variable if we need
+        print(name in self.parameter_trial.variables)
+        if create and name not in self.parameter_trial.variables:
+            self.parameter_trial[name] = self.parameter_trial[dim].astype(float).copy()
+        required_shape = self.parameter_trial[name].shape
+        try:
+            self.parameter_trial[name].values = np.array(data).reshape(required_shape)
+        except ValueError as e:
+            raise ValueError('The shape of the provided replacement data does',
+                             ' not match the shape of the original data.', e)
+        except KeyError as e:
+            raise KeyError(f'The key {name} does not exist in this trial parameter',
+                           'file. See the documentation at https://summa.readthedocs.',
+                           'io/en/latest/input_output/SUMMA_input/#attribute-and-',
+                           'parameter-files for more information', e)
+
+
 
     def create_backup(self):
         self.backup = {}
