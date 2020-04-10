@@ -291,6 +291,30 @@ def attribute_product(list_config):
             {'attributes': d} for d in product_dict(**list_config)}
 
 
+def trial_parameter_product(list_config):
+    """
+    Create a dictionary of runs based on a simpler list configuration
+    of trial parameter values
+
+    Parameters
+    ----------
+    list_config:
+        A dictionary of the sort
+        {key1: [list of values], key2: [list of values]}
+
+    Returns
+    --------
+    A dictionary of the sort:
+        {name: {key1: value1, key2: value1},
+         name: {key1: value2, key2: value1},
+         ...
+         name: {key1: valueN, key2: valueN}}
+    """
+    return {'++'+'++'.join('{}={}'.format(k, v) for k, v in d.items())+'++':
+            {'trial_parameters': d} for d in product_dict(**list_config)}
+
+
+
 def file_manager_product(list_config):
     """
     Create a dictionary of runs based on a simpler list configuration

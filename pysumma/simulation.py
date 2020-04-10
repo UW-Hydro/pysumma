@@ -105,6 +105,7 @@ class Simulation():
                 'file_manager': '/home/user/cool_setup/file_manager_new.txt',
                 'decisions': {'snowLayers': 'CLM_2010'},
                 'parameters': {'albedoDecayRate': 1e-6},
+                'trial_parameters': {'theta_mp': 0.4},
                 'attributes': {'mHeight': 15}
                 }
         """
@@ -160,7 +161,6 @@ class Simulation():
             must match the shape in the parameter trial file
         """
         # Create the variable if we need
-        print(name in self.parameter_trial.variables)
         if create and name not in self.parameter_trial.variables:
             self.parameter_trial[name] = self.parameter_trial[dim].astype(float).copy()
         required_shape = self.parameter_trial[name].shape
