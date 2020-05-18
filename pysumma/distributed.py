@@ -115,7 +115,7 @@ class Distributed(object):
         if chunk_size:
             sim_truncated = (chunk_size-1) * (sim_size // (chunk_size-1))
             starts = np.arange(1, sim_truncated+1, chunk_size).astype(int)
-            stops = np.append(starts[1:], sim_size)
+            stops = np.append(starts[1:], sim_size+1)
             chunks = np.vstack([starts, stops]).T
         elif num_chunks:
             chunk_size = np.ceil(sim_size / num_chunks).astype(int)
