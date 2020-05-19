@@ -1,0 +1,6 @@
+import pysumma as ps
+import xarray as xr
+import os
+
+if __name__ == '__main__':
+    pass
