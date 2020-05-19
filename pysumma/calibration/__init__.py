@@ -1,1 +1,1 @@
-from ostrich import Ostrich
+from .ostrich import Ostrich, OstrichParam

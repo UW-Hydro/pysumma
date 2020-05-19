@@ -16,7 +16,7 @@ RandomSeed $seed
 OnObsError $errval
 
 BeginFilePairs
-$weightTemplateFile; $weigthtValueFile
+$weightTemplateFile; $weightValueFile
 EndFilePairs
 
 # -------------------------------------------------

@@ -2,6 +2,15 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error
 import math
 import numpy as np
 
+def trim_time(sim, obs):
+    sim_start = sim['time'].values[0]
+    sim_stop = sim['time'].values[-1]
+    obs_start = obs['time'].values[0]
+    obs_stop = obs['time'].values[-1]
+    start = max(sim_start, obs_start)
+    stop = min(sim_stop, obs_stop)
+    return slice(start, stop)
+
 
 def kling_gupta_efficiency(sim, obs):
     obs = np.asarray(obs)
