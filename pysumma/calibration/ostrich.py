@@ -1,13 +1,14 @@
-from pkg_resources import resource_filename as resource
-from functools import partial
-from string import Template
-from typing import List, Dict
-from pathlib import Path
-from pysumma import Simulation
-import subprocess
+import os
+import numpy as np
 import shutil
 import stat
-import os
+import subprocess
+from functools import partial
+from pathlib import Path
+from pkg_resources import resource_filename as resource
+from pysumma import Simulation
+from string import Template
+from typing import List, Dict
 
 def read_template(path):
     with open(path, 'r') as f:
@@ -16,18 +17,80 @@ def read_template(path):
 
 resource = partial(resource, __name__)
 
+# Paths to template files
 INPT_FILE = resource('meta/ostIn.template')
 EXEC_FILE = resource('meta/model_executable.template')
 SAVE_FILE = resource('meta/save_parameters.template')
 
+# Templates
 INPT_META = read_template(INPT_FILE)
 EXEC_META = read_template(EXEC_FILE)
 SAVE_META = read_template(SAVE_FILE)
 
 
 class Ostrich():
+    """
+    Provides a high level interface to the OSTRICH optimization package.
+    This class can currently only be used for single-objective optimization
+    using the DDS algorithm as defined in the template file. Currently the
+    metrics calculated are KGE, MAE, and MSE as defined in the evaluation
+    package, though more metrics can be implemmented quite easily.
+
+    A basic workflow for this object is:
+
+        ::
+        import pysumma as ps
+        summa_exe = './summa.exe'
+        ostrich_exe = './ostrich.exe'
+        file_manager = './file_manager.txt'
+        python_exe = '/pool0/data/andrbenn/.conda/all/bin/python'
+        ostrich = ps.Ostrich(ostrich_exe, summa_exe, file_manager, python_path=python_exe)
+        ostrich.calib_params = [
+            ps.OstrichParam('paramName', starValue, (minValue, maxValue)),
+        ]
+        ostrich.obs_data_file = 'obs_data.nc'
+        ostrich.sim_calib_var = 'sim_varname'
+        ostrich.obs_calib_var = 'obs_varname'
+        ostrich.write_config()
+        ostrich.run()
+
+    Attributes
+    ----------
+    ostrich:
+        Path to OSTRICH executable
+    python_path:
+        Path to Python executable used for the ``run_script``
+    summa:
+        Path to the SUMMA executable
+    template:
+        OSTRICH configuration file template
+    save_template:
+        Template for script to save best parameters
+    run_template:
+        Template for script to run and evaluate SUMMA
+    config_path:
+        Path to location of calibration runs/logs
+    simulation:
+        pysumma Simulation object used as template
+    file_manager:
+        File manager file for SUMMA simulation
+    seed:
+        Random seed for calibration
+    errval:
+        Error value for OSTRICH
+    perturb_val:
+        Strength of parameter perturbations during calibration
+    max_iters:
+        Number of calibration trial runs
+    cost_function:
+        Metric to use when ranking calibration runs
+    maximize:
+        Whether to maximize the ``cost_function``
+    """
 
     def __init__(self, ostrich_executable, summa_executable, file_manager, python_path='python'):
+        """Initialize a new Ostrich object"""
+        self.available_metrics: np.ndarray = np.array(['KGE', 'MAE', 'RMSE'])
         self.ostrich: str = ostrich_executable
         self.python_path: str = python_path
         self.summa: str = summa_executable
@@ -52,6 +115,7 @@ class Ostrich():
         self.maximize: bool = True
 
     def run(self, prerun_cmds=[]):
+        """Start calibration run"""
         if len(prerun_cmds):
             preprocess_cmd = " && ".join(prerun_cmds) + " && "
         else:
@@ -64,10 +128,8 @@ class Ostrich():
             self.stderr = self.stderr.decode('utf-8', 'ignore')
             self.stdout = self.stdout.decode('utf-8', 'ignore')
 
-    def read_config(self, config_file):
-        raise NotImplementedError('We do not yet support importing OSTRICH configurations!')
-
     def write_config(self):
+        """Writes all necessary files for calibration"""
         if not os.path.exists(self.config_path):
             os.mkdir(self.config_path)
 
@@ -95,12 +157,14 @@ class Ostrich():
         os.chmod(self.save_script, st.st_mode | stat.S_IEXEC)
 
     def write_weight_template_section(self, file_name=Path('param_mapping.tpl')) -> Path:
+        """Write the parameter name mapping for OSTRICH"""
         with open(self.config_path / file_name, 'w') as f:
             f.write('\n'.join([f'{cp.realname} | {cp.weightname}'
                                for cp in self.calib_params]))
         return Path('.') / file_name
 
     def write_weight_value_section(self, file_name='param_weights.txt') -> Path:
+        """Write the parameter values for OSTRICH"""
         with open(self.config_path / file_name, 'w') as f:
             f.write('\n'.join([f'{cp.realname} | {cp.value}'
                                for cp in self.calib_params]))
@@ -108,14 +172,18 @@ class Ostrich():
 
     @property
     def param_section(self) -> str:
+        """Write list of calibration parameters"""
         return '\n'.join(str(param) for param in self.calib_params)
 
     @property
     def response_section(self) -> str:
-        return f"{self.cost_function} {self.metrics_file}; OST_NULL 0 1 ' '"
+        """Write section of OSTRICH configuration for selecting metric"""
+        metric_row = np.argwhere(self.cost_function == self.available_metrics)[0][0]
+        return f"{self.cost_function} {self.metrics_file}; OST_NULL {metric_row} 1 ' '"
 
     @property
     def tied_response_section(self) -> str:
+        """Write section for determining if we are maximizing or minimizing the metric"""
         if self.maximize:
             return f'neg{self.cost_function} 1 {self.cost_function} wsum -1.00'
         else:
@@ -123,6 +191,7 @@ class Ostrich():
 
     @property
     def map_vars_to_template(self):
+        """For completion of the OSTRICH input template"""
         return {'runScript': self.run_script,
                 'objectiveFun': self.objective_function,
                 'saveScript': self.save_script,
@@ -141,6 +210,7 @@ class Ostrich():
 
     @property
     def map_vars_to_save_template(self):
+        """For completion of the parameter saving template"""
         return {
                 'pythonPath': self.python_path,
                 'saveDir': self.config_path.parent / 'best_calibration',
@@ -148,6 +218,7 @@ class Ostrich():
 
     @property
     def map_vars_to_run_template(self):
+        """For completion of the model run script template"""
         return {
                 'pythonPath': self.python_path,
                 'summaExe': self.summa,
@@ -164,6 +235,22 @@ class Ostrich():
 
 
 class OstrichParam():
+    """
+    Definition of a SUMMA parameter to be optimized by OSTRICH
+
+    Parameters
+    ----------
+    realname:
+        Parameter name as seen by SUMMA
+    weightname:
+        Parameter name as seen by OSTRICH
+    value:
+        Default value
+    lower:
+        Lower bound for parameter value
+    upper:
+        Upper bound for parameter value
+    """
 
     def __init__(self, name, value, val_range):
         self.realname = name
@@ -173,7 +260,3 @@ class OstrichParam():
 
     def __str__(self):
         return f"{self.weightname} {self.value} {self.lower} {self.upper} none none none free"
-
-
-def read_ostrich_params(path):
-    pass
