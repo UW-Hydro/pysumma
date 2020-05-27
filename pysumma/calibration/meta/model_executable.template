@@ -16,6 +16,7 @@ if __name__ == '__main__':
     param_weight_file = '$paramWeightFile'
     param_file = '$paramFile'
     simulation_args = $simulationArgs
+    conversion = $conversionFunc
 
     # read in parameters from ostrich files and summa setup
     with xr.open_dataset(param_file) as temp:
@@ -52,9 +53,9 @@ if __name__ == '__main__':
     sim_ds = sim_ds.sel(time=time_slice)
     obs_ds = obs_ds.sel(time=time_slice)
 
-    kge = pse.kling_gupta_efficiency(sim_ds[sim_calib_var], obs_ds[obs_calib_var])
-    mae = pse.mean_absolute_error(sim_ds[sim_calib_var], obs_ds[obs_calib_var])
-    rmse = pse.root_mean_square_error(sim_ds[sim_calib_var], obs_ds[obs_calib_var])
+    kge = pse.kling_gupta_efficiency(sim_ds[sim_calib_var],  conversion(obs_ds[obs_calib_var]))
+    mae = pse.mean_absolute_error(sim_ds[sim_calib_var],     conversion(obs_ds[obs_calib_var]))
+    rmse = pse.root_mean_square_error(sim_ds[sim_calib_var], conversion(obs_ds[obs_calib_var]))
 
     # save diagnostics in form that ostrich can read
     with open(out_file, 'w+') as f:

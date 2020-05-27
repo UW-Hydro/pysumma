@@ -2,6 +2,7 @@ import os
 import numpy as np
 import shutil
 import stat
+import inspect
 import subprocess
 from functools import partial
 from pathlib import Path
@@ -106,6 +107,7 @@ class Ostrich():
         self.run_script: Path = self.config_path / 'run_script.py'
         self.save_script: Path = self.config_path / 'save_script.py'
         self.metrics_file: Path = self.config_path / 'metrics.txt'
+        self.conversion_function: callable = lambda x: x
         self.preserve_output: str ='no'
         self.seed: int = 42
         self.errval: float = -9999
@@ -248,6 +250,7 @@ class Ostrich():
                 'simVarName': self.sim_calib_var,
                 'obsVarName': self.obs_calib_var,
                 'outFile': self.metrics_file,
+                'conversionFunc': inspect.getsource(self.conversion_function).split('=')[-1],
                 'paramMappingFile': self.weightTemplateFile,
                 'paramWeightFile': self.weightValueFile,
                 'simulationArgs': self.simulation_kwargs,
