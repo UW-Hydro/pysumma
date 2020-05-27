@@ -29,6 +29,15 @@ $paramSection
 EndParams
 
 # -------------------------------------------------
+# Parameter/DV Specification - note: what are txInN, txOst ...?
+# Format:
+#     parameter start minimum maximum txInN txOst txOut fmt
+# -------------------------------------------------
+BeginTiedParams
+$tiedParamSection
+EndTiedParams
+
+# -------------------------------------------------
 # Response variable specification - note: keyworld should aways be OST_NULL
 # Format:
 #     name  filename  keyword line col token

@@ -15,6 +15,7 @@ if __name__ == '__main__':
     param_mapping_file = '$paramMappingFile'
     param_weight_file = '$paramWeightFile'
     param_file = '$paramFile'
+    simulation_args = $simulationArgs
 
     # read in parameters from ostrich files and summa setup
     with xr.open_dataset(param_file) as temp:
@@ -32,10 +33,14 @@ if __name__ == '__main__':
     trial_params.to_netcdf(param_file)
 
     # initialize simulation object
-    s = ps.Simulation(summa_exe, file_manager)
+    s = ps.Simulation(summa_exe, file_manager, **simulation_args)
 
     # run the simulation
     s.run('local')
+    if s.status != 'Success':
+        print(s.stdout)
+        print('--------------------------------------------')
+        print(s.stderr)
     assert s.status == 'Success'
 
     # open output and calculate diagnostics

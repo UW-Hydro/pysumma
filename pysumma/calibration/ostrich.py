@@ -86,6 +86,8 @@ class Ostrich():
         Metric to use when ranking calibration runs
     maximize:
         Whether to maximize the ``cost_function``
+    simulation_kwargs:
+        Keyword arguments to pass to the simulation run function
     """
 
     def __init__(self, ostrich_executable, summa_executable, file_manager, python_path='python'):
@@ -110,9 +112,11 @@ class Ostrich():
         self.perturb_val: float = 0.2
         self.max_iters: int = 100
         self.calib_params: List[OstrichParam] = []
+        self.tied_params: List[OstrichTiedParam] = []
         self.cost_function: str = 'KGE'
         self.objective_function: str = 'gcop'
         self.maximize: bool = True
+        self.simulation_kwargs: Dict = {}
 
     def run(self, prerun_cmds=[]):
         """Start calibration run"""
@@ -159,21 +163,37 @@ class Ostrich():
     def write_weight_template_section(self, file_name=Path('param_mapping.tpl')) -> Path:
         """Write the parameter name mapping for OSTRICH"""
         with open(self.config_path / file_name, 'w') as f:
-            f.write('\n'.join([f'{cp.realname} | {cp.weightname}'
-                               for cp in self.calib_params]))
+            for cp in self.calib_params:
+                if cp.weightname.endswith('mtp'):
+                    f.write(f'{cp.realname} | {cp.weightname}\n')
+            for tp in self.tied_params:
+                if tp.realname.endswith('mtp'):
+                    f.write(f'{tp.realname.replace("_mtp", "")} | {tp.realname}\n')
         return Path('.') / file_name
 
     def write_weight_value_section(self, file_name='param_weights.txt') -> Path:
         """Write the parameter values for OSTRICH"""
         with open(self.config_path / file_name, 'w') as f:
             f.write('\n'.join([f'{cp.realname} | {cp.value}'
-                               for cp in self.calib_params]))
+                               for cp in self.calib_params]) + '\n')
         return Path('.') / file_name
+
+    def add_tied_param(self, param_name, lower_bound, upper_bound):
+        self.calib_params.append(OstrichParam(f'{param_name}', 0.5, (0.01, 0.99), weightname=f'{param_name}_scale'))
+        self.tied_params.append(OstrichTiedParam(param_name, lower_bound, upper_bound))
 
     @property
     def param_section(self) -> str:
         """Write list of calibration parameters"""
         return '\n'.join(str(param) for param in self.calib_params)
+
+    @property
+    def tied_param_section(self) -> str:
+        """Write list of tied calibration parameters"""
+        if len(self.tied_params):
+            return '\n'.join(str(param) for param in self.tied_params)
+        else:
+            return '# nothing to do here'
 
     @property
     def response_section(self) -> str:
@@ -201,6 +221,7 @@ class Ostrich():
                 'perturbVal': self.perturb_val,
                 'maxIters': self.max_iters,
                 'paramSection': self.param_section,
+                'tiedParamSection': self.tied_param_section,
                 'responseSection': self.response_section,
                 'tiedResponseSection': self.tied_response_section,
                 'costFunction': f'neg{self.cost_function}' if self.maximize else self.cost_function,
@@ -229,6 +250,7 @@ class Ostrich():
                 'outFile': self.metrics_file,
                 'paramMappingFile': self.weightTemplateFile,
                 'paramWeightFile': self.weightValueFile,
+                'simulationArgs': self.simulation_kwargs,
                 'paramFile': (self.simulation.manager['settings_path'].value
                               + self.simulation.manager['parameter_trial'].value),
                 }
@@ -252,11 +274,37 @@ class OstrichParam():
         Upper bound for parameter value
     """
 
-    def __init__(self, name, value, val_range):
+    def __init__(self, name, value, val_range, weightname=''):
         self.realname = name
-        self.weightname = f'{name}_mtp'
+        if not weightname:
+            self.weightname = f'{name}_mtp'
+        else:
+            self.weightname = weightname
         self.value = value
         self.lower, self.upper = val_range
 
     def __str__(self):
         return f"{self.weightname} {self.value} {self.lower} {self.upper} none none none free"
+
+
+class OstrichTiedParam():
+    def __init__(self, name, lower_param, upper_param):
+        self.realname = f'{name}_mtp'
+        self.weightname = f'{name}_scale'
+        self.lower_param = f'{lower_param}_mtp'
+        self.upper_param = f'{upper_param}_mtp'
+
+    @property
+    def type_data(self):
+        """This corresponds to the equation y = x2 + x1x3 - x1x2"""
+        if self.lower_param and self.upper_param:
+            return "ratio 0 -1 1 0 0 1 0 0 0 0 0 0 0 0 0 1 free"
+        elif self.lower_param:
+            raise NotImplementedError()
+            return ""
+        elif self.upper_param:
+            raise NotImplementedError()
+            return ""
+
+    def __str__(self):
+        return f"{self.realname} 3 {self.weightname} {self.lower_param} {self.upper_param} {self.type_data}"
