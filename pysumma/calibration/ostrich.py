@@ -107,7 +107,9 @@ class Ostrich():
         self.run_script: Path = self.config_path / 'run_script.py'
         self.save_script: Path = self.config_path / 'save_script.py'
         self.metrics_file: Path = self.config_path / 'metrics.txt'
+        self.impot_strings: str = ''
         self.conversion_function: callable = lambda x: x
+        self.filter_function: callable = lambda x: x
         self.preserve_output: str ='no'
         self.seed: int = 42
         self.errval: float = -9999
@@ -250,7 +252,9 @@ class Ostrich():
                 'simVarName': self.sim_calib_var,
                 'obsVarName': self.obs_calib_var,
                 'outFile': self.metrics_file,
-                'conversionFunc': inspect.getsource(self.conversion_function).split('=')[-1],
+                'importStrings': self.import_strings,
+                'conversionFunc': "=".join(inspect.getsource(self.conversion_function).split('=')[1:]),
+                'filterFunc': "=".join(inspect.getsource(self.filter_function).split('=')[1:]),
                 'paramMappingFile': self.weightTemplateFile,
                 'paramWeightFile': self.weightValueFile,
                 'simulationArgs': self.simulation_kwargs,
@@ -270,6 +274,7 @@ class OstrichParam():
     weightname:
         Parameter name as seen by OSTRICH
     value:
+
         Default value
     lower:
         Lower bound for parameter value

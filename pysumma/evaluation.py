@@ -2,7 +2,9 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error
 import math
 import numpy as np
 
-def trim_time(sim, obs):
+def trim_time(sim, obs, roundto='min'):
+    sim['time'] = sim['time'].dt.round(roundto)
+    obs['time'] = obs['time'].dt.round(roundto)
     sim_start = sim['time'].values[1]
     sim_stop = sim['time'].values[-2]
     obs_start = obs['time'].values[1]
