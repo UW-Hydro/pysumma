@@ -50,14 +50,14 @@ class Simulation():
         InitialConditions object (populated after calling ``initialize``)
     """
 
-    def __init__(self, executable, filemanager, initialize=True):
+    def __init__(self, executable, filemanager, initialize=True, config_dir='.pysumma'):
         """Initialize a new simulation object"""
         self.stdout = None
         self.stderr = None
         self.process = None
         self.executable = executable
         self.manager_path = Path(os.path.abspath(os.path.realpath(filemanager)))
-        self.config_path = self.manager_path.parent / '.pysumma'
+        self.config_path = self.manager_path.parent / config_dir
         self.status = 'Uninitialized'
         if initialize:
             self.initialize()
@@ -362,7 +362,7 @@ class Simulation():
 
         return self.status
 
-    def _write_configuration(self, name, write_netcdf: str=False):
+    def _write_configuration(self, name=''):
         self.config_path = self.config_path / name
         self.config_path.mkdir(parents=True, exist_ok=True)
         manager_path = str(self.manager_path.parent)
