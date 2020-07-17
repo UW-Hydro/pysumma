@@ -42,6 +42,8 @@ class FileManager(OptionContainer):
 
     def __init__(self, path, name):
         super().__init__(FileManagerOption, path, name)
+        assert self.get_option('controlVersion') == 'SUMMA_FILE_MANAGER_V3.0.0'
+
 
     def set_option(self, key, value):
         o = self.get_option(key)
