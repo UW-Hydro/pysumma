@@ -66,72 +66,72 @@ class FileManager(OptionContainer):
         return self._output_control
 
     @property
-    def local_param_info(self):
-        p1 = self.get_value('settings_path')
-        p2 = self.get_value('local_param_info')
-        self._local_param_info = LocalParamInfo(p1, p2)
-        return self._local_param_info
+    def global_hru_params(self):
+        p1 = self.get_value('settingsPath')
+        p2 = self.get_value('globalHruParams')
+        self._hru_params = GlobalParams(p1, p2)
+        return self._hru_params
 
     @property
-    def basin_param_info(self):
-        p1 = self.get_value('settings_path')
-        p2 = self.get_value('basin_param_info')
-        self._basin_param_info = LocalParamInfo(p1, p2)
-        return self._basin_param_info
+    def global_gru_params(self):
+        p1 = self.get_value('settingsPath')
+        p2 = self.get_value('GlobalGruParams')
+        self._gru_params = GlobalParams(p1, p2)
+        return self._gru_params
 
     @property
     def force_file_list(self):
-        p1 = self.get_value('settings_path')
-        p2 = self.get_value('forcing_file_list')
-        p3 = self.get_value('input_path')
-        self._force_file_list = ForceFileList(p1, p2, p3)
+        p1 = self.get_value('settingsPath')
+        p2 = self.get_value('forcingList')
+        p3 = self.get_value('forcingPath')
+        self._force_file_list = ForcingList(p1, p2, p3)
         return self._force_file_list
 
     @property
     def local_attributes(self):
-        p1 = self.get_value('settings_path')
-        p2 = self.get_value('local_attributes')
+        p1 = self.get_value('settingsPath')
+        p2 = self.get_value('attributeFile')
         self._local_attrs = xr.open_dataset(p1 + p2)
         return self._local_attrs
 
     @property
-    def parameter_trial(self):
-        p1 = self.get_value('settings_path')
-        p2 = self.get_value('parameter_trial')
-        self._param_trial = xr.open_dataset(p1 + p2)
-        return self._param_trial
+    def spatial_paramr(self):
+        p1 = self.get_value('settingsPath')
+        p2 = self.get_value('spatialParams')
+        self._spatial_params = xr.open_dataset(p1 + p2)
+        return self._spatial_params
 
     @property
     def initial_conditions(self):
-        p1 = self.get_value('settings_path')
-        p2 = self.get_value('model_init_cond')
+        p1 = self.get_value('settingsPath')
+        p2 = self.get_value('initCondFile')
         self._init_cond = xr.open_dataset(p1 + p2)
         return self._init_cond
 
     @property
     def genparm(self):
-        p1, p2 = self.get_value('settings_path'), 'GENPARM.TBL'
+        p1, p2 = self.get_value('settingsPath'), 'GENPARM.TBL'
         with open(p1 + p2, 'r') as f:
             self._genparm = f.readlines()
         return self._genparm
 
     @property
     def mptable(self):
-        p1, p2 = self.get_value('settings_path'), 'MPTABLE.TBL'
+        p1, p2 = self.get_value('settingsPath'), 'MPTABLE.TBL'
         with open(p1 + p2, 'r') as f:
             self._mptable = f.readlines()
         return self._mptable
 
     @property
     def soilparm(self):
-        p1, p2 = self.get_value('settings_path'), 'SOILPARM.TBL'
+        p1, p2 = self.get_value('settingsPath'), 'SOILPARM.TBL'
         with open(p1 + p2, 'r') as f:
             self._soilparm = f.readlines()
         return self._soilparm
 
     @property
     def vegparm(self):
-        p1, p2 = self.get_value('settings_path'), 'VEGPARM.TBL'
+        p1, p2 = self.get_value('settingsPath'), 'VEGPARM.TBL'
         with open(p1 + p2, 'r') as f:
             self._vegparm = f.readlines()
         return self._vegparm
