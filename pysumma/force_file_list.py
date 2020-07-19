@@ -5,7 +5,7 @@ from .option import BaseOption
 from .option import OptionContainer
 
 
-class ForceFileListOption(BaseOption):
+class ForcingOption(BaseOption):
 
     def __init__(self, name):
         super().__init__(name)
@@ -26,13 +26,13 @@ class ForceFileListOption(BaseOption):
         return "'{}'".format(self.name.split('/')[-1])
 
 
-class ForceFileList(OptionContainer):
+class ForcingList(OptionContainer):
 
     prefix: str = ''
 
     def __init__(self, dirpath, filepath, force_file_prefix_path):
         self.prefix = str(force_file_prefix_path)
-        super().__init__(ForceFileListOption, dirpath, filepath)
+        super().__init__(ForcingOption, dirpath, filepath)
 
     def set_option(self, key, value):
         o = self.get_option(key)

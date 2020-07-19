@@ -7,8 +7,8 @@ from pathlib import Path
 from .option import BaseOption, OptionContainer
 from .decisions import Decisions
 from .output_control import OutputControl
-from .local_param_info import LocalParamInfo
-from .force_file_list import ForceFileList
+from .global_params import GlobalParams
+from .force_file_list import ForcingList
 
 # Option names for the file manager, this is just a list,
 # as the order of these values matters. They may also not be
@@ -31,7 +31,7 @@ class FileManagerOption(BaseOption):
         self.value = new_value
 
     def __str__(self):
-        return "{} '{}'".format(self.value, self.name)
+        return "{} '{}'".format(self.name.ljust(36), self.value)
 
 
 class FileManager(OptionContainer):
@@ -42,16 +42,18 @@ class FileManager(OptionContainer):
 
     def __init__(self, path, name):
         super().__init__(FileManagerOption, path, name)
-        assert self.get_option('controlVersion') == 'SUMMA_FILE_MANAGER_V3.0.0'
-
+        assert self.get_value('controlVersion') == 'SUMMA_FILE_MANAGER_V3.0.0'
 
     def set_option(self, key, value):
         o = self.get_option(key)
         o.set_value(value)
 
     def get_constructor_args(self, line):
-        name, value = line.split('!')[0].strip().split('')
-        return (name.strip(), value.strip(). replace("'", "").strip())
+        name, *value = line.split('!')[0].strip().split()
+        if isinstance(value, list):
+            value = " ".join(value).replace("'", "")
+        print(name, value)
+        return (name.strip(), value.strip().replace("'", "").strip())
 
     @property
     def decisions(self):
@@ -63,7 +65,7 @@ class FileManager(OptionContainer):
     @property
     def output_control(self):
         p1 = self.get_value('settingsPath')
-        p2 = self.get_value('outputDefFile')
+        p2 = self.get_value('outputControl')
         self._output_control = OutputControl(p1, p2)
         return self._output_control
 
@@ -77,7 +79,7 @@ class FileManager(OptionContainer):
     @property
     def global_gru_params(self):
         p1 = self.get_value('settingsPath')
-        p2 = self.get_value('GlobalGruParams')
+        p2 = self.get_value('globalGruParams')
         self._gru_params = GlobalParams(p1, p2)
         return self._gru_params
 

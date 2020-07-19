@@ -8,12 +8,12 @@
         "outputPath",
         "attributeFile",
         "decisionsFile",
-        "hruParamFile",
-        "gruParamFile",
+        "globalHruParams",
+        "globalGruParams",
         "forcingList",
-        "outputDefFile",
+        "outputControl",
         "initCondFile",
-        "trialParamFile",
+        "spatialParams",
         "outFilePrefix"
     ]
 }

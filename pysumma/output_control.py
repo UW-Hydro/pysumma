@@ -27,7 +27,10 @@ class OutputControlOption(BaseOption):
     def __init__(self, var=None, period=None, sum=0, instant=1,
                  mean=0, variance=0, min=0, max=0, mode=0):
         self.name = var
-        self.period = int(period)
+        if self.name == 'outputPrecision':
+            self.period = period
+        else:
+            self.period = int(period)
         self.sum = int(sum)
         self.instant = int(instant)
         self.mean = int(mean)
@@ -64,6 +67,8 @@ class OutputControlOption(BaseOption):
         self.validate()
         plist = [self.name.ljust(36), self.period, self.sum, self.instant,
                  self.mean, self.variance, self.min, self.max, self.mode]
+        if self.name == 'outputPrecision':
+            plist = plist[0:2]
         return [str(p) for p in plist]
 
     def __str__(self):

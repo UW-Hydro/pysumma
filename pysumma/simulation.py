@@ -10,8 +10,8 @@ from typing import List
 from .decisions import Decisions
 from .file_manager import FileManager
 from .output_control import OutputControl
-from .local_param_info import LocalParamInfo
-from .force_file_list import ForceFileList
+from .global_params import GlobalParams
+from .force_file_list import ForcingList
 
 
 class Simulation():
@@ -36,14 +36,14 @@ class Simulation():
         Decisions object (populated after calling ``initialize``)
     output_control:
         OutputControl object (populated after calling ``initialize``)
-    parameter_trial:
-        Parameter trial object (populated after calling ``initialize``)
+    spatial_params:
+        Spatially distributed parameters (populated after calling ``initialize``)
     force_file_list:
-        Forcing file list object (populated after calling ``initialize``)
-    local_param_info:
-        LocalParamInfo object (populated after calling ``initialize``)
-    basin_param_info:
-        BasinParamInfo object (populated after calling ``initialize``)
+        ForcingList object (populated after calling ``initialize``)
+    global_hru_params:
+        GlobalParams object for hru (populated after calling ``initialize``)
+    global_gru_params:
+        GlobalParams object for gru (populated after calling ``initialize``)
     local_attributes:
         LocalAttributes object (populated after calling ``initialize``)
     initial_conditions:
@@ -75,10 +75,10 @@ class Simulation():
         self.status = 'Initialized'
         self.decisions = self.manager.decisions
         self.output_control = self.manager.output_control
-        self.parameter_trial = self.manager.parameter_trial
+        self.spatial_params = self.manager.spatial_params
         self.force_file_list = self.manager.force_file_list
-        self.local_param_info = self.manager.local_param_info
-        self.basin_param_info = self.manager.basin_param_info
+        self.global_hru_params = self.manager.global_hru_params
+        self.global_gru_params = self.manager.global_gru_params
         self.local_attributes = self.manager.local_attributes
         self.initial_conditions = self.manager.initial_conditions
         self.genparm = self.manager.genparm
@@ -114,7 +114,7 @@ class Simulation():
         for k, v in config.get('decisions', {}).items():
             self.decisions.set_option(k, v)
         for k, v in config.get('parameters', {}).items():
-            self.local_param_info.set_option(k, v)
+            self.global_hru_params.set_option(k, v)
         for k, v in config.get('output_control', {}).items():
             self.output_control.set_option(k, **v)
         for k, v in config.get('attributes', {}).items():
@@ -122,7 +122,7 @@ class Simulation():
         for k, v in config.get('trial_parameters', {}).items():
             self.assign_trial_params(k, v)
         if self.decisions['snowLayers'] == 'CLM_2010':
-            self.validate_layer_params(self.local_param_info)
+            self.validate_layer_params(self.global_hru_params)
 
     def assign_attributes(self, name, data):
         """
@@ -150,7 +150,7 @@ class Simulation():
 
     def assign_trial_params(self, name, data, dim='hru', create=True):
         """
-        Assign new data to the ``parameter_trial`` dataset.
+        Assign new data to the ``spatial_params`` dataset.
 
         Parameters
         ----------
@@ -161,11 +161,11 @@ class Simulation():
             must match the shape in the parameter trial file
         """
         # Create the variable if we need
-        if create and name not in self.parameter_trial.variables:
-            self.parameter_trial[name] = self.parameter_trial[dim].astype(float).copy()
-        required_shape = self.parameter_trial[name].shape
+        if create and name not in self.spatial_params.variables:
+            self.spatial_params[name] = self.spatial_params[dim].astype(float).copy()
+        required_shape = self.spatial_params[name].shape
         try:
-            self.parameter_trial[name].values = np.array(data).reshape(required_shape)
+            self.spatial_params[name].values = np.array(data).reshape(required_shape)
         except ValueError as e:
             raise ValueError('The shape of the provided replacement data does',
                              ' not match the shape of the original data.', e)
@@ -189,10 +189,10 @@ class Simulation():
         self.config_path = self.manager_path.parent / '.pysumma'
         self.decisions = self.manager.decisions
         self.output_control = self.manager.output_control
-        self.parameter_trial = self.manager.parameter_trial
+        self.spatial_params = self.manager.spatial_params
         self.force_file_list = self.manager.force_file_list
-        self.local_param_info = self.manager.local_param_info
-        self.basin_param_info = self.manager.basin_param_info
+        self.global_hru_params = self.manager.global_hru_params
+        self.global_gru_params = self.manager.global_gru_params
         self.local_attributes = self.manager.local_attributes
         self.initial_conditions = self.manager.initial_conditions
         self.genparm = self.manager.genparm
@@ -366,19 +366,19 @@ class Simulation():
         self.config_path = self.config_path / name
         self.config_path.mkdir(parents=True, exist_ok=True)
         manager_path = str(self.manager_path.parent)
-        settings_path = os.path.abspath(os.path.realpath(str(self.manager['settings_path'].value)))
+        settings_path = os.path.abspath(os.path.realpath(str(self.manager['settingsPath'].value)))
         settings_path = Path(settings_path.replace(manager_path, str(self.config_path)))
         self.manager_path = self.config_path / self.manager.file_name
-        self.manager['settings_path'] = str(settings_path) + os.sep
+        self.manager['settingsPath'] = str(settings_path) + os.sep
         self.manager.write(path=self.config_path)
         self.decisions.write(path=settings_path)
         self.force_file_list.write(path=settings_path)
-        self.local_param_info.write(path=settings_path)
-        self.basin_param_info.write(path=settings_path)
+        self.global_hru_params.write(path=settings_path)
+        self.global_gru_params.write(path=settings_path)
         self.output_control.write(path=settings_path)
-        self.local_attributes.to_netcdf(settings_path / self.manager['local_attributes'].value)
-        self.parameter_trial.to_netcdf(settings_path / self.manager['parameter_trial'].value)
-        self.initial_conditions.to_netcdf(settings_path / self.manager['model_init_cond'].value)
+        self.local_attributes.to_netcdf(settings_path / self.manager['attributeFile'].value)
+        self.spatial_params.to_netcdf(settings_path / self.manager['spatialParams'].value)
+        self.initial_conditions.to_netcdf(settings_path / self.manager['initCondFile'].value)
         with open(settings_path / 'GENPARM.TBL', 'w+') as f:
             f.writelines(self.genparm)
         with open(settings_path / 'MPTABLE.TBL', 'w+') as f:
