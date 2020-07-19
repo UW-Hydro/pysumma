@@ -68,25 +68,25 @@ class FileManager(OptionContainer):
         return self._output_control
 
     @property
-    def local_param_info(self):
+    def global_hru_params(self):
         p1 = self.get_value('settingsPath')
-        p2 = self.get_value('hruParamFile')
-        self._local_param_info = LocalParamInfo(p1, p2)
-        return self._local_param_info
+        p2 = self.get_value('globalHruParams')
+        self._hru_params = GlobalParams(p1, p2)
+        return self._hru_params
 
     @property
-    def basin_param_info(self):
+    def global_gru_params(self):
         p1 = self.get_value('settingsPath')
-        p2 = self.get_value('gruParamFile')
-        self._basin_param_info = LocalParamInfo(p1, p2)
-        return self._basin_param_info
+        p2 = self.get_value('GlobalGruParams')
+        self._gru_params = GlobalParams(p1, p2)
+        return self._gru_params
 
     @property
     def force_file_list(self):
         p1 = self.get_value('settingsPath')
         p2 = self.get_value('forcingList')
         p3 = self.get_value('forcingPath')
-        self._force_file_list = ForceFileList(p1, p2, p3)
+        self._force_file_list = ForcingList(p1, p2, p3)
         return self._force_file_list
 
     @property
@@ -97,11 +97,11 @@ class FileManager(OptionContainer):
         return self._local_attrs
 
     @property
-    def parameter_trial(self):
+    def spatial_params(self):
         p1 = self.get_value('settingsPath')
-        p2 = self.get_value('trialParamFile')
-        self._param_trial = xr.open_dataset(p1 + p2)
-        return self._param_trial
+        p2 = self.get_value('spatialParams')
+        self._spatial_params = xr.open_dataset(p1 + p2)
+        return self._spatial_params
 
     @property
     def initial_conditions(self):

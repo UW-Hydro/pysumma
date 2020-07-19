@@ -19,6 +19,7 @@ setup(name='pysumma',
           'hs_restclient',
           'distributed',
           'fiona',
+          'cartopy',
           'netcdf4'
           ],
       include_package_data=True,
