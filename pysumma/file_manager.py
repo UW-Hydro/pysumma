@@ -52,7 +52,6 @@ class FileManager(OptionContainer):
         name, *value = line.split('!')[0].strip().split()
         if isinstance(value, list):
             value = " ".join(value).replace("'", "")
-        print(name, value)
         return (name.strip(), value.strip().replace("'", "").strip())
 
     @property
