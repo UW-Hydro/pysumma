@@ -36,7 +36,7 @@ class Simulation():
         Decisions object (populated after calling ``initialize``)
     output_control:
         OutputControl object (populated after calling ``initialize``)
-    spatial_params:
+    trial_params:
         Spatially distributed parameters (populated after calling ``initialize``)
     force_file_list:
         ForcingList object (populated after calling ``initialize``)
@@ -75,7 +75,7 @@ class Simulation():
         self.status = 'Initialized'
         self.decisions = self.manager.decisions
         self.output_control = self.manager.output_control
-        self.spatial_params = self.manager.spatial_params
+        self.trial_params = self.manager.trial_params
         self.force_file_list = self.manager.force_file_list
         self.global_hru_params = self.manager.global_hru_params
         self.global_gru_params = self.manager.global_gru_params
@@ -161,11 +161,11 @@ class Simulation():
             must match the shape in the parameter trial file
         """
         # Create the variable if we need
-        if create and name not in self.spatial_params.variables:
-            self.spatial_params[name] = self.spatial_params[dim].astype(float).copy()
-        required_shape = self.spatial_params[name].shape
+        if create and name not in self.trial_params.variables:
+            self.trial_params[name] = self.trial_params[dim].astype(float).copy()
+        required_shape = self.trial_params[name].shape
         try:
-            self.spatial_params[name].values = np.array(data).reshape(required_shape)
+            self.trial_params[name].values = np.array(data).reshape(required_shape)
         except ValueError as e:
             raise ValueError('The shape of the provided replacement data does',
                              ' not match the shape of the original data.', e)
@@ -189,7 +189,7 @@ class Simulation():
         self.config_path = self.manager_path.parent / '.pysumma'
         self.decisions = self.manager.decisions
         self.output_control = self.manager.output_control
-        self.spatial_params = self.manager.spatial_params
+        self.trial_params = self.manager.trial_params
         self.force_file_list = self.manager.force_file_list
         self.global_hru_params = self.manager.global_hru_params
         self.global_gru_params = self.manager.global_gru_params
@@ -377,15 +377,15 @@ class Simulation():
         self.global_gru_params.write(path=settings_path)
         self.output_control.write(path=settings_path)
         self.local_attributes.to_netcdf(settings_path / self.manager['attributeFile'].value)
-        self.spatial_params.to_netcdf(settings_path / self.manager['spatialParams'].value)
-        self.initial_conditions.to_netcdf(settings_path / self.manager['initCondFile'].value)
-        with open(settings_path / 'GENPARM.TBL', 'w+') as f:
+        self.trial_params.to_netcdf(settings_path / self.manager['trialParamFile'].value)
+        self.initial_conditions.to_netcdf(settings_path / self.manager['initConditionFile'].value)
+        with open(settings_path / self.manager['generalTableFile'].value, 'w+') as f:
             f.writelines(self.genparm)
-        with open(settings_path / 'MPTABLE.TBL', 'w+') as f:
+        with open(settings_path / self.manager['noahmpTableFile'].value, 'w+') as f:
             f.writelines(self.mptable)
-        with open(settings_path / 'SOILPARM.TBL', 'w+') as f:
+        with open(settings_path / self.manager['soilTableFile'].value, 'w+') as f:
             f.writelines(self.soilparm)
-        with open(settings_path / 'VEGPARM.TBL', 'w+') as f:
+        with open(settings_path / self.manager['vegTableFile'].value, 'w+') as f:
             f.writelines(self.vegparm)
 
     def get_output_files(self) -> List[str]:

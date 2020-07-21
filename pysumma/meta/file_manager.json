@@ -8,12 +8,16 @@
         "outputPath",
         "attributeFile",
         "decisionsFile",
-        "globalHruParams",
-        "globalGruParams",
-        "forcingList",
-        "outputControl",
-        "initCondFile",
-        "spatialParams",
+        "globalHruParamFile",
+        "globalGruParamFile",
+        "forcingListFile",
+        "outputControlFile",
+        "initConditionFile",
+        "trialParamFile",
+        "vegTableFile",
+        "soilTableFile",
+        "generalTableFile",
+        "noahmpTableFile",
         "outFilePrefix"
     ]
 }

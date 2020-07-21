@@ -64,28 +64,28 @@ class FileManager(OptionContainer):
     @property
     def output_control(self):
         p1 = self.get_value('settingsPath')
-        p2 = self.get_value('outputControl')
+        p2 = self.get_value('outputControlFile')
         self._output_control = OutputControl(p1, p2)
         return self._output_control
 
     @property
     def global_hru_params(self):
         p1 = self.get_value('settingsPath')
-        p2 = self.get_value('globalHruParams')
+        p2 = self.get_value('globalHruParamFile')
         self._hru_params = GlobalParams(p1, p2)
         return self._hru_params
 
     @property
     def global_gru_params(self):
         p1 = self.get_value('settingsPath')
-        p2 = self.get_value('globalGruParams')
+        p2 = self.get_value('globalGruParamFile')
         self._gru_params = GlobalParams(p1, p2)
         return self._gru_params
 
     @property
     def force_file_list(self):
         p1 = self.get_value('settingsPath')
-        p2 = self.get_value('forcingList')
+        p2 = self.get_value('forcingListFile')
         p3 = self.get_value('forcingPath')
         self._force_file_list = ForcingList(p1, p2, p3)
         return self._force_file_list
@@ -98,43 +98,48 @@ class FileManager(OptionContainer):
         return self._local_attrs
 
     @property
-    def spatial_params(self):
+    def trial_params(self):
         p1 = self.get_value('settingsPath')
-        p2 = self.get_value('spatialParams')
-        self._spatial_params = xr.open_dataset(p1 + p2)
-        return self._spatial_params
+        p2 = self.get_value('trialParamFile')
+        self._trial_params = xr.open_dataset(p1 + p2)
+        return self._trial_params
 
     @property
     def initial_conditions(self):
         p1 = self.get_value('settingsPath')
-        p2 = self.get_value('initCondFile')
+        p2 = self.get_value('initConditionFile')
         self._init_cond = xr.open_dataset(p1 + p2)
         return self._init_cond
 
     @property
     def genparm(self):
-        p1, p2 = self.get_value('settingsPath'), 'GENPARM.TBL'
+        p1 = self.get_value('settingsPath')
+        p2 = self.get_value('generalTableFile')
+        print(p1, p2)
         with open(p1 + p2, 'r') as f:
             self._genparm = f.readlines()
         return self._genparm
 
     @property
     def mptable(self):
-        p1, p2 = self.get_value('settingsPath'), 'MPTABLE.TBL'
+        p1 = self.get_value('settingsPath')
+        p2 = self.get_value('noahmpTableFile')
         with open(p1 + p2, 'r') as f:
             self._mptable = f.readlines()
         return self._mptable
 
     @property
     def soilparm(self):
-        p1, p2 = self.get_value('settingsPath'), 'SOILPARM.TBL'
+        p1 = self.get_value('settingsPath')
+        p2 = self.get_value('soilTableFile')
         with open(p1 + p2, 'r') as f:
             self._soilparm = f.readlines()
         return self._soilparm
 
     @property
     def vegparm(self):
-        p1, p2 = self.get_value('settingsPath'), 'VEGPARM.TBL'
+        p1 = self.get_value('settingsPath')
+        p2 = self.get_value('vegTableFile')
         with open(p1 + p2, 'r') as f:
             self._vegparm = f.readlines()
         return self._vegparm
