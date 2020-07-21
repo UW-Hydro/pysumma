@@ -143,9 +143,10 @@ class OptionContainer(object):
         with open(path, 'r') as f:
             self.original_contents = f.readlines()
         for line in self.original_contents:
-            if line.startswith('!') and not self.opt_count:
+            isnt_empty = len(''.join(map(lambda x: x.strip(), line.split() )))
+            if line.startswith('!') and not self.opt_count and not isnt_empty:
                 self.header.append(line)
-            elif not line.startswith('!'):
+            elif not line.startswith('!') and isnt_empty:
                 self.options.append(self.OptionType(
                     *self.get_constructor_args(line)))
                 self.opt_count += 1
@@ -187,6 +188,10 @@ class OptionContainer(object):
         if strict:
             raise ValueError("Could not find option {}!".format(name))
         return None
+
+    def list_options(self):
+        """Return a list of all available option keys"""
+        return [o.name for o in self.options]
 
     def clear(self):
         self.options = []

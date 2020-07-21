@@ -1,0 +1,73 @@
+# -----------------------------------------------------------------
+# Ostrich configuration file template for pysumma calibration
+# -----------------------------------------------------------------
+#   This file is automatically populated by pysumma and provides
+#   a high level interface to the OSTRICH optimization package.
+#   We do not implement many of the available options for the
+#   sake of ease of use (and implementation).
+# -----------------------------------------------------------------
+# Currently only allow DDS optimization routine
+ProgramType DDS
+ModelExecutable $runScript
+ObjectiveFunction $objectiveFun
+PreserveBestModel $saveScript
+PreserveModelOutput $preserveOutput
+RandomSeed $seed
+OnObsError $errval
+
+BeginFilePairs
+$weightTemplateFile; $weightValueFile
+EndFilePairs
+
+# -------------------------------------------------
+# Parameter/DV Specification - note: what are txInN, txOst ...?
+# Format:
+#     parameter start minimum maximum txInN txOst txOut fmt
+# -------------------------------------------------
+BeginParams
+$paramSection
+EndParams
+
+# -------------------------------------------------
+# Parameter/DV Specification - note: what are txInN, txOst ...?
+# Format:
+#     parameter start minimum maximum txInN txOst txOut fmt
+# -------------------------------------------------
+BeginTiedParams
+$tiedParamSection
+EndTiedParams
+
+# -------------------------------------------------
+# Response variable specification - note: keyworld should aways be OST_NULL
+# Format:
+#     name  filename  keyword line col token
+# -------------------------------------------------
+BeginResponseVars
+$responseSection
+EndResponseVars
+
+# -------------------------------------------------
+# Compound response variable specification
+# Format is complicated - see OSTRICH documentation
+# -------------------------------------------------
+BeginTiedRespVars
+$tiedResponseSection
+EndTiedRespVars
+
+# -------------------------------------------------
+# Definition of cost function and penalty.
+# Currently we do not support constraints so penalty is hard coded to APM
+# -------------------------------------------------
+BeginGCOP
+CostFunction $costFunction
+PenaltyFunction APM
+EndGCOP
+
+# -------------------------------------------------
+# DDS algorithm control
+# -------------------------------------------------
+BeginDDSAlg
+PerturbationValue $perturbVal
+MaxIterations $maxIters
+UseInitialParamValues
+EndDDSAlg

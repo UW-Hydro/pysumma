@@ -22,11 +22,7 @@ class DecisionOption(BaseOption):
         self.set_value(value)
 
     def set_value(self, new_value):
-        datestring = r"[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}"
-        if (self.name in ['simulStart', 'simulFinsh'] and
-                re.match(datestring, new_value) is not None):
-            self.value = new_value
-        elif new_value in self.available_options:
+        if new_value in self.available_options:
             self.value = new_value
         else:
             raise ValueError(os.linesep.join([

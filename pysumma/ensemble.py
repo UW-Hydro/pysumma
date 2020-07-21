@@ -15,12 +15,25 @@ class Ensemble(object):
     '''
     Ensembles represent an multiple SUMMA configurations based on
     changing the decisions or parameters of a given run.
+
+    Attributes
+    ----------
+    executable:
+        Path to the SUMMA executable
+    filemanager: (optional)
+        Path to the file manager
+    configuration:
+        Dictionary of runs, along with settings
+    num_workers:
+        Number of parallel workers to use
+    simulations:
+        Dictionary of run names and Simulation objects
     '''
 
     def __init__(self, executable: str,configuration: dict,
                  filemanager: str=None, num_workers: int=1,
                  threads_per_worker: int=OMP_NUM_THREADS,
-                 scheduler: str=None):
+                 scheduler: str=None, client: Client=None):
         """
         Create a new Ensemble object. The API mirrors that of the
         Simulation object.
@@ -33,15 +46,21 @@ class Ensemble(object):
         self.simulations: dict = {}
         self.submissions: list = []
         # Try to get a client, and if none exists then start a new one
-        try:
-            self._client = get_client()
-            # Start more workers if necessary:
+        if client:
+            self._client = client
             workers = len(self._client.get_worker_logs())
             if workers <= self.num_workers:
                 self._client.cluster.scale(workers)
-        except ValueError:
-            self._client = Client(n_workers=self.num_workers,
-                                  threads_per_worker=threads_per_worker)
+        else:
+            try:
+                self._client = get_client()
+                # Start more workers if necessary:
+                workers = len(self._client.get_worker_logs())
+                if workers <= self.num_workers:
+                    self._client.cluster.scale(workers)
+            except ValueError:
+                self._client = Client(n_workers=self.num_workers,
+                                      threads_per_worker=threads_per_worker)
         self._generate_simulation_objects()
 
     def _generate_simulation_objects(self):
@@ -204,31 +223,142 @@ def _submit(s: Simulation, name: str, run_option: str, prerun_cmds, config):
 
 
 def decision_product(list_config):
+    """
+    Create a dictionary of runs based on a simpler list configuration
+    of decision options
+
+    Parameters
+    ----------
+    list_config:
+        A dictionary of the sort
+        {key1: [list of values], key2: [list of values]}
+
+    Returns
+    --------
+    A dictionary of the sort:
+        {name: {key1: value1, key2: value1},
+         name: {key1: value2, key2: value1},
+         ...
+         name: {key1: valueN, key2: valueN}}
+    """
     return {'++'+'++'.join(d.values())+'++': {'decisions': d}
             for d in product_dict(**list_config)}
 
 
 def parameter_product(list_config):
+    """
+    Create a dictionary of runs based on a simpler list configuration
+    of parameter values
+
+    Parameters
+    ----------
+    list_config:
+        A dictionary of the sort
+        {key1: [list of values], key2: [list of values]}
+
+    Returns
+    --------
+    A dictionary of the sort:
+        {name: {key1: value1, key2: value1},
+         name: {key1: value2, key2: value1},
+         ...
+         name: {key1: valueN, key2: valueN}}
+    """
     return {'++'+'++'.join('{}={}'.format(k, v) for k, v in d.items())+'++':
             {'parameters': d} for d in product_dict(**list_config)}
 
 
 def attribute_product(list_config):
+    """
+    Create a dictionary of runs based on a simpler list configuration
+    of attribute values
+
+    Parameters
+    ----------
+    list_config:
+        A dictionary of the sort
+        {key1: [list of values], key2: [list of values]}
+
+    Returns
+    --------
+    A dictionary of the sort:
+        {name: {key1: value1, key2: value1},
+         name: {key1: value2, key2: value1},
+         ...
+         name: {key1: valueN, key2: valueN}}
+    """
     return {'++'+'++'.join('{}={}'.format(k, v) for k, v in d.items())+'++':
             {'attributes': d} for d in product_dict(**list_config)}
 
 
-def total_product(dec_conf={}, param_conf={}, attr_conf={}):
+def trial_parameter_product(list_config):
+    """
+    Create a dictionary of runs based on a simpler list configuration
+    of trial parameter values
+
+    Parameters
+    ----------
+    list_config:
+        A dictionary of the sort
+        {key1: [list of values], key2: [list of values]}
+
+    Returns
+    --------
+    A dictionary of the sort:
+        {name: {key1: value1, key2: value1},
+         name: {key1: value2, key2: value1},
+         ...
+         name: {key1: valueN, key2: valueN}}
+    """
+    return {'++'+'++'.join('{}={}'.format(k, v) for k, v in d.items())+'++':
+            {'trial_parameters': d} for d in product_dict(**list_config)}
+
+
+
+def file_manager_product(list_config):
+    """
+    Create a dictionary of runs based on a simpler list configuration
+    of file managers
+
+    Parameters
+    ----------
+    list_config:
+        A dictionary of the sort
+        {key1: [list of values], key2: [list of values]}
+
+    Returns
+    --------
+    A dictionary of the sort:
+        {name: {key1: value1, key2: value1},
+         name: {key1: value2, key2: value1},
+         ...
+         name: {key1: valueN, key2: valueN}}
+    """
+    return {'++'+'++'.join('{}={}'.format(k, v) for k, v in d.items())+'++':
+            {'file_manager': d} for d in product_dict(**list_config)}
+
+
+def total_product(dec_conf={}, param_conf={}, attr_conf={}, fman_conf={},
+                  param_trial_conf={}, sequential_keys=False):
+    """
+    Combines multiple types of model changes into a single configuration
+    for the Ensemble object.
+    """
     full_conf = deepcopy(dec_conf)
     full_conf.update(param_conf)
     full_conf.update(attr_conf)
+    full_conf.update(param_trial_conf)
+    full_conf.update(fman_conf)
     prod_dict = product_dict(**full_conf)
     config = {}
-    for d in prod_dict:
+    for i, d in enumerate(prod_dict):
         name = '++' + '++'.join(
-            '{}={}'.format(k, v) if k in param_conf or k in attr_conf else v
+            '{}={}'.format(k, v) if k in param_conf or k in attr_conf or k in param_trial_conf
+            else v.replace('/', '_').replace('\\', '_')
             for k, v in d.items()) + '++'
-        config[name] = {'decisions': {}, 'parameters': {}, 'attributes': {}}
+        if sequential_keys:
+            name = f'run_{i}'
+        config[name] = {'decisions': {}, 'parameters': {}, 'attributes': {}, 'trial_parameters': {}}
         for k, v in d.items():
             if k in dec_conf:
                 config[name]['decisions'][k] = v
@@ -236,4 +366,8 @@ def total_product(dec_conf={}, param_conf={}, attr_conf={}):
                 config[name]['parameters'][k] = v
             elif k in attr_conf:
                 config[name]['attributes'][k] = v
+            elif k in param_trial_conf:
+                config[name]['trial_parameters'][k] = v
+            elif k in fman_conf:
+                config[name]['file_manager'] = v
     return config
