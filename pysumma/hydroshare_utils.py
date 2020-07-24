@@ -29,3 +29,4 @@ def get_hs_resource(resource_id, file_path):
     shutil.unpack_archive(hs_resource_dir+hs_resource[0], extract_dir=file_path)
     cmd = "rm -rf " + os.path.join(file_path, resource_id)
     subprocess.run(cmd, shell=True)
+    return hs_resource[0].split(".")[0]
