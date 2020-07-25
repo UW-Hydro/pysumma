@@ -1,4 +1,4 @@
-name: pysumma_test
+name: pysumma
 channels:
   - conda-forge
 dependencies:
