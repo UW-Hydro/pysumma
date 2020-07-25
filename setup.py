@@ -20,7 +20,9 @@ setup(name='pysumma',
           'distributed',
           'fiona',
           'cartopy',
-          'netcdf4'
+          'netcdf4',
+          'geoviews',
+          'jupyterthemes'
           ],
       include_package_data=True,
       test_suite='pysumma.tests')
