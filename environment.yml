@@ -1,4 +1,4 @@
-name: pysumma
+name: pysumma_test
 channels:
   - conda-forge
 dependencies:
@@ -17,6 +17,9 @@ dependencies:
   - seaborn
   - matplotlib
   - geopandas
+  - pandas
+  - geoviews
+  - jupyterthemes
   - jupyter
   - pip
   - summa=3.0.0
