@@ -258,8 +258,8 @@ class Ostrich():
                 'paramMappingFile': self.weightTemplateFile,
                 'paramWeightFile': self.weightValueFile,
                 'simulationArgs': self.simulation_kwargs,
-                'paramFile': (self.simulation.manager['settings_path'].value
-                              + self.simulation.manager['parameter_trial'].value),
+                'paramFile': (self.simulation.manager['settingsPath'].value
+                              + self.simulation.manager['trialParamFile'].value),
                 }
 
 
