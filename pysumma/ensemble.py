@@ -91,7 +91,9 @@ class Ensemble(object):
                 decision_dims[k] = v
             for k, v in conf.get('file_manager', {}).items():
                 manager_dims[k] = v
-            for k, v in conf.get('parameters', {}).items():
+            #for k, v in conf.get('parameters', {}).items():
+            #    parameter_dims[k] = v
+            for k, v in conf.get('trial_parameters', {}).items():
                 parameter_dims[k] = v
         return {'decisions': decision_dims,
                 'managers': manager_dims,
@@ -120,7 +122,7 @@ class Ensemble(object):
             decision_names[i] = '++'.join(l.split('=')[0] for l in t)
         new_idx = pd.MultiIndex.from_tuples(
             decision_tuples, names=new_coords)
-        out_file_paths = [s.get_output() for s in self.simulations.values()]
+        out_file_paths = [s.get_output_files() for s in self.simulations.values()]
         out_file_paths = [fi for sublist in out_file_paths for fi in sublist]
         full = xr.open_mfdataset(out_file_paths, concat_dim='run_number')
         merged = full.assign_coords(run_number=decision_names)
