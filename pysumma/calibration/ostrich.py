@@ -1,4 +1,5 @@
 import os
+import pandas as pd
 import numpy as np
 import shutil
 import stat
@@ -93,7 +94,7 @@ class Ostrich():
 
     def __init__(self, ostrich_executable, summa_executable, file_manager, python_path='python'):
         """Initialize a new Ostrich object"""
-        self.available_metrics: np.ndarray = np.array(['KGE', 'MAE', 'RMSE'])
+        self.available_metrics: np.ndarray = np.array(['KGE', 'MAE', 'MSE', 'RMSE', 'NSE'])
         self.ostrich: str = ostrich_executable
         self.python_path: str = python_path
         self.summa: str = summa_executable
@@ -109,7 +110,7 @@ class Ostrich():
         self.metrics_file: Path = self.config_path / 'metrics.txt'
         self.impot_strings: str = ''
         self.conversion_function: callable = lambda x: x
-        self.filter_function: callable = lambda x: x
+        self.filter_function: callable = lambda x, y: (x, y)
         self.preserve_output: str ='no'
         self.seed: int = 42
         self.errval: float = -9999
@@ -122,19 +123,31 @@ class Ostrich():
         self.maximize: bool = True
         self.simulation_kwargs: Dict = {}
 
-    def run(self, prerun_cmds=[]):
+    def run(self, prerun_cmds=[], monitor=True):
         """Start calibration run"""
         if len(prerun_cmds):
             preprocess_cmd = " && ".join(prerun_cmds) + " && "
         else:
             preprocess_cmd = ""
         cmd = preprocess_cmd + f'cd {str(self.config_path)} && ./ostrich'
+        self.cmd = cmd
         self.process = subprocess.Popen(cmd, stdout=subprocess.PIPE,
                                         stderr=subprocess.PIPE, shell=True)
-        self.stdout, self.stderr = self.process.communicate()
-        if isinstance(self.stdout, bytes):
-            self.stderr = self.stderr.decode('utf-8', 'ignore')
-            self.stdout = self.stdout.decode('utf-8', 'ignore')
+        if monitor:
+            self.stdout, self.stderr = self.process.communicate()
+            if isinstance(self.stdout, bytes):
+                self.stderr = self.stderr.decode('utf-8', 'ignore')
+                self.stdout = self.stdout.decode('utf-8', 'ignore')
+
+    def monitor(self):
+        if not self.process:
+            return
+        else:
+            self.stdout, self.stderr = self.process.communicate()
+            if isinstance(self.stdout, bytes):
+                self.stderr = self.stderr.decode('utf-8', 'ignore')
+                self.stdout = self.stdout.decode('utf-8', 'ignore')
+        return self.stdout, self.stderr
 
     def write_config(self):
         """Writes all necessary files for calibration"""
