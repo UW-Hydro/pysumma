@@ -54,13 +54,18 @@ if __name__ == '__main__':
     time_slice = pse.trim_time(sim_ds, obs_ds)
     sim_ds = sim_ds.sel(time=time_slice)
     obs_ds = obs_ds.sel(time=time_slice)
+    sim_filt, obs_filt = filter(sim_ds,  obs_ds)
 
-    kge = pse.kling_gupta_efficiency( filter(sim_ds[sim_calib_var]),  filter(conversion(obs_ds[obs_calib_var])))
-    mae = pse.mean_absolute_error(    filter(sim_ds[sim_calib_var]),  filter(conversion(obs_ds[obs_calib_var])))
-    rmse = pse.root_mean_square_error(filter(sim_ds[sim_calib_var]),  filter(conversion(obs_ds[obs_calib_var])))
+    kge = pse.kling_gupta_efficiency(sim_filt[sim_calib_var], conversion(obs_filt[obs_calib_var]))
+    mae = pse.mean_absolute_error(sim_filt[sim_calib_var], conversion(obs_filt[obs_calib_var]))
+    mse = pse.mean_squared_error(sim_filt[sim_calib_var], conversion(obs_filt[obs_calib_var]))
+    rmse = pse.root_mean_square_error(sim_filt[sim_calib_var], conversion(obs_filt[obs_calib_var]))
+    nse  = pse.nash_sutcliffe_efficiency(sim_filt[sim_calib_var], conversion(obs_filt[obs_calib_var]))
 
     # save diagnostics in form that ostrich can read
     with open(out_file, 'w+') as f:
         f.write('%.6f'%kge  + '\t #KGE\n')
         f.write('%.6f'%mae  + '\t #MAE\n')
+        f.write('%.6f'%mse  + '\t #MSE\n')
         f.write('%.6f'%rmse + '\t #RMSE\n')
+        f.write('%.6f'%nse  + '\t #NSE\n')

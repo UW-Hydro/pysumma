@@ -118,7 +118,6 @@ class FileManager(OptionContainer):
     def genparm(self):
         p1 = self.get_value('settingsPath')
         p2 = self.get_value('generalTableFile')
-        print(p1, p2)
         with open(p1 + p2, 'r') as f:
             self._genparm = f.readlines()
         return self._genparm
