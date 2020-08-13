@@ -25,8 +25,6 @@ setup(name='pysumma',
           'geopandas',
           'pandas',
           'hs_restclient',
-          'geoviews',
-          'jupyterthemes'
           ],
       include_package_data=True,
       test_suite='pysumma.tests')
