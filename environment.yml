@@ -17,6 +17,7 @@ dependencies:
   - seaborn
   - matplotlib
   - geopandas
+  - pandas
   - jupyter
   - pip
   - summa=3.0.0
