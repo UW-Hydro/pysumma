@@ -40,7 +40,7 @@
             "description": "Ball-Berry: controls on carbon assimilation"
         },
         "bbCanIntg8": {
-            "options": ["constantScaling", "laiscaling"],
+            "options": ["constantScaling", "laiScaling"],
             "description": "Ball-Berry: scaling of photosynthesis from the leaf to the canopy"
         },
         "num_method": {
