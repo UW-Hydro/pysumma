@@ -108,6 +108,7 @@ class Ostrich():
         self.run_script: Path = self.config_path / 'run_script.py'
         self.save_script: Path = self.config_path / 'save_script.py'
         self.metrics_file: Path = self.config_path / 'metrics.txt'
+        self.metrics_log: Path = self.config_path / 'metrics_log.csv'
         self.impot_strings: str = ''
         self.conversion_function: callable = lambda x: x
         self.filter_function: callable = lambda x, y: (x, y)
@@ -122,6 +123,7 @@ class Ostrich():
         self.objective_function: str = 'gcop'
         self.maximize: bool = True
         self.simulation_kwargs: Dict = {}
+        self.allow_failures: bool = False
 
     def run(self, prerun_cmds=[], monitor=True):
         """Start calibration run"""
@@ -265,12 +267,14 @@ class Ostrich():
                 'simVarName': self.sim_calib_var,
                 'obsVarName': self.obs_calib_var,
                 'outFile': self.metrics_file,
+                'metricsLog': self.metrics_log,
                 'importStrings': self.import_strings,
                 'conversionFunc': "=".join(inspect.getsource(self.conversion_function).split('=')[1:]),
                 'filterFunc': "=".join(inspect.getsource(self.filter_function).split('=')[1:]),
                 'paramMappingFile': self.weightTemplateFile,
                 'paramWeightFile': self.weightValueFile,
                 'simulationArgs': self.simulation_kwargs,
+                'allowFailures': self.allow_failures,
                 'paramFile': (self.simulation.manager['settingsPath'].value
                               + self.simulation.manager['trialParamFile'].value),
                 }
