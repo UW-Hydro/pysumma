@@ -3,6 +3,7 @@ import copy
 import shutil
 import subprocess
 import numpy as np
+import pandas as pd
 import xarray as xr
 from pathlib import Path
 from typing import List
@@ -361,6 +362,14 @@ class Simulation():
             self._output = None
 
         return self.status
+
+    def spinup(self, period='1Y', niters=10):
+        # open forcings
+        with xr.open_mfdataset(self.force_file_list.open_forcing_data) as ds:
+            start_date = pd.datetime(ds['time'].values[0])
+            end_date = start_date + pd.Timedelta(period)
+            forcings = ds.sel(time=slice(start_date, end_date)).load()
+        pass
 
     def _write_configuration(self, name=''):
         self.config_path = self.config_path / name
