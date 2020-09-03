@@ -12,7 +12,7 @@ from .decisions import Decisions
 from .file_manager import FileManager
 from .output_control import OutputControl
 from .global_params import GlobalParams
-from .force_file_list import ForcingList
+from .force_file_list import ForcingList, ForcingOption
 
 
 class Simulation():
@@ -204,12 +204,12 @@ class Simulation():
     def validate_layer_params(self, params):
         """Ensure that the layer parameters are valid"""
         for i in range(1, 5):
-            assert (params[f'zmaxLayer{i}_upper']
-                    <= params[f'zmaxLayer{i}_lower'], i)
-            assert (params[f'zmaxLayer{i}_upper'] / params[f'zminLayer{i}']
-                    >= 2.5, i)
-            assert (params[f'zmaxLayer{i}_upper'] / params[f'zminLayer{i+1}']
-                    >= 2.5, i)
+            assert params[f'zmaxLayer{i}_upper'] \
+                    <= params[f'zmaxLayer{i}_lower'], i
+            assert params[f'zmaxLayer{i}_upper'] / params[f'zminLayer{i}'] \
+                    >= 2.5, i
+            assert params[f'zmaxLayer{i}_upper'] / params[f'zminLayer{i+1}'] \
+                    >= 2.5, i
 
     def _gen_summa_cmd(self, run_suffix, processes=1, prerun_cmds=[],
                        startGRU=None, countGRU=None, iHRU=None,
@@ -362,13 +362,29 @@ class Simulation():
 
         return self.status
 
-    def spinup(self, period='1Y', niters=10):
+    def spinup(self, run_option, period='1Y', niters=10, run_suffix='pysumma_spinup'):
         # open forcings
-        with xr.open_mfdataset(self.force_file_list.open_forcing_data) as ds:
-            start_date = pd.datetime(ds['time'].values[0])
-            end_date = start_date + pd.Timedelta(period)
+        spinup_force_name = 'pysumma_spinup.nc'
+        with xr.open_mfdataset(self.force_file_list.forcing_paths) as ds:
+            start_date = pd.to_datetime(ds['time'].values[0])
+            end_date = pd.to_datetime(start_date + pd.Timedelta(period))
             forcings = ds.sel(time=slice(start_date, end_date)).load()
-        pass
+        spinup_force_path = self.manager['forcingPath'].value + spinup_force_name
+        forcings.to_netcdf(spinup_force_path)
+        self.force_file_list.options = [ForcingOption(spinup_force_path)]
+        self.manager['simStartTime'] = start_date
+        self.manager['simEndTime'] = end_date
+        ymdh = str(self.manager['simEndTime'].value).replace(' ', '-').split(':')[0]
+        out_dir = self.manager['outputPath'].value
+        prefix = self.manager['outFilePrefix'].value
+        restart_file_path = f'{out_dir}{prefix}_summaRestart_{ymdh}_{run_suffix}.nc'
+        restart_dest = os.path.dirname(self.manager['initConditionFile'].value) + '/pysumma_spinup.nc'
+        for n in range(niters):
+            self.run(run_option, run_suffix=run_suffix, freq_restart='e')
+            shutil.copy(restart_file_path, self.manager['settingsPath'].value + restart_dest)
+            self.manager['initConditionFile'] = restart_dest
+            with xr.open_dataset(self.manager['settingsPath'].value + restart_dest) as ds:
+                self.initial_conditions = ds.load()
 
     def _write_configuration(self, name=''):
         self.config_path = self.config_path / name
