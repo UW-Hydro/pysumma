@@ -363,11 +363,19 @@ class Simulation():
         return self.status
 
     def _write_configuration(self, name=''):
+        import shutil
+
         self.config_path = self.config_path / name
         self.config_path.mkdir(parents=True, exist_ok=True)
         manager_path = str(self.manager_path.parent)
         settings_path = os.path.abspath(os.path.realpath(str(self.manager['settingsPath'].value)))
         settings_path = Path(settings_path.replace(manager_path, str(self.config_path)))
+
+        if 'neuralNetFile' in [o.name for o in self.manager.options]:
+            param_path = os.path.abspath(os.path.realpath(str(self.manager['settingsPath'].value)))
+            src_nn = os.path.abspath(param_path + '/' + self.manager['neuralNetFile'].value)
+            dest_nn = os.path.abspath(settings_path / self.manager['neuralNetFile'].value)
+
         self.manager_path = self.config_path / self.manager.file_name
         self.manager['settingsPath'] = str(settings_path) + os.sep
         self.manager.write(path=self.config_path)
@@ -387,6 +395,9 @@ class Simulation():
             f.writelines(self.soilparm)
         with open(settings_path / self.manager['vegTableFile'].value, 'w+') as f:
             f.writelines(self.vegparm)
+
+        if 'neuralNetFile' in [o.name for o in self.manager.options]:
+            shutil.copy(src_nn, dest_nn)
 
     def get_output_files(self) -> List[str]:
         """Find output files given the ``stdout`` generated from a run"""
