@@ -94,22 +94,25 @@ class FileManager(OptionContainer):
     def local_attributes(self):
         p1 = self.get_value('settingsPath')
         p2 = self.get_value('attributeFile')
-        self._local_attrs = xr.open_dataset(p1 + p2)
-        return self._local_attrs
+        with xr.open_dataset(p1 + p2) as self._local_attrs:
+        	self._local_attrs.load()
+        return self._local_attrs.load()
 
     @property
     def trial_params(self):
         p1 = self.get_value('settingsPath')
         p2 = self.get_value('trialParamFile')
-        self._trial_params = xr.open_dataset(p1 + p2)
-        return self._trial_params
+        with xr.open_dataset(p1 + p2) as self._trial_params:
+        	self._trial_params.load()
+        return self._trial_params.load()
 
     @property
     def initial_conditions(self):
         p1 = self.get_value('settingsPath')
         p2 = self.get_value('initConditionFile')
-        self._init_cond = xr.open_dataset(p1 + p2)
-        return self._init_cond
+        with xr.open_dataset(p1 + p2) as self._init_cond:
+        	self._init_cond.load()
+        return self._init_cond.load()
 
     @property
     def genparm(self):
