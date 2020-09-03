@@ -4,22 +4,6 @@ import shutil
 from urllib.request import urlretrieve
 import subprocess
 
-
-def install_test_cases_summa_web(save_filepath):
-    """Download SUMMA TestCases from UCAR web site.
-    TODO: however this is old version of SUMMA TestCases
-    """
-    url = ("https://ral.ucar.edu/sites/default/files/public/projects/"
-           "structure-for-unifying-multiple-modeling-alternatives-summa/"
-           "summatestcases-2.x.tar.gz")
-    filepath = save_filepath + "summatestcases-2.x.tar.gz"
-    urlretrieve(url, filepath)
-    shutil.unpack_archive(filepath, extract_dir=os.path.dirname(filepath))
-    cmd = ("cd {}/summaTestCases_2.x/; "
-           "./installTestCases_local.sh").format(save_filepath)
-    subprocess.run(cmd, shell=True)
-
-
 def product_dict(**kwargs):
     """
     Take a set of dictionary arguments and generate a new set of

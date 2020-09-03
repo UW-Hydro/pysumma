@@ -44,52 +44,38 @@ Then, you can see what is in it simply by printing it out:
 
     print(fm)
 
-    > 'SUMMA_FILE_MANAGER_V1.0'    ! filemanager_version
-    > '/home/user/summa_setup_template/settings/'    ! settings_path
-    > '/home/user/summa_setup_template/forcing/'    ! input_path
-    > '/home/user/summa_setup_template/output/'    ! output_path
-    > 'decisions.txt'    ! decisions_path
-    > '[notUsed]'    ! meta_time
-    > '[notUsed]'    ! meta_attr
-    > '[notUsed]'    ! meta_type
-    > '[notUsed]'    ! meta_force
-    > '[notUsed]'    ! meta_localparam
-    > 'output_control.txt'    ! output_control
-    > '[notUsed]'    ! meta_localindex
-    > '[notUsed]'    ! meta_basinparam
-    > '[notUsed]'    ! meta_basinmvar
-    > 'local_attributes.nc'    ! local_attributes
-    > 'local_param_info.txt'    ! local_param_info
-    > 'basin_param_info.txt'    ! basin_param_info
-    > 'forcing_file_list.txt'    ! forcing_file_list
-    > 'initial_conditions.nc'    ! model_init_cond
-    > 'parameter_trial.nc'    ! parameter_trial
-    > 'test'    ! output_prefix
+    > controlVersion          'SUMMA_FILE_MANAGER_V3.0.0'
+    > simStartTime            '2002-10-01 00:00'
+    > simEndTime              '2003-05-31 00:00'
+    > tmZoneInfo              'localTime'
+    > settingsPath            '/pool0/data/andrbenn/dana_3_test/.pysumma/_test/settings/'
+    > forcingPath             './forcings/'
+    > outputPath              './output/'
+    > decisionsFile           'decisions.txt'
+    > outputControlFile       'output_control.txt'
+    > globalHruParamFile      '../params/local_param_info.txt'
+    > globalGruParamFile      '../params/basin_param_info.txt'
+    > attributeFile           '../params/local_attributes.nc'
+    > trialParamFile          '../params/parameter_trial.nc'
+    > forcingListFile         '../forcings/forcing_file_list.txt'
+    > initConditionFile       '../params/initial_conditions.nc'
+    > outFilePrefix           'template_output'
+    > vegTableFile            'VEGPARM.TBL'
+    > soilTableFile           'SOILPARM.TBL'
+    > generalTableFile        'GENPARM.TBL'
+    > noahmpTableFile         'MPTABLE.TBL'
 
 To see how to access each of these specific options you can use the ``list_options`` method.
-
-::
-
-    print(fm.list_options)
-
-    > ['filemanager_version', 'settings_path', 'input_path',
-    >  'output_path', 'decisions_path', 'meta_time',
-    >  'meta_attr', 'meta_type', 'meta_force', 'meta_localparam',
-    >  'output_control', 'meta_localindex', 'meta_basinparam',
-    >  'meta_basinmvar', 'local_attributes', 'local_param_info',
-    >  'basin_param_info', 'forcing_file_list', 'model_init_cond',
-    >  'parameter_trial', 'output_prefix']
-
 Then, each of these keys can be accessed directly similarly to how is done with python dictionaries.
 This can be used to inspect the values of each option as well as modify their values.
 
 ::
 
-    print(fm['output_prefix'])
+    print(fm['outputPrefix'])
 
     > 'test'    ! output_prefix
 
-    fm['output_prefix'] = 'tutorial'
+    fm['outputPrefix'] = 'tutorial'
 
     print(fm['output_prefix'])
 
@@ -114,14 +100,13 @@ Once instantiated you can inspect the available decisions and the options availa
 
     print(dec.list_options())
 
-    > ['simulStart', 'simulFinsh', 'tmZoneInfo', 'soilCatTbl',
-    >  'vegeParTbl', 'soilStress', 'stomResist', 'num_method',
+    > ['soilCatTbl', 'vegeParTbl', 'soilStress', 'stomResist',
     >  'fDerivMeth', 'LAI_method', 'f_Richards', 'groundwatr',
     >  'hc_profile', 'bcUpprTdyn', 'bcLowrTdyn', 'bcUpprSoiH',
     >  'bcLowrSoiH', 'veg_traits', 'canopyEmis', 'snowIncept',
     >  'windPrfile', 'astability', 'canopySrad', 'alb_method',
     >  'compaction', 'snowLayers', 'thCondSnow', 'thCondSoil',
-    >  'spatial_gw', 'subRouting']
+    >  'spatial_gw', 'subRouting', 'num_method']
 
     print(dec['snowLayers'])
 
@@ -136,12 +121,12 @@ Once instantiated you can inspect the available decisions and the options availa
 Forcing file list
 -----------------
 The forcing file list contains a listing of each of the forcing files available for use as SUMMA input.
-To instantiate the `ForceFileList` you will have to specify the path that is set as the ``input_path`` in your ``FileManager``. Below we show using the ``FileManager`` (``fm``) to do so.
-Once instantiated you can also use the `ForceFileList` object to inspect the forcing files themselves.
+To instantiate the `ForcingList` you will have to specify the path that is set as the ``input_path`` in your ``FileManager``. Below we show using the ``FileManager`` (``fm``) to do so.
+Once instantiated you can also use the `ForcingList` object to inspect the forcing files themselves.
 
 ::
 
-    ff = ps.ForceFileList('.', 'forcingFileList.1hr.txt', fm['input_path'])
+    ff = ps.ForcingList('.', 'forcingFileList.1hr.txt', fm['input_path'])
     print(ff)
 
     >> 'forcing_file.nc'
@@ -204,9 +189,9 @@ The format of the output control file mirrors the way that it is described in th
     >> sum
 
 
-Local parameter info
+GlobalParams
 --------------------
-The local parameter info file contains a listing of global parameters. Spatially dependent parameters are specified
+The GlobalParams object listing of global parameters. Spatially dependent parameters are specified
 in the parameter trial NetCDF file. Values which are specified in the local parameter info file will be overwritten
 by those specified in the parameter trial file.
 As with the output control file, there are many parameters which can be specified, so we omit them for brevity.
@@ -215,7 +200,7 @@ this out currently is by looking at the SUMMA source code directly.
 
 ::
 
-    lpi = ps.LocalParamInfo('.', 'local_param_info.txt')
+    lpi = ps.GlobalParams('.', 'global_param_info.txt')
     print(lpi.list_options())
 
     >> ['upperBoundHead', 'lowerBoundHead', 'upperBoundTheta', 'lowerBoundTheta',
@@ -230,7 +215,7 @@ NetCDF based files
 ==================
 The following input files are NetCDF-based and therefore, should be interacted with via ``xarray`` when using pysumma:
 
- - Parameter trial
+ - Parameter trial (Spatially distributed parameters)
  - Basin parameters
  - Local attributes
  - Initial conditions

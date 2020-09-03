@@ -1,3 +1,5 @@
+# pysumma
+
 pysumma is a Python wrapper for manipulating, running, managing, and analyzing
 of SUMMA (Structure for Unifying Multiple Modeling Alternatives)
 * [SUMMA web site at UCAR ](https://www.rap.ucar.edu/projects/summa)
@@ -6,6 +8,7 @@ pysumma provides methods for:
  - Running SUMMA
  - Modifying SUMMA input files
  - Automatically parallelizing distributed and sensitivity analysis type experiments
+ - Calibration via OSTRICH
  - Visualizing output
 
 # Installation
