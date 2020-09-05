@@ -375,12 +375,12 @@ class Simulation():
         self.force_file_list.options = [ForcingOption(spinup_force_path)]
         self.manager['simStartTime'] = start_date
         self.manager['simEndTime'] = end_date
-        ymdh = str(self.manager['simEndTime'].value).replace(' ', '-').split(':')[0]
+        ymdh = str(self.manager['simEndTime'].value).replace(' ', '-').replace('-', '').split(':')[0]
         for n in range(niters):
             self.run(run_option, run_suffix=run_suffix, freq_restart='e', **kwargs)
             out_dir = self.manager['outputPath'].value
             prefix = self.manager['outFilePrefix'].value
-            restart_file_name = f'{prefix}_summaRestart_{ymdh}_{run_suffix}*.nc'
+            restart_file_name = f'{prefix}_restart_{ymdh}_{run_suffix}*nc'
             restart_file_path = glob(f'{out_dir}{restart_file_name}')[0]
             restart_file_name = restart_file_path.split(os.path.sep)[-1]
             self.reset()
