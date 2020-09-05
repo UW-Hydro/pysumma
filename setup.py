@@ -22,7 +22,7 @@ setup(name='pysumma',
           'pandas',
           'hs_restclient'
           ],
-       extras_require={'pysumma': [
+       extras_require={'plotting': [
           'fiona',
           'cartopy',	
           'shapely',
