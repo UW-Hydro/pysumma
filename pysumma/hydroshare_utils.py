@@ -28,5 +28,4 @@ def get_hs_resource(resource_id, file_path):
     hs_resource = os.listdir(hs_resource_dir)
     shutil.unpack_archive(hs_resource_dir+hs_resource[0], extract_dir=file_path)
     shutil.rmtree(os.path.join(file_path, resource_id))
-    subprocess.run(cmd, shell=True)
     return hs_resource[0].split(".")[0]
