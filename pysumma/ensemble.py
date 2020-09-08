@@ -170,9 +170,9 @@ class Ensemble(object):
         for n, s in self.simulations.items():
             config = self.configuration[n]
             if include_sims:
-                all_args = (s, n, config, *args)
+                all_args = (s, n, *args, {'config': config})
             else:
-                all_args = args
+                all_args = (*args, {'config': config})
             self.submissions.append(self._client.submit(
                 fun, *all_args))
         if monitor:
