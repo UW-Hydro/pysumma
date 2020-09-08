@@ -384,8 +384,11 @@ class Simulation():
             restart_file_path = glob(f'{out_dir}{restart_file_name}')[0]
             restart_file_name = restart_file_path.split(os.path.sep)[-1]
             self.reset()
+            self.manager['simStartTime'] = start_date
+            self.manager['simEndTime'] = end_date
             restart_dest = os.path.dirname(self.manager['initConditionFile'].value) + f'/{restart_file_name}'
             shutil.copy(restart_file_path, self.manager['settingsPath'].value + restart_dest)
+            [os.remove(f) for f in self.get_output_files()]
             self.manager['initConditionFile'] = restart_dest
             with xr.open_dataset(self.manager['settingsPath'].value + restart_dest) as ds:
                 self.initial_conditions = ds.load()
