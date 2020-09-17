@@ -3,7 +3,9 @@ import copy
 import shutil
 import subprocess
 import numpy as np
+import pandas as pd
 import xarray as xr
+from glob import glob
 from pathlib import Path
 from typing import List
 
@@ -11,7 +13,7 @@ from .decisions import Decisions
 from .file_manager import FileManager
 from .output_control import OutputControl
 from .global_params import GlobalParams
-from .force_file_list import ForcingList
+from .force_file_list import ForcingList, ForcingOption
 
 
 class Simulation():
@@ -203,12 +205,12 @@ class Simulation():
     def validate_layer_params(self, params):
         """Ensure that the layer parameters are valid"""
         for i in range(1, 5):
-            assert (params[f'zmaxLayer{i}_upper']
-                    <= params[f'zmaxLayer{i}_lower'], i)
-            assert (params[f'zmaxLayer{i}_upper'] / params[f'zminLayer{i}']
-                    >= 2.5, i)
-            assert (params[f'zmaxLayer{i}_upper'] / params[f'zminLayer{i+1}']
-                    >= 2.5, i)
+            assert params[f'zmaxLayer{i}_upper'] \
+                    <= params[f'zmaxLayer{i}_lower'], i
+            assert params[f'zmaxLayer{i}_upper'] / params[f'zminLayer{i}'] \
+                    >= 2.5, i
+            assert params[f'zmaxLayer{i}_upper'] / params[f'zminLayer{i+1}'] \
+                    >= 2.5, i
 
     def _gen_summa_cmd(self, run_suffix, processes=1, prerun_cmds=[],
                        startGRU=None, countGRU=None, iHRU=None,
@@ -270,7 +272,7 @@ class Simulation():
 
     def start(self, run_option,  run_suffix='pysumma_run', processes=1,
               prerun_cmds=[], startGRU=None, countGRU=None, iHRU=None,
-              freq_restart=None, progress=None):
+              freq_restart=None, progress=None, **kwargs):
         """
         Run a SUMMA simulation without halting. Most likely this should
         not be used. Use the ``run`` method for most common use cases.
@@ -292,7 +294,7 @@ class Simulation():
 
     def run(self, run_option,  run_suffix='pysumma_run', processes=1,
             prerun_cmds=None, startGRU=None, countGRU=None, iHRU=None,
-            freq_restart=None, progress=None):
+            freq_restart=None, progress=None, **kwargs):
         """
         Run a SUMMA simulation and halt until completion or error.
 
@@ -328,7 +330,7 @@ class Simulation():
             hourly output.
         """
         self.start(run_option, run_suffix, processes, prerun_cmds,
-                   startGRU, countGRU, iHRU, freq_restart, progress)
+                   startGRU, countGRU, iHRU, freq_restart, progress, **kwargs)
         self.monitor()
 
     def monitor(self):
@@ -361,12 +363,50 @@ class Simulation():
 
         return self.status
 
+    def spinup(self, run_option, period='1Y', niters=10, run_suffix='pysumma_spinup', **kwargs):
+        # open forcings
+        spinup_force_name = f'{run_suffix}.nc'
+        with xr.open_mfdataset(self.force_file_list.forcing_paths) as ds:
+            start_date = pd.to_datetime(ds['time'].values[0])
+            end_date = pd.to_datetime(start_date + pd.Timedelta(period))
+            forcings = ds.sel(time=slice(start_date, end_date)).load()
+        spinup_force_path = self.manager['forcingPath'].value + spinup_force_name
+        forcings.to_netcdf(spinup_force_path)
+        self.force_file_list.options = [ForcingOption(spinup_force_path)]
+        self.manager['simStartTime'] = start_date
+        self.manager['simEndTime'] = end_date
+        ymdh = str(self.manager['simEndTime'].value).replace(' ', '-').replace('-', '').split(':')[0]
+        for n in range(niters):
+            self.run(run_option, run_suffix=run_suffix, freq_restart='e', **kwargs)
+            out_dir = self.manager['outputPath'].value
+            prefix = self.manager['outFilePrefix'].value
+            restart_file_name = f'{prefix}_restart_{ymdh}_{run_suffix}*nc'
+            restart_file_path = glob(f'{out_dir}{restart_file_name}')[0]
+            restart_file_name = restart_file_path.split(os.path.sep)[-1]
+            self.reset()
+            self.manager['simStartTime'] = start_date
+            self.manager['simEndTime'] = end_date
+            restart_dest = os.path.dirname(self.manager['initConditionFile'].value) + f'/{restart_file_name}'
+            shutil.copy(restart_file_path, self.manager['settingsPath'].value + restart_dest)
+            [os.remove(f) for f in self.get_output_files()]
+            self.manager['initConditionFile'] = restart_dest
+            with xr.open_dataset(self.manager['settingsPath'].value + restart_dest) as ds:
+                self.initial_conditions = ds.load()
+
     def _write_configuration(self, name=''):
+        import shutil
+
         self.config_path = self.config_path / name
         self.config_path.mkdir(parents=True, exist_ok=True)
         manager_path = str(self.manager_path.parent)
         settings_path = os.path.abspath(os.path.realpath(str(self.manager['settingsPath'].value)))
         settings_path = Path(settings_path.replace(manager_path, str(self.config_path)))
+
+        if 'neuralNetFile' in [o.name for o in self.manager.options]:
+            param_path = os.path.abspath(os.path.realpath(str(self.manager['settingsPath'].value)))
+            src_nn = os.path.abspath(param_path + '/' + self.manager['neuralNetFile'].value)
+            dest_nn = os.path.abspath(settings_path / self.manager['neuralNetFile'].value)
+
         self.manager_path = self.config_path / self.manager.file_name
         self.manager['settingsPath'] = str(settings_path) + os.sep
         self.manager.write(path=self.config_path)
@@ -386,6 +426,9 @@ class Simulation():
             f.writelines(self.soilparm)
         with open(settings_path / self.manager['vegTableFile'].value, 'w+') as f:
             f.writelines(self.vegparm)
+
+        if 'neuralNetFile' in [o.name for o in self.manager.options]:
+            shutil.copy(src_nn, dest_nn)
 
     def get_output_files(self) -> List[str]:
         """Find output files given the ``stdout`` generated from a run"""
