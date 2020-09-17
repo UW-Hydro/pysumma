@@ -197,8 +197,8 @@ class Ostrich():
                                for cp in self.calib_params]) + '\n')
         return Path('.') / file_name
 
-    def add_tied_param(self, param_name, lower_bound, upper_bound):
-        self.calib_params.append(OstrichParam(f'{param_name}', 0.5, (0.01, 0.99), weightname=f'{param_name}_scale'))
+    def add_tied_param(self, param_name, lower_bound, upper_bound, initial_value=0.5):
+        self.calib_params.append(OstrichParam(f'{param_name}', initial_value, (0.01, 0.99), weightname=f'{param_name}_scale'))
         self.tied_params.append(OstrichTiedParam(param_name, lower_bound, upper_bound))
 
     @property
