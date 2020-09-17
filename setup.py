@@ -17,14 +17,16 @@ setup(name='pysumma',
           'distributed',
           'toolz',
           'pytest',		
-          'fiona',
-          'cartopy',	
-          'shapely',
-          'seaborn',		  
           'matplotlib',
           'geopandas',
           'pandas',
-          'hs_restclient',
+          'hs_restclient'
           ],
+       extras_require={'plotting': [
+          'fiona',
+          'cartopy',	
+          'shapely',
+          'seaborn'
+          ],},
       include_package_data=True,
       test_suite='pysumma.tests')

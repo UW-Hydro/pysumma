@@ -17,8 +17,8 @@ def trim_time(sim, obs, roundto='min'):
 def kling_gupta_efficiency(sim, obs):
     obs = np.asarray(obs)
     sim = np.asarray(sim)
-    obs_filtered = obs[~np.isnan(obs)]
-    sim_filtered = sim[~np.isnan(obs)]
+    obs_filtered = obs[np.logical_and(~np.isnan(obs), ~np.isnan(sim))]
+    sim_filtered = sim[np.logical_and(~np.isnan(obs), ~np.isnan(sim))]
     sim_std = np.std(sim_filtered, ddof=1)
     obs_std = np.std(obs_filtered, ddof=1)
     sim_mu = np.mean(sim_filtered)
@@ -33,8 +33,8 @@ def kling_gupta_efficiency(sim, obs):
 def decomposed_kling_gupta_efficiency(sim, obs):
     obs = np.asarray(obs)
     sim = np.asarray(sim)
-    obs_filtered = obs[~np.isnan(obs)]
-    sim_filtered = sim[~np.isnan(obs)]
+    obs_filtered = obs[np.logical_and(~np.isnan(obs), ~np.isnan(sim))]
+    sim_filtered = sim[np.logical_and(~np.isnan(obs), ~np.isnan(sim))]
     sim_std = np.std(sim_filtered, ddof=1)
     obs_std = np.std(obs_filtered, ddof=1)
     sim_mu = np.mean(sim_filtered)
@@ -49,8 +49,8 @@ def decomposed_kling_gupta_efficiency(sim, obs):
 def nash_sutcliffe_efficiency(sim, obs):
     obs = np.asarray(obs)
     sim = np.asarray(sim)
-    obs_filtered = obs[~np.isnan(obs)]
-    sim_filtered = sim[~np.isnan(obs)]
+    obs_filtered = obs[np.logical_and(~np.isnan(obs), ~np.isnan(sim))]
+    sim_filtered = sim[np.logical_and(~np.isnan(obs), ~np.isnan(sim))]
     obs_mu = np.mean(obs_filtered)
     num = np.sum( (sim_filtered - obs_filtered) ** 2 )
     den = np.sum( (obs_filtered - obs_mu) ** 2 )
