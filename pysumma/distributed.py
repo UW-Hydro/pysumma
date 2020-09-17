@@ -169,7 +169,21 @@ class Distributed(object):
             self.simulations[s.run_suffix] = s
 
     def merge_output(self):
-        pass
+        out_ds = [s.output for n, s in self.simulations.items()]
+        hru_vars = [] # variables that have hru dimension
+        gru_vars = [] # variables that have gru dimension
+        for name, var in out_ds[0].variables.items():
+            if 'hru' in var.dims:
+                hru_vars.append(name)
+            elif 'gru' in var.dims:
+                gru_vars.append(name)
+        hru_ds = [ds[hru_vars] for ds in out_ds]
+        gru_ds = [ds[gru_vars] for ds in out_ds]
+        hru_merged = xr.concat(hru_ds, dim='hru')
+        gru_merged = xr.concat(gru_ds, dim='gru')
+
+        merged_ds = xr.merge([hru_merged, hru_merged])
+        return merged_ds
 
     def map(self, fun, args, include_sims=True, monitor=True):
         for i, (n, s) in enumerate(self.simulations.items()):
