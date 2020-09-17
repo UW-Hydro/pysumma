@@ -166,6 +166,20 @@ class Ensemble(object):
         else:
             return True
 
+    def map(self, fun, args, include_sims=True, monitor=True):
+        for n, s in self.simulations.items():
+            config = self.configuration[n]
+            if include_sims:
+                all_args = (s, n, *args, {'config': config})
+            else:
+                all_args = (*args, {'config': config})
+            self.submissions.append(self._client.submit(
+                fun, *all_args))
+        if monitor:
+            return self.monitor()
+        else:
+            return True
+
     def monitor(self):
         """
         Halt computation until submitted simulations are complete

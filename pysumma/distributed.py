@@ -171,6 +171,20 @@ class Distributed(object):
     def merge_output(self):
         pass
 
+    def map(self, fun, args, include_sims=True, monitor=True):
+        for i, (n, s) in enumerate(self.simulations.items()):
+            kwargs =  self.chunk_args[i]
+            if include_sims:
+                all_args = (s, n, *args, kwargs)
+            else:
+                all_args = (*args, kwargs)
+            self.submissions.append(self._client.submit(
+                fun, *all_args))
+        if monitor:
+            return self.monitor()
+        else:
+            return True
+
 
 def _submit(s: Simulation, name: str, run_option: str,
             prerun_cmds: List[str], run_args: dict, **kwargs):
