@@ -32,24 +32,3 @@ def test_SetSoilCategoryDataset(name, option1, option2, option3):
     test_decisions.write()
     d_new_value = test_decisions[name].value
     assert new_value == d_new_value
-
-
-@pytest.mark.parametrize('name, value, description',
-                         [("simulStart", "2010-10-01 00:00",
-                           ['YYYY-MM-DD hh:mm'])])
-def test_GetSimulStartDataset(name, value, description):
-    sim_start_dataset = DecisionOption(name, value)
-    assert name == sim_start_dataset.name
-    assert description == sim_start_dataset.available_options
-
-
-@pytest.mark.parametrize('name, value, new_date',
-                         [("simulStart", "2010-10-01 00:00",
-                           "2010-10-01 00:00")])
-def test_SetSimulStartDataset(name, value, new_date):
-    sim_start_dataset = DecisionOption(name, value)
-    new_value = new_date
-    sim_start_dataset.value = new_value
-    test_decisions.write()
-    d_new_value = test_decisions[name].value
-    assert new_value == d_new_value
