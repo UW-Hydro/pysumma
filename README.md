@@ -3,7 +3,7 @@
 | pysumma Links & Badges              |                                                                             |
 |------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | pysumma Documentation      | [![Documentation Status](http://readthedocs.org/projects/pysumma/badge/?version=develop)](http://pysumma.readthedocs.io/en/develop/?badge=develop) |
-| Travis-CI Build           | [![Build Status](https://travis-ci.org/UW-Hydro/MetSim.png)](https://travis-ci.org/UW-Hydro/MetSim) |
+| Travis-CI Build           | [![Build Status](https://travis-ci.org/UW-pysumma/pysumma.png)](https://travis-ci.org/UW-Hydro/pysumma) |
 
 pysumma is a Python wrapper for manipulating, running, managing, and analyzing
 of SUMMA (Structure for Unifying Multiple Modeling Alternatives)
