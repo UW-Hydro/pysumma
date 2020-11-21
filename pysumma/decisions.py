@@ -45,7 +45,7 @@ class Decisions(OptionContainer):
     a SUMMA decisions file.
     """
 
-    def __init__(self, dirpath, filepath):
+    def __init__(self, dirpath, filepath=None):
         super().__init__(DecisionOption, dirpath, filepath)
 
     def set_option(self, key, value):
