@@ -30,7 +30,12 @@ class ForcingList(OptionContainer):
 
     prefix: str = ''
 
-    def __init__(self, dirpath, filepath, force_file_prefix_path):
+    def __init__(self, dirpath, filepath=None, force_file_prefix_path=None):
+        if not filepath:
+            filepath = dirpath.split('/')[-1]
+            dirpath = os.path.sep.join(dirpath.split('/')[0:-1])
+        if not force_file_prefix_path:
+            force_file_prefix_path = dirpath
         self.prefix = str(force_file_prefix_path)
         super().__init__(ForcingOption, dirpath, filepath)
 
