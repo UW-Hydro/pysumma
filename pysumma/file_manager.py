@@ -40,7 +40,7 @@ class FileManager(OptionContainer):
     a SUMMA file manager file.
     """
 
-    def __init__(self, path, name):
+    def __init__(self, path, name=None):
         super().__init__(FileManagerOption, path, name)
         assert self.get_value('controlVersion') == 'SUMMA_FILE_MANAGER_V3.0.0'
 

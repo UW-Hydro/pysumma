@@ -1,2 +1,4 @@
 include pysumma/meta/*
 include pysumma/calibration/meta/*
+include versioneer.py
+include pysumma/_version.py

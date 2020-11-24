@@ -130,6 +130,14 @@ class Ensemble(object):
         merged = merged.unstack('run_number')
         return merged
 
+    def open_output(self):
+        """
+        Open all of the output datasets from the ensembe and
+        return as a dictionary of datasets
+        """
+        return {n: s.output for n, s in self.simulations.items()}
+
+
     def start(self, run_option: str, prerun_cmds: list=None):
         """
         Start running the ensemble members.
@@ -200,7 +208,7 @@ class Ensemble(object):
                 error.append(n)
             else:
                 other.append(n)
-        return {'success': success, 'error': error, 'other': other}
+        return {'Success': success, 'Error': error, 'Other': other}
 
     def rerun_failed(self, run_option: str, prerun_cmds=None,
                      monitor: bool=True):
