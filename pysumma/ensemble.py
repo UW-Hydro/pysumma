@@ -124,7 +124,7 @@ class Ensemble(object):
             decision_tuples, names=new_coords)
         out_file_paths = [s.get_output_files() for s in self.simulations.values()]
         out_file_paths = [fi for sublist in out_file_paths for fi in sublist]
-        full = xr.open_mfdataset(out_file_paths, concat_dim='run_number')
+        full = xr.open_mfdataset(out_file_paths, concat_dim='run_number', combine='nested')
         merged = full.assign_coords(run_number=decision_names)
         merged['run_number'] = new_idx
         merged = merged.unstack('run_number')
@@ -233,7 +233,7 @@ class Ensemble(object):
 def _submit(s: Simulation, name: str, run_option: str, prerun_cmds, config):
     s.initialize()
     s.apply_config(config)
-    s.run(run_option, run_suffix=name, prerun_cmds=prerun_cmds)
+    s.run(run_option, run_suffix=name, prerun_cmds=prerun_cmds, freq_restart='e')
     s.process = None
     return s
 
