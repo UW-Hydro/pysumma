@@ -4,6 +4,7 @@ import pysumma as ps
 import pysumma.evaluation as pse
 import shutil
 import xarray as xr
+import numpy as np
 $importStrings
 
 if __name__ == '__main__':
@@ -11,8 +12,8 @@ if __name__ == '__main__':
     summa_exe = '$summaExe'
     file_manager = '$fileManager'
     obs_data_file = '$obsDataFile'
-    sim_calib_var = '$simVarName'
-    obs_calib_var = '$obsVarName'
+    sim_calib_vars = $simVarList
+    obs_calib_vars = $obsVarList
     out_file = '$outFile'
     metrics_log = '$metricsLog'
     param_mapping_file = '$paramMappingFile'
@@ -78,11 +79,23 @@ if __name__ == '__main__':
     obs_ds = obs_ds.sel(time=time_slice)
     sim_filt, obs_filt = filter(sim_ds,  obs_ds)
 
-    kge = pse.kling_gupta_efficiency(sim_filt[sim_calib_var], conversion(obs_filt[obs_calib_var]))
-    mae = pse.mean_absolute_error(sim_filt[sim_calib_var], conversion(obs_filt[obs_calib_var]))
-    mse = pse.mean_squared_error(sim_filt[sim_calib_var], conversion(obs_filt[obs_calib_var]))
-    rmse = pse.root_mean_square_error(sim_filt[sim_calib_var], conversion(obs_filt[obs_calib_var]))
-    nse  = pse.nash_sutcliffe_efficiency(sim_filt[sim_calib_var], conversion(obs_filt[obs_calib_var]))
+    kge_list = []
+    mae_list = []
+    mse_list = []
+    rmse_list = []
+    nse_list = []
+    for simvar, obsvar in zip(sim_calib_vars, obs_calib_vars):
+        kge_list.append(pse.kling_gupta_efficiency(sim_filt[simvar], conversion(obs_filt[obsvar])))
+        mae_list.append(pse.mean_absolute_error(sim_filt[simvar], conversion(obs_filt[obsvar])))
+        mse_list.append(pse.mean_squared_error(sim_filt[simvar], conversion(obs_filt[obsvar])))
+        rmse_list.append(pse.root_mean_square_error(sim_filt[simvar], conversion(obs_filt[obsvar])))
+        nse_list.append(pse.nash_sutcliffe_efficiency(sim_filt[simvar], conversion(obs_filt[obsvar])))
+
+    kge = np.mean(kge_list)
+    mae = np.mean(mae_list)
+    mse = np.mean(mse_list)
+    rmse = np.mean(rmse_list)
+    nse = np.mean(nse_list)
 
     # save diagnostics in form that ostrich can read
     with open(out_file, 'w+') as f:
