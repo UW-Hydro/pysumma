@@ -107,11 +107,14 @@ class OptionContainer(object):
     used directly.
     """
 
-    def __init__(self, optiontype, dir='.', name='option'):
+    def __init__(self, optiontype, dir='.', name=None):
         """
         Instantiate the object and populate the
         values from the given filepath.
         """
+        if not name:
+            name = dir.split('/')[-1]
+            dir = os.path.sep.join(dir.split('/')[0:-1])
         self.OptionType = optiontype
         self.opt_count = 0
         self.original_path = Path(dir)

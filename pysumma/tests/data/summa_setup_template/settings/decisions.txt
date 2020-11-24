@@ -1,45 +1,29 @@
-! ***********************************************************************************************************************
-! DEFINITION OF THE MODEL DECISIONS
-! ***********************************************************************************************************************
-! This file defines the modeling decisions used.
-! NOTES:
-! (1) lines starting with ! are treated as comment lines -- there is no limit on the number of comment lines
-! (2) the name of the decision is followed by the character string defining the decision
-! (3) the simulation start/end times must be within single quotes
-! ***********************************************************************************************************************
-soilCatTbl    ROSETTA                 ! soil-category dataset
+soilCatTbl    ROSETTA              ! soil-category dataset
 vegeParTbl    MODIFIED_IGBP_MODIS_NOAH ! vegetation-category dataset
-soilStress    NoahType             ! choice of function for the soil moisture stomatal resistance
-stomResist    BallBerryFlex        ! choice of function for stomatal resistance
-bbTempFunc    q10Func              !
-bbHumdFunc    humidLeafSurface     !
-bbElecFunc    quadraticJmax        !
-bbCO2point    Leuning              !
-bbAssimFnc    colimitation         !
-bbCanIntg8    laiScaling           !
-bbNumerics    newtonRaphson        !
+soilStress    NoahType             ! choice of function for the soil moisture control on stomatal resistance
+stomResist    BallBerry            ! choice of function for stomatal resistance
 num_method    itertive             ! choice of numerical method
 fDerivMeth    analytic             ! choice of method to calculate flux derivatives
 LAI_method    monTable             ! choice of method to determine LAI and SAI
 f_Richards    mixdform             ! form of Richards equation
-groundwatr    bigBuckt             ! choice of groundwater parameterization
+groundwatr    qTopmodl             ! choice of groundwater parameterization
 hc_profile    pow_prof             ! choice of hydraulic conductivity profile
 bcUpprTdyn    nrg_flux             ! type of upper boundary condition for thermodynamics
 bcLowrTdyn    zeroFlux             ! type of lower boundary condition for thermodynamics
 bcUpprSoiH    liq_flux             ! type of upper boundary condition for soil hydrology
 bcLowrSoiH    zeroFlux             ! type of lower boundary condition for soil hydrology
 veg_traits    CM_QJRMS1988         ! choice of parameterization for vegetation roughness length and displacement height
-rootProfil    powerLaw             !
+rootProfil    powerLaw             ! choice of parameterization for rooting depth profile
 canopyEmis    difTrans             ! choice of parameterization for canopy emissivity
 snowIncept    lightSnow            ! choice of parameterization for snow interception
 windPrfile    logBelowCanopy       ! choice of canopy wind profile
 astability    louisinv             ! choice of stability function
 canopySrad    BeersLaw             ! choice of method for canopy shortwave radiation
-alb_method    varDecay             ! choice of albedo representation
+alb_method    conDecay             ! choice of albedo representation
 compaction    anderson             ! choice of compaction routine
 snowLayers    CLM_2010             ! choice of method to combine and sub-divide snow layers
-thCondSnow    jrdn1991             ! choice of thermal conductivity representation for snow
+thCondSnow    smnv2000             ! choice of thermal conductivity representation for snow
 thCondSoil    funcSoilWet          ! choice of thermal conductivity representation for soil
 spatial_gw    localColumn          ! choice of method for spatial representation of groundwater
-subRouting    qInstant             ! choice of method for sub-grid routing
-
+subRouting    timeDlay             ! choice of method for sub-grid routing
+snowDenNew    constDens            ! choice of new snow density

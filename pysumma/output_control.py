@@ -84,7 +84,7 @@ class OutputControl(OptionContainer):
     added or modified through the `set_option` method.
     """
 
-    def __init__(self, dirpath, filepath):
+    def __init__(self, dirpath, filepath=None):
         super().__init__(OutputControlOption, dirpath, filepath)
 
     def set_option(self, name=None, period=None, sum=0, instant=1,

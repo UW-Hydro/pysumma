@@ -1,0 +1,10 @@
+! ---------
+! model variables
+! ---------
+! Format:
+! varname | timestep | instant | sum | mean | var | min | max | mode
+pptrate                          | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+airtemp                          | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarSWE                        | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarSenHeatTotal               | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarTotalRunoff                | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
