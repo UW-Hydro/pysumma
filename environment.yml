@@ -20,6 +20,6 @@ dependencies:
   - pandas
   - jupyter
   - pip
-  - summa=3.0.0
+  - summa>=3.0.3
   - pip:
     - hs_restclient
