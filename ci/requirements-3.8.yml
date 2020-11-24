@@ -2,7 +2,7 @@ name: test_env
 channels:
   - conda-forge
 dependencies:
-  - python=3.6
+  - python=3.8
   - xarray>=0.15.0
   - pandas
   - netcdf4
@@ -18,8 +18,7 @@ dependencies:
   - matplotlib
   - geopandas
   - pandas
-  - jupyter
   - pip
-  - summa>=3.0.0
+  - summa>=3.0.3
   - pip:
     - hs_restclient
