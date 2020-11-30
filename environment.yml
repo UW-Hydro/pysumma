@@ -2,8 +2,8 @@ name: pysumma
 channels:
   - conda-forge
 dependencies:
-  - python>=3.5
-  - xarray>=0.11.0
+  - python>=3.6
+  - xarray>=0.15.0
   - pandas
   - netcdf4>=1.2.5
   - numpy>=1.11.2
@@ -20,6 +20,7 @@ dependencies:
   - pandas
   - jupyter
   - pip
-  - summa=3.0.0
+  - summa>=3.0.3
+  - pysumma>=3.0.3
   - pip:
     - hs_restclient

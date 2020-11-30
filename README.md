@@ -3,7 +3,7 @@
 | pysumma Links & Badges              |                                                                             |
 |------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | pysumma Documentation      | [![Documentation Status](http://readthedocs.org/projects/pysumma/badge/?version=develop)](http://pysumma.readthedocs.io/en/develop/?badge=develop) |
-| Travis-CI Build           | [![Build Status](https://travis-ci.org/UW-pysumma/pysumma.png)](https://travis-ci.org/UW-Hydro/pysumma) |
+| Travis-CI Build           | [![Build Status](https://travis-ci.com/UW-Hydro/pysumma.svg?branch=master)](https://travis-ci.org/UW-Hydro/pysumma) |
 
 pysumma is a Python wrapper for manipulating, running, managing, and analyzing
 of SUMMA (Structure for Unifying Multiple Modeling Alternatives)
@@ -16,40 +16,47 @@ pysumma provides methods for:
  - Calibration via OSTRICH
  - Visualizing output
 
-# Installation
+Installation
+============
 
-## Dependencies
+pysumma can be installed from either `conda` or `pip`. Installation using `conda` is preferred, because
+it will also install a compatible version of SUMMA.
+
+To install via `conda` use:
+
+```conda install -c conda-forge pysumma```
+
+To install via `pip` use:
+
+```pip install pysumma```
+
+
+Dependencies
+------------
+
 A conda environment is available for management of pysumma's dependencies.
 You can create your own environment from this file by running:
-```
-conda env create -f environment.yml
-```
+
+```conda env create -f environment.yml```
 
 Then, you can activate this environment with `conda activate pysumma`.
 Before installing pysumma into this environment you may also wish to install it as a kernel in your Jupyter environments.
 This can be accomplished by running:
 
-```
-python -m ipykernel install --user --name=pysumma
-```
+```python -m ipykernel install --user --name=pysumma```
 
 With this environment active you can install pysumma this environment with the instructions below.
 
-## Installing pysumma
-Currently we only support building pysumma from source. This can be accomplished by
-running:
-```
-git clone https://github.com/UW-Hydro/pysumma.git
-cd pysumma
-python setup.py install
-```
+Installing pysumma from source
+------------------------------
 
-If you plan on helping to develop pysumma you may wish to use the following to install
-```
-git clone https://github.com/UW-Hydro/pysumma.git
-cd pysumma
-python setup.py develop
-```
+Installing pysumma from source can be useful for developing new features. This can be accomplished by
+running:
+
+    git clone https://github.com/UW-Hydro/pysumma.git
+    cd pysumma
+    python setup.py develop
+
 
 # Additional SUMMA References
  - [Document](http://summa.readthedocs.io/en/latest/) : SUMMA documentation is available online and remains a work in progress.
