@@ -21,11 +21,11 @@ setup(name='pysumma',
           'toolz',
           'pytest',
           'matplotlib',
-          'geopandas',
           'pandas',
           'hs_restclient'
           ],
        extras_require={'plotting': [
+          'geopandas',
           'fiona',
           'cartopy',
           'shapely',
