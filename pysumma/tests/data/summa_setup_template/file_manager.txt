@@ -1,0 +1,20 @@
+controlVersion       'SUMMA_FILE_MANAGER_V3.0.0' !  filemanager_version
+simStartTime         '2016-01-01 01:00'   ! simulation start time
+simEndTime           '2016-12-31 01:00'   ! simulation end time
+tmZoneInfo           'localTime' !
+settingsPath         '/home/bzq/workspace/pysumma/pysumma/tests/data/summa_setup_template/settings/' !  settings_path
+forcingPath          '/home/bzq/workspace/pysumma/pysumma/tests/data/summa_setup_template/forcings/' !  input_path
+outputPath           '/home/bzq/workspace/pysumma/pysumma/tests/data/summa_setup_template/output/' !  output_path
+decisionsFile        'decisions.txt' !  decisions_path
+outputControlFile    'output_control.txt' !  output_control
+globalHruParamFile   '../params/local_param_info.txt' !  local_param_info
+globalGruParamFile   '../params/basin_param_info.txt' !  basin_param_info
+attributeFile        '../params/local_attributes.nc' !  local_attributes
+trialParamFile       '../params/parameter_trial.nc' !  parameter_trial
+forcingListFile      '../forcings/forcing_file_list.txt' !  forcing_file_list
+initConditionFile    '../params/initial_conditions.nc' !  model_init_cond
+outFilePrefix        'template_output' !  output_prefix
+vegTableFile         'VEGPARM.TBL' !
+soilTableFile        'SOILPARM.TBL' !
+generalTableFile     'GENPARM.TBL' !
+noahmpTableFile      'MPTABLE.TBL' !

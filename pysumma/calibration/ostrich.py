@@ -1,4 +1,5 @@
 import os
+import pandas as pd
 import numpy as np
 import shutil
 import stat
@@ -93,7 +94,7 @@ class Ostrich():
 
     def __init__(self, ostrich_executable, summa_executable, file_manager, python_path='python'):
         """Initialize a new Ostrich object"""
-        self.available_metrics: np.ndarray = np.array(['KGE', 'MAE', 'RMSE'])
+        self.available_metrics: np.ndarray = np.array(['KGE', 'MAE', 'MSE', 'RMSE', 'NSE'])
         self.ostrich: str = ostrich_executable
         self.python_path: str = python_path
         self.summa: str = summa_executable
@@ -107,9 +108,10 @@ class Ostrich():
         self.run_script: Path = self.config_path / 'run_script.py'
         self.save_script: Path = self.config_path / 'save_script.py'
         self.metrics_file: Path = self.config_path / 'metrics.txt'
+        self.metrics_log: Path = self.config_path / 'metrics_log.csv'
         self.impot_strings: str = ''
         self.conversion_function: callable = lambda x: x
-        self.filter_function: callable = lambda x: x
+        self.filter_function: callable = lambda x, y: (x, y)
         self.preserve_output: str ='no'
         self.seed: int = 42
         self.errval: float = -9999
@@ -121,20 +123,33 @@ class Ostrich():
         self.objective_function: str = 'gcop'
         self.maximize: bool = True
         self.simulation_kwargs: Dict = {}
+        self.allow_failures: bool = False
 
-    def run(self, prerun_cmds=[]):
+    def run(self, prerun_cmds=[], monitor=True):
         """Start calibration run"""
         if len(prerun_cmds):
             preprocess_cmd = " && ".join(prerun_cmds) + " && "
         else:
             preprocess_cmd = ""
         cmd = preprocess_cmd + f'cd {str(self.config_path)} && ./ostrich'
+        self.cmd = cmd
         self.process = subprocess.Popen(cmd, stdout=subprocess.PIPE,
                                         stderr=subprocess.PIPE, shell=True)
-        self.stdout, self.stderr = self.process.communicate()
-        if isinstance(self.stdout, bytes):
-            self.stderr = self.stderr.decode('utf-8', 'ignore')
-            self.stdout = self.stdout.decode('utf-8', 'ignore')
+        if monitor:
+            self.stdout, self.stderr = self.process.communicate()
+            if isinstance(self.stdout, bytes):
+                self.stderr = self.stderr.decode('utf-8', 'ignore')
+                self.stdout = self.stdout.decode('utf-8', 'ignore')
+
+    def monitor(self):
+        if not self.process:
+            return
+        else:
+            self.stdout, self.stderr = self.process.communicate()
+            if isinstance(self.stdout, bytes):
+                self.stderr = self.stderr.decode('utf-8', 'ignore')
+                self.stdout = self.stdout.decode('utf-8', 'ignore')
+        return self.stdout, self.stderr
 
     def write_config(self):
         """Writes all necessary files for calibration"""
@@ -182,8 +197,8 @@ class Ostrich():
                                for cp in self.calib_params]) + '\n')
         return Path('.') / file_name
 
-    def add_tied_param(self, param_name, lower_bound, upper_bound):
-        self.calib_params.append(OstrichParam(f'{param_name}', 0.5, (0.01, 0.99), weightname=f'{param_name}_scale'))
+    def add_tied_param(self, param_name, lower_bound, upper_bound, initial_value=0.5):
+        self.calib_params.append(OstrichParam(f'{param_name}', initial_value, (0.01, 0.99), weightname=f'{param_name}_scale'))
         self.tied_params.append(OstrichTiedParam(param_name, lower_bound, upper_bound))
 
     @property
@@ -249,15 +264,17 @@ class Ostrich():
                 'summaExe': self.summa,
                 'fileManager': self.simulation.manager_path,
                 'obsDataFile': self.obs_data_file,
-                'simVarName': self.sim_calib_var,
-                'obsVarName': self.obs_calib_var,
+                'simVarList': self.sim_calib_vars,
+                'obsVarList': self.obs_calib_vars,
                 'outFile': self.metrics_file,
+                'metricsLog': self.metrics_log,
                 'importStrings': self.import_strings,
                 'conversionFunc': "=".join(inspect.getsource(self.conversion_function).split('=')[1:]),
                 'filterFunc': "=".join(inspect.getsource(self.filter_function).split('=')[1:]),
                 'paramMappingFile': self.weightTemplateFile,
                 'paramWeightFile': self.weightValueFile,
                 'simulationArgs': self.simulation_kwargs,
+                'allowFailures': self.allow_failures,
                 'paramFile': (self.simulation.manager['settingsPath'].value
                               + self.simulation.manager['trialParamFile'].value),
                 }

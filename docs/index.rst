@@ -17,6 +17,22 @@ pysumma provides methods for:
 Installation
 ============
 
+``pysumma`` can be installed from either ``conda`` or ``pip``. Installation using ``conda`` is preferred, because
+it will also install a compatible version of SUMMA.
+
+To install via ``conda`` use:
+
+:: 
+
+    conda install -c conda-forge pysumma
+
+To install via ``pip`` use:
+
+::
+
+    pip install pysumma
+
+
 Dependencies
 ------------
 
@@ -37,19 +53,11 @@ This can be accomplished by running:
 
 With this environment active you can install pysumma this environment with the instructions below.
 
-Installing pysumma
-------------------
+Installing pysumma from source
+------------------------------
 
-Currently we only support building pysumma from source. This can be accomplished by
+Installing pysumma from source can be useful for developing new features. This can be accomplished by
 running:
-
-::
-
-    git clone https://github.com/UW-Hydro/pysumma.git
-    cd pysumma
-    python setup.py install
-
-If you plan on helping to develop pysumma you may wish to use the following to install
 
 ::
 

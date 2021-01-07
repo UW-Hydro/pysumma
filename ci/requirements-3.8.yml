@@ -1,12 +1,12 @@
-name: pysumma
+name: test_env
 channels:
   - conda-forge
 dependencies:
-  - python>=3.6
+  - python=3.8
   - xarray>=0.15.0
   - pandas
-  - netcdf4>=1.2.5
-  - numpy>=1.11.2
+  - netcdf4
+  - numpy
   - dask
   - distributed
   - toolz
@@ -18,9 +18,7 @@ dependencies:
   - matplotlib
   - geopandas
   - pandas
-  - jupyter
   - pip
   - summa>=3.0.3
-  - pysumma>=3.0.3
   - pip:
     - hs_restclient

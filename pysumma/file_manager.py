@@ -40,7 +40,7 @@ class FileManager(OptionContainer):
     a SUMMA file manager file.
     """
 
-    def __init__(self, path, name):
+    def __init__(self, path, name=None):
         super().__init__(FileManagerOption, path, name)
         assert self.get_value('controlVersion') == 'SUMMA_FILE_MANAGER_V3.0.0'
 
@@ -118,7 +118,6 @@ class FileManager(OptionContainer):
     def genparm(self):
         p1 = self.get_value('settingsPath')
         p2 = self.get_value('generalTableFile')
-        print(p1, p2)
         with open(p1 + p2, 'r') as f:
             self._genparm = f.readlines()
         return self._genparm

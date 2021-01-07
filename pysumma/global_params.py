@@ -33,7 +33,7 @@ class GlobalParams(OptionContainer):
     fmt_strings = ["'(a25,1x,3(a1,1x,f12.4,1x))'",
                    "'(a25,1x,a1,1x,3(f12.4,1x,a1,1x))'"]
 
-    def __init__(self, dirpath, filepath):
+    def __init__(self, dirpath, filepath=None):
         super().__init__(GlobalParamOption, dirpath, filepath)
 
     def set_option(self, key, value):

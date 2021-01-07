@@ -1,8 +1,10 @@
 #!$pythonPath
+import os
 import pysumma as ps
 import pysumma.evaluation as pse
 import shutil
 import xarray as xr
+import numpy as np
 $importStrings
 
 if __name__ == '__main__':
@@ -10,12 +12,14 @@ if __name__ == '__main__':
     summa_exe = '$summaExe'
     file_manager = '$fileManager'
     obs_data_file = '$obsDataFile'
-    sim_calib_var = '$simVarName'
-    obs_calib_var = '$obsVarName'
+    sim_calib_vars = $simVarList
+    obs_calib_vars = $obsVarList
     out_file = '$outFile'
+    metrics_log = '$metricsLog'
     param_mapping_file = '$paramMappingFile'
     param_weight_file = '$paramWeightFile'
     param_file = '$paramFile'
+    allow_failures = $allowFailures
     simulation_args = $simulationArgs
     conversion = $conversionFunc
     filter = $filterFunc
@@ -37,30 +41,69 @@ if __name__ == '__main__':
 
     # initialize simulation object
     s = ps.Simulation(summa_exe, file_manager, **simulation_args)
-
+    if os.path.exists(out_file):
+        os.remove(out_file)
     # run the simulation
     s.run('local')
     if s.status != 'Success':
         print(s.stdout)
         print('--------------------------------------------')
         print(s.stderr)
+        if allow_failures:
+            kge = -3
+            nse = -3
+            mae = 9999.0
+            mse = 999999.0
+            rmse = 9999.0
+            with open(out_file, 'w+') as f:
+                f.write('%.6f'%kge  + '\t #KGE\n')
+                f.write('%.6f'%mae  + '\t #MAE\n')
+                f.write('%.6f'%mse  + '\t #MSE\n')
+                f.write('%.6f'%rmse + '\t #RMSE\n')
+                f.write('%.6f'%nse  + '\t #NSE\n')
+
+            with open(metrics_log, 'a') as f:
+                f.write('%.6f'%kge  + ', %.6f'%mae
+                        + ', %.6f'%mse + ', %.6f'%rmse
+                        + ', %.6f'%nse + '\n')
+
     assert s.status == 'Success'
 
     # open output and calculate diagnostics
-    sim_ds = s.output
-    obs_ds = xr.open_dataset(obs_data_file)
+    sim_ds = s.output.load()
+    obs_ds = xr.open_dataset(obs_data_file).load()
 
     # trim sim and obs to common time length
     time_slice = pse.trim_time(sim_ds, obs_ds)
     sim_ds = sim_ds.sel(time=time_slice)
     obs_ds = obs_ds.sel(time=time_slice)
+    sim_filt, obs_filt = filter(sim_ds,  obs_ds)
 
-    kge = pse.kling_gupta_efficiency( filter(sim_ds[sim_calib_var]),  filter(conversion(obs_ds[obs_calib_var])))
-    mae = pse.mean_absolute_error(    filter(sim_ds[sim_calib_var]),  filter(conversion(obs_ds[obs_calib_var])))
-    rmse = pse.root_mean_square_error(filter(sim_ds[sim_calib_var]),  filter(conversion(obs_ds[obs_calib_var])))
+    kge_list = []
+    mae_list = []
+    mse_list = []
+    rmse_list = []
+    nse_list = []
+    for simvar, obsvar in zip(sim_calib_vars, obs_calib_vars):
+        kge_list.append(pse.kling_gupta_efficiency(sim_filt[simvar], conversion(obs_filt[obsvar])))
+        mae_list.append(pse.mean_absolute_error(sim_filt[simvar], conversion(obs_filt[obsvar])))
+        mse_list.append(pse.mean_squared_error(sim_filt[simvar], conversion(obs_filt[obsvar])))
+        rmse_list.append(pse.root_mean_square_error(sim_filt[simvar], conversion(obs_filt[obsvar])))
+        nse_list.append(pse.nash_sutcliffe_efficiency(sim_filt[simvar], conversion(obs_filt[obsvar])))
+
+    kge = np.mean(kge_list)
+    mae = np.mean(mae_list)
+    mse = np.mean(mse_list)
+    rmse = np.mean(rmse_list)
+    nse = np.mean(nse_list)
 
     # save diagnostics in form that ostrich can read
     with open(out_file, 'w+') as f:
         f.write('%.6f'%kge  + '\t #KGE\n')
         f.write('%.6f'%mae  + '\t #MAE\n')
+        f.write('%.6f'%mse  + '\t #MSE\n')
         f.write('%.6f'%rmse + '\t #RMSE\n')
+        f.write('%.6f'%nse  + '\t #NSE\n')
+
+    with open(metrics_log, 'a') as f:
+        f.write('%.6f'%kge  + ', %.6f'%mae + ', %.6f'%mse + ', %.6f'%rmse + ', %.6f'%nse + '\n')
