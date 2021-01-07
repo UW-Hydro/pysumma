@@ -1,0 +1,6 @@
+{"scalarv": 1, "frozenPrecipMultip": 1.0, "theta_mp": 0.2211, "theta_sat": 0.4792, "theta_res": 0.1, 
+ "vGn_alpha": -0.858, "vGn_n": 1.306, "f_impede": 0.0, 
+ "k_soil": 3.53e-06, "k_macropore": 0.06255, "critSoilWilting": 0.125, 
+ "critSoilTranspire": 0.2, "winterSAI": 0.45, "summerLAI": 2.5, "heightCanopyTop": 9.5,
+ "heightCanopyBottom": 3.0, "kAnisotropic": 1.0, "zScale_TOPMODEL": 
+ 4.057, "qSurfScale": 84.06, "fieldCapacity": 0.2}
