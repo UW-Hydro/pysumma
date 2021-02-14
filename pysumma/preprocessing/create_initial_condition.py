@@ -79,7 +79,7 @@ class InitialCondition(object):
             if all_soil_depth['nSoil'].iloc[i] < all_soil_depth['nSoil'].max():
                 while all_soil_depth['nSoil'].max() > all_soil_depth['nSoil'].iloc[i]:
                     all_soil_depth.iat[i,0] = all_soil_depth['nSoil'].iloc[i] + 1
-                    all_soil_depth.iat[i,int(all_soil_depth['nSoil'].iloc[i]+1)] = all_soil_depth.iat[i,int(all_soil_depth['nSoil'].iloc[i])] + 0.01
+                    all_soil_depth.iat[i,int(all_soil_depth['nSoil'].iloc[i]+1)] = all_soil_depth.iat[i,int(all_soil_depth['nSoil'].iloc[i])] + 0.10
         ifc = pd.DataFrame()
         for i in range(all_soil_depth.shape[0]):
             m_soil = all_soil_depth.loc[i, ]
