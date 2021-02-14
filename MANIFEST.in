@@ -1,5 +1,6 @@
 include pysumma/meta/*
 include pysumma/calibration/meta/*
+include pysumma/preprocessing/meta/*
 include versioneer.py
 include pysumma/_version.py
 include LICENSE

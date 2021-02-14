@@ -1,0 +1,4 @@
+{"scalarv": 1, "scalarSnowAlbedo": 0.82, "scalarSnowDepth": 0, "scalarSWE": 0, 
+    "scalarSfcMeltPond": 0, "scalarCanopyTemp": 290, "scalarCanopyLiq": 3.16, 
+    "scalarCanopyIce": 0, "scalarCanairTemp": 286, "scalarAquiferStorage": 0, 
+    "nSnow": 0, "dt_init": 10800}
