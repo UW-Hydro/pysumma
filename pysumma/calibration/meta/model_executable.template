@@ -36,7 +36,7 @@ if __name__ == '__main__':
 
     # insert calibration parameters from ostrich
     for k, v in param_dict.items():
-        trial_params[k] = xr.full_like(trial_params['hruIndex'], fill_value=v)
+        trial_params[k] = xr.full_like(trial_params['hru'], fill_value=v)
     trial_params.to_netcdf(param_file)
 
     # initialize simulation object
