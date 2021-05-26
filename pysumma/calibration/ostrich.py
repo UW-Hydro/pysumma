@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import shutil
 import stat
+import sys
 import inspect
 import subprocess
 from functools import partial
@@ -10,7 +11,7 @@ from pathlib import Path
 from pkg_resources import resource_filename as resource
 from pysumma import Simulation
 from string import Template
-from typing import List, Dict
+from typing import List, Dict, Union
 
 def read_template(path):
     with open(path, 'r') as f:
@@ -61,7 +62,9 @@ class Ostrich():
     ostrich:
         Path to OSTRICH executable
     python_path:
-        Path to Python executable used for the ``run_script``
+        Path to Python executable used for the ``run_script``.
+        Note, you may need to set this if you are running the calibration
+        from inside a non-default environment (ie from conda/poetry/etc)!
     summa:
         Path to the SUMMA executable
     template:
@@ -92,10 +95,10 @@ class Ostrich():
         Keyword arguments to pass to the simulation run function
     """
 
-    def __init__(self, ostrich_executable, summa_executable, file_manager, python_path='python'):
+    def __init__(self, ostrich_executable, summa_executable, file_manager, python_path=sys.executable):
         """Initialize a new Ostrich object"""
-        self.available_metrics: np.ndarray = np.array(['KGE', 'MAE', 'MSE', 'RMSE', 'NSE'])
-        self.ostrich: str = ostrich_executable
+        self.default_metrics: np.ndarray = np.array(['KGE', 'MAE', 'MSE', 'RMSE', 'NSE'])
+        self.ostrich: str = os.path.abspath(ostrich_executable)
         self.python_path: str = python_path
         self.summa: str = summa_executable
         self.template: Template = INPT_META
@@ -109,21 +112,26 @@ class Ostrich():
         self.save_script: Path = self.config_path / 'save_script.py'
         self.metrics_file: Path = self.config_path / 'metrics.txt'
         self.metrics_log: Path = self.config_path / 'metrics_log.csv'
-        self.impot_strings: str = ''
+        self.import_strings: str = ''
+        self.function_strings: str = ''
         self.conversion_function: callable = lambda x: x
         self.filter_function: callable = lambda x, y: (x, y)
-        self.preserve_output: str ='no'
+        self.preserve_output: str = 'no'
         self.seed: int = 42
         self.errval: float = -9999
         self.perturb_val: float = 0.2
         self.max_iters: int = 100
         self.calib_params: List[OstrichParam] = []
         self.tied_params: List[OstrichTiedParam] = []
-        self.cost_function: str = 'KGE'
+        self.cost_function: Union[str, callable] = 'KGE'
+        self.cost_function_code: str = ''
         self.objective_function: str = 'gcop'
         self.maximize: bool = True
         self.simulation_kwargs: Dict = {}
         self.allow_failures: bool = False
+        self.obs_data_file: str = None
+        self.sim_calib_vars: List = None
+        self.obs_calib_vars: List = None
 
     def run(self, prerun_cmds=[], monitor=True):
         """Start calibration run"""
@@ -132,6 +140,22 @@ class Ostrich():
         else:
             preprocess_cmd = ""
         cmd = preprocess_cmd + f'cd {str(self.config_path)} && ./ostrich'
+        self.cmd = cmd
+        self.process = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                                        stderr=subprocess.PIPE, shell=True)
+        if monitor:
+            self.stdout, self.stderr = self.process.communicate()
+            if isinstance(self.stdout, bytes):
+                self.stderr = self.stderr.decode('utf-8', 'ignore')
+                self.stdout = self.stdout.decode('utf-8', 'ignore')
+
+    def test_runscript(self, prerun_cmds=[], monitor=True):
+        """Run a single instance of the underlying runscript"""
+        if len(prerun_cmds):
+            preprocess_cmd = " && ".join(prerun_cmds) + " && "
+        else:
+            preprocess_cmd = ""
+        cmd = preprocess_cmd + f'cd {str(self.config_path)} && ./run_script.py'
         self.cmd = cmd
         self.process = subprocess.Popen(cmd, stdout=subprocess.PIPE,
                                         stderr=subprocess.PIPE, shell=True)
@@ -153,6 +177,7 @@ class Ostrich():
 
     def write_config(self):
         """Writes all necessary files for calibration"""
+        self.validate()
         if not os.path.exists(self.config_path):
             os.mkdir(self.config_path)
 
@@ -198,7 +223,8 @@ class Ostrich():
         return Path('.') / file_name
 
     def add_tied_param(self, param_name, lower_bound, upper_bound, initial_value=0.5):
-        self.calib_params.append(OstrichParam(f'{param_name}', initial_value, (0.01, 0.99), weightname=f'{param_name}_scale'))
+        self.calib_params.append(OstrichParam(f'{param_name}', initial_value, (0.01, 0.99),
+                                              weightname=f'{param_name}_scale'))
         self.tied_params.append(OstrichTiedParam(param_name, lower_bound, upper_bound))
 
     @property
@@ -217,7 +243,10 @@ class Ostrich():
     @property
     def response_section(self) -> str:
         """Write section of OSTRICH configuration for selecting metric"""
-        metric_row = np.argwhere(self.cost_function == self.available_metrics)[0][0]
+        try:
+            metric_row = np.argwhere(self.cost_function == self.default_metrics)[0][0]
+        except IndexError:
+            metric_row = -1
         return f"{self.cost_function} {self.metrics_file}; OST_NULL {metric_row} 1 ' '"
 
     @property
@@ -227,6 +256,65 @@ class Ostrich():
             return f'neg{self.cost_function} 1 {self.cost_function} wsum -1.00'
         else:
             return '# nothing to do here'
+
+    def open_metrics_log(self):
+        columns = ['kge', 'mae', 'mse', 'rmse', 'nse']
+        if self.cost_function not in columns:
+            columns.append(self.cost_function)
+        file = str(self.metrics_log)
+        if os.path.exists(file):
+            df = pd.read_csv(file, names=columns)
+            return df
+        else:
+            #TODO: Error handling
+            return None
+
+    def open_parameter_log(self):
+        file = str(self.config_path) + '/OstModel0.txt'
+        if os.path.exists(file):
+            df = pd.read_csv(file, delim_whitespace=True)
+            return df
+        else:
+            #TODO: Error handling
+            return None
+
+    def validate(self):
+        """Try to make sure the configuration is usable"""
+
+        # Ensure observation data file exists
+        assert os.path.isfile(self.obs_data_file), \
+            (f"Observed file path doesn't exist!"
+             " You specified {self.obs_data_file}")
+
+        # Ensure the filter function has 2 args
+        filter_fun_args = len(dict(inspect.signature(self.filter_function).parameters))
+        assert filter_fun_args == 2, \
+            (f"The filter function must have two inputs so that it can be applied",
+             " to both the simulated data and the observed data!")
+
+        # Ensure the conversion function has 1 args
+        convert_fun_args = len(dict(inspect.signature(self.conversion_function).parameters))
+        assert convert_fun_args == 1, \
+            (f"The conversion function must have only one input so",
+             " that it can be applied to the observed data!")
+
+        # Ensure variables for calibration match up
+        assert self.sim_calib_vars is not None, "sim_calib_vars cannot be None!"
+        assert self.obs_calib_vars is not None, "obs_calib_vars cannot be None!"
+        if type(self.sim_calib_vars) == str:
+            self.sim_calib_vars = [self.sim_calib_vars]
+        if type(self.obs_calib_vars) == str:
+            self.obs_calib_vars = [self.obs_calib_vars]
+        assert len(self.sim_calib_vars) == len(self.obs_calib_vars), \
+            (f"The number of simulated calibration variables must match",
+             f" the number of observed variables to compare against.",
+             f" You gave {len(self.sim_calib_vars)} and",
+             f" {len(self.obs_calib_vars)}, respectively")
+
+        if callable(self.cost_function):
+            self.cost_function_code = inspect.getsource(self.cost_function)
+            self.cost_function = self.cost_function.__name__
+
 
     @property
     def map_vars_to_template(self):
@@ -251,8 +339,7 @@ class Ostrich():
     @property
     def map_vars_to_save_template(self):
         """For completion of the parameter saving template"""
-        return {
-                'pythonPath': self.python_path,
+        return {'pythonPath': self.python_path,
                 'saveDir': self.config_path.parent / 'best_calibration',
                 'modelDir': self.config_path}
 
@@ -263,12 +350,16 @@ class Ostrich():
                 'pythonPath': self.python_path,
                 'summaExe': self.summa,
                 'fileManager': self.simulation.manager_path,
-                'obsDataFile': self.obs_data_file,
+                'obsDataFile': os.path.abspath(self.obs_data_file),
                 'simVarList': self.sim_calib_vars,
                 'obsVarList': self.obs_calib_vars,
                 'outFile': self.metrics_file,
                 'metricsLog': self.metrics_log,
                 'importStrings': self.import_strings,
+                'functionStrings': self.function_strings,
+                'costFunctionCode': self.cost_function_code,
+                'costFunction': self.cost_function,
+                'maximize': self.maximize,
                 'conversionFunc': "=".join(inspect.getsource(self.conversion_function).split('=')[1:]),
                 'filterFunc': "=".join(inspect.getsource(self.filter_function).split('=')[1:]),
                 'paramMappingFile': self.weightTemplateFile,
