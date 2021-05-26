@@ -7,6 +7,10 @@ import xarray as xr
 import numpy as np
 $importStrings
 
+$functionStrings
+
+$costFunctionCode
+
 if __name__ == '__main__':
     # Template variables
     summa_exe = '$summaExe'
@@ -23,6 +27,31 @@ if __name__ == '__main__':
     simulation_args = $simulationArgs
     conversion = $conversionFunc
     filter = $filterFunc
+    cost_function = '$costFunction'.lower()
+    maximize = $maximize
+
+    metrics_mapping = {
+       'kge': pse.kling_gupta_efficiency,
+       'nse': pse.nash_sutcliffe_efficiency,
+       'mae': pse.mean_absolute_error,
+       'rmse': pse.root_mean_square_error,
+       'mse': pse.mean_squared_error
+    }
+    if cost_function not in metrics_mapping:
+        metrics_mapping[cost_function] = $costFunction
+    # default metrics are used when model failure occurs
+    default_metrics = {
+        'kge': -9999.0,
+        'nse': -9999.0,
+        'mae': 9999.0,
+        'mse': 99999.0,
+        'rmse': 9999.0,
+    }
+    if cost_function not in default_metrics:
+        if maximize:
+            default_metrics[cost_function] = -9999.0
+        else:
+            default_metrics[cost_function] = 9999.0
 
     # read in parameters from ostrich files and summa setup
     with xr.open_dataset(param_file) as temp:
@@ -33,10 +62,9 @@ if __name__ == '__main__':
         for line in weights:
             name, value = line.split('|')
             param_dict[name.strip()] = float(value.strip())
-
     # insert calibration parameters from ostrich
     for k, v in param_dict.items():
-        trial_params[k] = xr.full_like(trial_params['hru'], fill_value=v)
+        trial_params[k] = xr.full_like(trial_params['hru'], fill_value=v, dtype=np.float64)
     trial_params.to_netcdf(param_file)
 
     # initialize simulation object
@@ -45,32 +73,34 @@ if __name__ == '__main__':
         os.remove(out_file)
     # run the simulation
     s.run('local')
+
+    # error handling
     if s.status != 'Success':
         print(s.stdout)
         print('--------------------------------------------')
         print(s.stderr)
         if allow_failures:
-            kge = -3
-            nse = -3
-            mae = 9999.0
-            mse = 999999.0
-            rmse = 9999.0
             with open(out_file, 'w+') as f:
-                f.write('%.6f'%kge  + '\t #KGE\n')
-                f.write('%.6f'%mae  + '\t #MAE\n')
-                f.write('%.6f'%mse  + '\t #MSE\n')
-                f.write('%.6f'%rmse + '\t #RMSE\n')
-                f.write('%.6f'%nse  + '\t #NSE\n')
+                for k, v in default_metrics.items():
+                    f.write('%.6f'%v + f'\t #{k}\n')
 
             with open(metrics_log, 'a') as f:
-                f.write('%.6f'%kge  + ', %.6f'%mae
-                        + ', %.6f'%mse + ', %.6f'%rmse
-                        + ', %.6f'%nse + '\n')
+                f.write(', '.join(['%.6f'%v for v in default_metrics.values()]) + '\n')
 
     assert s.status == 'Success'
 
     # open output and calculate diagnostics
-    sim_ds = s.output.load()
+    if type(s.output) == list:
+        all_errs = []
+        for out_ds in s.output:
+            try:
+                sim_ds = out_ds[sim_calib_vars].load()
+            except KeyError as e:
+                all_errs.append(e)
+        if not sim_ds:
+            raise Exception(all_errs)
+    else:
+        sim_ds = s.output.load()
     obs_ds = xr.open_dataset(obs_data_file).load()
 
     # trim sim and obs to common time length
@@ -79,31 +109,17 @@ if __name__ == '__main__':
     obs_ds = obs_ds.sel(time=time_slice)
     sim_filt, obs_filt = filter(sim_ds,  obs_ds)
 
-    kge_list = []
-    mae_list = []
-    mse_list = []
-    rmse_list = []
-    nse_list = []
-    for simvar, obsvar in zip(sim_calib_vars, obs_calib_vars):
-        kge_list.append(pse.kling_gupta_efficiency(sim_filt[simvar], conversion(obs_filt[obsvar])))
-        mae_list.append(pse.mean_absolute_error(sim_filt[simvar], conversion(obs_filt[obsvar])))
-        mse_list.append(pse.mean_squared_error(sim_filt[simvar], conversion(obs_filt[obsvar])))
-        rmse_list.append(pse.root_mean_square_error(sim_filt[simvar], conversion(obs_filt[obsvar])))
-        nse_list.append(pse.nash_sutcliffe_efficiency(sim_filt[simvar], conversion(obs_filt[obsvar])))
-
-    kge = np.mean(kge_list)
-    mae = np.mean(mae_list)
-    mse = np.mean(mse_list)
-    rmse = np.mean(rmse_list)
-    nse = np.mean(nse_list)
-
-    # save diagnostics in form that ostrich can read
+    metrics_dict = {}
     with open(out_file, 'w+') as f:
-        f.write('%.6f'%kge  + '\t #KGE\n')
-        f.write('%.6f'%mae  + '\t #MAE\n')
-        f.write('%.6f'%mse  + '\t #MSE\n')
-        f.write('%.6f'%rmse + '\t #RMSE\n')
-        f.write('%.6f'%nse  + '\t #NSE\n')
+        for metric, metric_fun in metrics_mapping.items():
+            metric_list = []
+            for simvar, obsvar in zip(sim_calib_vars, obs_calib_vars):
+                metric_list.append(metric_fun(
+                    sim_filt[simvar], conversion(obs_filt[obsvar])))
+            metric_val = np.mean(metric_list)
+            # save diagnostics in form that ostrich can read
+            f.write('%.6f'%metric_val + f'\t #{metric}\n')
+            metrics_dict[metric] = metric_val
 
     with open(metrics_log, 'a') as f:
-        f.write('%.6f'%kge  + ', %.6f'%mae + ', %.6f'%mse + ', %.6f'%rmse + ', %.6f'%nse + '\n')
+        f.write(', '.join(['%.6f'%v for v in metrics_dict.values()]) + '\n')

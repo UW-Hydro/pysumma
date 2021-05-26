@@ -11,7 +11,7 @@ from pathlib import Path
 from pkg_resources import resource_filename as resource
 from pysumma import Simulation
 from string import Template
-from typing import List, Dict
+from typing import List, Dict, Union
 
 def read_template(path):
     with open(path, 'r') as f:
@@ -97,8 +97,8 @@ class Ostrich():
 
     def __init__(self, ostrich_executable, summa_executable, file_manager, python_path=sys.executable):
         """Initialize a new Ostrich object"""
-        self.available_metrics: np.ndarray = np.array(['KGE', 'MAE', 'MSE', 'RMSE', 'NSE'])
-        self.ostrich: str = ostrich_executable
+        self.default_metrics: np.ndarray = np.array(['KGE', 'MAE', 'MSE', 'RMSE', 'NSE'])
+        self.ostrich: str = os.path.abspath(ostrich_executable)
         self.python_path: str = python_path
         self.summa: str = summa_executable
         self.template: Template = INPT_META
@@ -113,6 +113,7 @@ class Ostrich():
         self.metrics_file: Path = self.config_path / 'metrics.txt'
         self.metrics_log: Path = self.config_path / 'metrics_log.csv'
         self.import_strings: str = ''
+        self.function_strings: str = ''
         self.conversion_function: callable = lambda x: x
         self.filter_function: callable = lambda x, y: (x, y)
         self.preserve_output: str = 'no'
@@ -122,7 +123,8 @@ class Ostrich():
         self.max_iters: int = 100
         self.calib_params: List[OstrichParam] = []
         self.tied_params: List[OstrichTiedParam] = []
-        self.cost_function: str = 'KGE'
+        self.cost_function: Union[str, callable] = 'KGE'
+        self.cost_function_code: str = ''
         self.objective_function: str = 'gcop'
         self.maximize: bool = True
         self.simulation_kwargs: Dict = {}
@@ -241,7 +243,10 @@ class Ostrich():
     @property
     def response_section(self) -> str:
         """Write section of OSTRICH configuration for selecting metric"""
-        metric_row = np.argwhere(self.cost_function == self.available_metrics)[0][0]
+        try:
+            metric_row = np.argwhere(self.cost_function == self.default_metrics)[0][0]
+        except IndexError:
+            metric_row = -1
         return f"{self.cost_function} {self.metrics_file}; OST_NULL {metric_row} 1 ' '"
 
     @property
@@ -253,9 +258,12 @@ class Ostrich():
             return '# nothing to do here'
 
     def open_metrics_log(self):
+        columns = ['kge', 'mae', 'mse', 'rmse', 'nse']
+        if self.cost_function not in columns:
+            columns.append(self.cost_function)
         file = str(self.metrics_log)
         if os.path.exists(file):
-            df = pd.read_csv(file, names=['kge', 'mae', 'mse', 'rmse', 'nse'])
+            df = pd.read_csv(file, names=columns)
             return df
         else:
             #TODO: Error handling
@@ -303,6 +311,10 @@ class Ostrich():
              f" You gave {len(self.sim_calib_vars)} and",
              f" {len(self.obs_calib_vars)}, respectively")
 
+        if callable(self.cost_function):
+            self.cost_function_code = inspect.getsource(self.cost_function)
+            self.cost_function = self.cost_function.__name__
+
 
     @property
     def map_vars_to_template(self):
@@ -338,12 +350,16 @@ class Ostrich():
                 'pythonPath': self.python_path,
                 'summaExe': self.summa,
                 'fileManager': self.simulation.manager_path,
-                'obsDataFile': self.obs_data_file,
+                'obsDataFile': os.path.abspath(self.obs_data_file),
                 'simVarList': self.sim_calib_vars,
                 'obsVarList': self.obs_calib_vars,
                 'outFile': self.metrics_file,
                 'metricsLog': self.metrics_log,
                 'importStrings': self.import_strings,
+                'functionStrings': self.function_strings,
+                'costFunctionCode': self.cost_function_code,
+                'costFunction': self.cost_function,
+                'maximize': self.maximize,
                 'conversionFunc': "=".join(inspect.getsource(self.conversion_function).split('=')[1:]),
                 'filterFunc': "=".join(inspect.getsource(self.filter_function).split('=')[1:]),
                 'paramMappingFile': self.weightTemplateFile,
