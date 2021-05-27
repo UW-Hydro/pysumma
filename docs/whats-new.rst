@@ -19,3 +19,4 @@ Enhancements
 Bug fixes
 ~~~~~~~~~
 - Fixes a bug in the Ostrich run script that assumes an `hruIndex` variable in the parameter dataset.
+- Provides an up to date `var_lookup.f90` which contains the correct variable definitions for newer versions of SUMMA
