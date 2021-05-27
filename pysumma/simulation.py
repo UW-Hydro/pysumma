@@ -150,7 +150,7 @@ class Simulation():
                            'io/en/latest/input_output/SUMMA_input/#attribute-and-',
                            'parameter-files for more information', e)
 
-    def assign_trial_params(self, name, data, dim='hru', create=True):
+    def assign_trial_params(self, name: str, data: np.array, dim='hru', create=True):
         """
         Assign new data to the ``spatial_params`` dataset.
 
@@ -177,7 +177,36 @@ class Simulation():
                            'io/en/latest/input_output/SUMMA_input/#attribute-and-',
                            'parameter-files for more information', e)
 
+    def assign_forcing_file(self, name: str, data: xr.Dataset):
+        """
+        Assign a new forcing dataset, writing out the data and updating
+        the forcing file list and file manager
 
+        Parameters
+        ----------
+        name: str
+            The name of the new forcing file dataset
+        data: xr.Dataset
+            The new forcing dataset
+        """
+        # Write out the new forcing data & update the force file list
+        if not name.endswith('.nc'):
+            name = f'{name}.nc'
+        current_ffile_dirpath = self.force_file_list.prefix
+        new_force_file =os.sep.join([current_ffile_dirpath, name])
+        data.to_netcdf(new_force_file)
+        new_force_file_list = f'{name[0:-3]}_force_list.txt'
+        # Update the file manager
+        new_file_manager = f'{str(self.manager_path)[0:-4]}_{name[0:-3]}.txt'
+        fm = self.manager
+        with open(f'{fm["settingsPath"].value}/{new_force_file_list}', 'w') as f:
+            f.write(f"'{name}'")
+        fm['forcingListFile'].value = new_force_file_list
+        fm.file_name = new_file_manager
+        fm.write()
+        # Update the simulation object with the new file manager
+        self.manager_path = Path(os.path.abspath(os.path.realpath(fm.file_name)))
+        self.initialize()
 
     def create_backup(self):
         self.backup = {}
@@ -421,6 +450,9 @@ class Simulation():
             f.writelines(self.soilparm)
         with open(settings_path / self.manager['vegTableFile'].value, 'w+') as f:
             f.writelines(self.vegparm)
+
+    def get_forcing_data_list(self) -> List[xr.Dataset]:
+        return self.force_file_list.open_forcing_data()
 
     def get_output_files(self) -> List[str]:
         """Find output files given the ``stdout`` generated from a run"""

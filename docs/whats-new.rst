@@ -15,6 +15,7 @@ Enhancements
 - Filter for multiple output files when calibrating.
 - Convert path for observed data to absolute path implicitly when calibrating.
 - Allow for user specified cost functions during calibration.
+- Added a helper method to the Simulation object which makes it wasy to change/modify forcing datasets
 
 Bug fixes
 ~~~~~~~~~
