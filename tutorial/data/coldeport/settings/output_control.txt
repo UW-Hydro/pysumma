@@ -1,0 +1,35 @@
+! ---------
+! model variables
+! ---------
+! Format:
+! varname | timestep | instant | sum | mean | var | min | max | mode
+!
+nSnow                     | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarSWE                 | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarSnowDepth           | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarSnowfallTemp        | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarSnowAge             | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarInfiltration        | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarExfiltration        | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarTotalSoilLiq        | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarTotalSoilIce        | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarSurfaceRunoff       | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarSurfaceTemp         | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarSnowSublimation     | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarLatHeatTotal        | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarSenHeatTotal        | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarSnowDrainage        | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarRainfall            | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarSnowfall            | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+iLayerLiqFluxSnow         | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+mLayerVolFracIce          | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+mLayerVolFracLiq          | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+mLayerVolFracWat          | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+mLayerDepth               | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+mLayerTemp                | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+mLayerHeight              | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+iLayerHeight              | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+iLayerNrgFlux             | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+mLayerNrgFlux             | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+iLayerConductiveFlux      | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+iLayerAdvectiveFlux       | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0

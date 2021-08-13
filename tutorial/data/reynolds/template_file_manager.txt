@@ -1,0 +1,21 @@
+controlVersion       'SUMMA_FILE_MANAGER_V3.0.0' !  fman_ver
+simStartTime         '1999-10-01 01:00' !
+simEndTime           '2002-09-30 23:00' !
+tmZoneInfo           'localTime' !
+settingsPath         'PWD/settings/' !  setting_path
+forcingPath          'PWD/forcing/' !  input_path
+outputPath           'PWD/output/' !  output_path
+decisionsFile        'snow_zDecisions.txt' !  decision
+outputControlFile    'snow_zOutputControl.txt' !  OUTPUT_CONTROL
+globalHruParamFile   'snow_zLocalParamInfo.txt' !  local_par
+globalGruParamFile   'snow_zBasinParamInfo.txt' !  basin_par
+attributeFile        'snow_zLocalAttributes.nc' !  local_attr
+trialParamFile       'snow_zParamTrial.nc' !  para_trial
+forcingListFile      'forcing_file_list.txt' !  forcing_list
+initConditionFile    'snow_zInitCond.nc' !  initial_cond
+outFilePrefix        'reynolds' !  output_prefix
+vegTableFile         'VEGPARM.TBL' !
+soilTableFile        'SOILPARM.TBL' !
+generalTableFile     'GENPARM.TBL' !
+noahmpTableFile      'MPTABLE.TBL' !
+! history Wed Jul 22 08:53:40 2020: /pool0/home/andrbenn/data/summa/utils/convert_summa_config_v2_v3.py snow_fileManager_template.txt

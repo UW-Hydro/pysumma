@@ -1,0 +1,21 @@
+controlVersion       'SUMMA_FILE_MANAGER_V3.0.0' !  filemanager_version
+simStartTime         '2010-06-01 00:00' !
+simEndTime           '2010-06-31 00:00' !
+tmZoneInfo           'utcTime' !
+settingsPath         '/home/bzq/workspace/pysumma/tutorial/data/yakima/settings/' !  settings_path
+forcingPath          '/home/bzq/workspace/pysumma/tutorial/data/yakima/forcings/' !  input_path
+outputPath           '/home/bzq/workspace/pysumma/tutorial/data/yakima/output/' !  output_path
+decisionsFile        'decisions.txt' !  decisions_path
+outputControlFile    'output_control.txt' !  output_control
+globalHruParamFile   '../params/local_param_info.txt' !  local_param_info
+globalGruParamFile   '../params/basin_param_info.txt' !  basin_param_info
+attributeFile        '../params/local_attributes.nc' !  local_attributes
+trialParamFile       '../params/parameter_trial.nc' !  parameter_trial
+forcingListFile      '../forcings/forcing_file_list.txt' !  forcing_file_list
+initConditionFile    '../params/initial_conditions.nc' !  model_init_cond
+outFilePrefix        'yakima' !  output_prefix
+vegTableFile         'VEGPARM.TBL' !
+soilTableFile        'SOILPARM.TBL' !
+generalTableFile     'GENPARM.TBL' !
+noahmpTableFile      'MPTABLE.TBL' !
+! history Fri Aug  7 11:11:26 2020: /pool0/home/andrbenn/data/summa/utils/convert_summa_config_v2_v3.py file_manager.txt
