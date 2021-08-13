@@ -36,7 +36,9 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.mathjax',
               'sphinx.ext.viewcode',
               'sphinx.ext.napoleon',
-              'sphinx.ext.autosummary']
+              'sphinx.ext.autosummary',
+              'nbsphinx'
+              ]
 
 extlinks = {'issue': ('https://github.com/UW-Hydro/pysumma/issues/%s', 'GH'),
             'pull': ('https://github.com/UW-Hydro/pysumma/pull/%s', 'PR'),
