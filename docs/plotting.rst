@@ -22,32 +22,23 @@ base examples which are provided as tutorials. In order to get some data
 set up, we will start by importing the required libraries as well as run
 an example simulation.
 
-.. code:: ipython3
+.. code:: python3
 
     %pylab inline
     %load_ext autoreload
     %autoreload 2
     %reload_ext autoreload
-    
+
     import cartopy.crs as ccrs
     import numpy as np
     import matplotlib.pyplot as plt
     import geopandas as gpd
     import warnings
     warnings.filterwarnings('ignore')
-    
+
     import pysumma as ps
     import pysumma.plotting as psp
     ! cd ../../tutorial/data/reynolds && ./install_local_setup.sh && cd -
-
-
-.. parsed-literal::
-
-    Populating the interactive namespace from numpy and matplotlib
-    /home/bzq/workspace/pysumma/docs/notebooks
-
-
-.. code:: ipython3
 
     sim = ps.Simulation('summa.exe', '../../tutorial/data/reynolds/file_manager.txt')
     sim.run()
@@ -66,21 +57,12 @@ This is given by the variable ``iLayerHeight``. We can easily select out
 these two variables and then input them into the ``psp.layers`` function
 with no other arguments.
 
-.. code:: ipython3
+.. code:: python3
 
     time_range = slice('10-29-2000', '04-30-2001')
     depth    = ds.isel(hru=0).sel(time=time_range)['iLayerHeight']
     temp     = ds.isel(hru=0).sel(time=time_range)['mLayerTemp']
     psp.layers(temp, depth)
-
-
-
-
-.. parsed-literal::
-
-    (<AxesSubplot:>, <matplotlib.cm.ScalarMappable at 0x7f3b452d4050>)
-
-
 
 
 .. image:: ./plotting_files/./plotting_4_1.png
@@ -102,14 +84,14 @@ up the figure with three subplots. Finally, we will do some
 customization on the ``psp.layers`` call. Finally, we’ll add the other
 two subplots with the air temperature and precipitation timeseries.
 
-.. code:: ipython3
+.. code:: python3
 
     # Create the figure
     fig, axes = plt.subplots(3, 1, figsize=(14, 8), gridspec_kw={'height_ratios': [1, 3, 1]}, sharex=True)
     # Add a new axis for the colorbar
     cax = fig.add_axes([0.15, 0.25, 1, 0.55])
     cax.axis('off')
-    
+
     # Calculate the daily values
     depth        = depth.resample({'time': 'D'}).mean()
     temp         = temp.resample({'time': 'D'}).mean()
@@ -117,20 +99,20 @@ two subplots with the air temperature and precipitation timeseries.
     airtemp_mean = ds['airtemp'].isel(hru=0).sel(time=time_range).resample({'time': 'D'}).mean()
     airtemp_max  = ds['airtemp'].isel(hru=0).sel(time=time_range).resample({'time': 'D'}).max()
     airtemp_min  = ds['airtemp'].isel(hru=0).sel(time=time_range).resample({'time': 'D'}).min()
-    
+
     # Do the layers plot
-    psp.layers(temp, depth, ax=axes[1], 
-               variable_range=[260, 273.15],                                # Set a range for the colors
-               line_kwargs={'linewidth': 6},                                # Wider linewidth because we are plotting daily
+    psp.layers(temp, depth, ax=axes[1],
+               variable_range=[260, 273.15],                         # Set a range for the colors
+               line_kwargs={'linewidth': 6},                         # Wider linewidth because we are plotting daily
                cbar_kwargs={'label': 'Temperature (K)', 'ax': cax},  # Colorbar arguments
-               plot_soil=False)                                             # Limit to the snow domain
-    
+               plot_soil=False)                                      # Limit to the snow domain
+
     # Add the precip and temperature plots
     precip.plot(ax=axes[0], marker='o')
     airtemp_min.plot(ax=axes[2], label='Minimum')
     airtemp_max.plot(ax=axes[2], label='Maximum')
     axes[2].legend()
-    
+
     # Set some axis labels
     axes[2].axhline(273.16, color='black')
     axes[0].invert_yaxis()
@@ -171,13 +153,13 @@ here that there are higher frequency oscillations in the upper layers,
 as well as a more pronounced seasonal cycle. in the deeper layers we see
 a dampened and delayed response.
 
-.. code:: ipython3
+.. code:: python3
 
     # Reindex so that the bottom layers are the soil layers
     mlayertemp = ds['mLayerTemp'].isel(hru=0)
     mlayertemp.values = psp.utils.justify(mlayertemp.where(mlayertemp > -900).values)
     mlayertemp = mlayertemp.isel(midToto=slice(-6, None))
-    
+
     fig, ax = plt.subplots(figsize=(12, 6))
     psp.hovmoller(mlayertemp, 'dayofyear', 'midToto', ax=ax, colormap='turbo')
     ax.invert_yaxis()
@@ -185,15 +167,6 @@ a dampened and delayed response.
     ax.set_yticklabels([1, 2, 3, 4, 5])
     ax.set_ylabel('Soil layer (index, higher=deeper)')
     ax.set_xlabel('Day of year')
-
-
-
-
-.. parsed-literal::
-
-    Text(0.5, 0, 'Day of year')
-
-
 
 
 .. image:: ./plotting_files/./plotting_8_1.png
@@ -211,39 +184,30 @@ sensible heat. In this case we’ll aggregate over two temporal dimensions
 dimensions include
 ``year, month, day, hour, minute, dayofyear, week, dayofweek, and quarter``.
 
-.. code:: ipython3
+.. code:: python3
 
     fig, axes = plt.subplots(1, 3, figsize=(16, 5), sharex=True, sharey=True)
     time_range = slice('01-01-2001', '01-01-2002')
     netrad = ds['scalarNetRadiation'].isel(hru=0).sel(time=time_range)
     latheat = -ds['scalarLatHeatTotal'].isel(hru=0).sel(time=time_range)
     senheat = -ds['scalarSenHeatTotal'].isel(hru=0).sel(time=time_range)
-    
+
     # Colorbar axis
     cax = fig.add_axes([0.15, 0.0, 0.9, 0.95])
     cax.axis('off')
-    
+
     # Range for colormap
     vrange = [-50, 500]
-    
+
     psp.hovmoller(netrad,  'month', 'hour', variable_range=vrange, colormap='turbo', ax=axes[0], add_colorbar=False)
     psp.hovmoller(latheat, 'month', 'hour', variable_range=vrange, colormap='turbo', ax=axes[1], add_colorbar=False)
     psp.hovmoller(senheat, 'month', 'hour', variable_range=vrange, colormap='turbo', ax=axes[2], cbar_kwargs={'ax': cax, 'label': 'Radiative flux ($W/m^2$)'})
-    
+
     axes[1].set_xlabel('Month of year')
     axes[0].set_ylabel('Hour of day')
     axes[0].set_title('Net radiation')
     axes[1].set_title('Latent heat flux')
     axes[2].set_title('Sensible heat flux')
-
-
-
-
-.. parsed-literal::
-
-    Text(0.5, 1.0, 'Sensible heat flux')
-
-
 
 
 .. image:: ./plotting_files/./plotting_10_1.png
@@ -269,40 +233,22 @@ either a single time slice or an aggregation over the simulation time
 period. In this case we’ll just take the mean of the input air
 temperature.
 
-.. code:: ipython3
+.. code:: python3
 
     !cd ../../tutorial/data/yakima && ./install_local_setup.sh && cd -
-    
+
     shapefile = '../../tutorial/data/yakima/shapefile/yakima.shp'
     file_manager = '../../tutorial/data/yakima/file_manager.txt'
     gdf = gpd.GeoDataFrame.from_file(shapefile)
     yakima = ps.Distributed('summa.exe', file_manager)
     yakima.run()
     assert np.alltrue([s.status == 'Success' for s in yakima.simulations.values()])
-    
     yakima_ds = yakima.merge_output()
 
-
-.. parsed-literal::
-
-    /home/bzq/workspace/pysumma/docs/notebooks
-
-
-.. code:: ipython3
-
     fig, ax = plt.subplots(figsize=(10, 10), subplot_kw={'projection':ccrs.Mercator()})
-    
-    psp.spatial(yakima_ds['airtemp'].mean(dim='time'), gdf, ax=ax)
-
-
-
-
-.. parsed-literal::
-
-    <GeoAxesSubplot:>
-
-
+    psp.spatial(yakima_ds['scalarTotalSoilLiq'].mean(dim='time'), gdf, ax=ax)
 
 
 .. image:: ./plotting_files/./plotting_13_1.png
+
 

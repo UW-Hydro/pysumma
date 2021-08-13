@@ -8,6 +8,7 @@ Develop version
 
 Enhancements
 ~~~~~~~~~~~~
+- Add a plotting page to the documentation
 - Plot soil made default in ``psp.layers``
 - Make 'local' the default run option in ``Simulation`` based classes
 - Add ``_repr_html_`` to ``OptionContainer`` classes to make viewing easier in notebooks
