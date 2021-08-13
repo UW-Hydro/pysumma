@@ -125,7 +125,7 @@ class Distributed(object):
         return [{'startGRU': start, 'countGRU': stop - start}
                 for start, stop in chunks]
 
-    def start(self, run_option: str, prerun_cmds: List=None):
+    def start(self, run_option: str='local', prerun_cmds: List=None):
         """
         Start running the ensemble members.
 
@@ -141,7 +141,7 @@ class Distributed(object):
             self.submissions.append(self._client.submit(
                 _submit, sim, name, run_option, prerun_cmds, kwargs))
 
-    def run(self, run_option: str, prerun_cmds=None, monitor: bool=True):
+    def run(self, run_option: str='local', prerun_cmds=None, monitor: bool=True):
         """
         Run the ensemble
 
@@ -182,7 +182,7 @@ class Distributed(object):
         hru_merged = xr.concat(hru_ds, dim='hru')
         gru_merged = xr.concat(gru_ds, dim='gru')
 
-        merged_ds = xr.merge([hru_merged, hru_merged])
+        merged_ds = xr.merge([hru_merged, gru_merged])
         return merged_ds
 
     def map(self, fun, args, include_sims=True, monitor=True):
