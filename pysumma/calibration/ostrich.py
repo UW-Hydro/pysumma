@@ -41,7 +41,8 @@ class Ostrich():
 
     A basic workflow for this object is:
 
-        ::
+    ::
+
         import pysumma as ps
         summa_exe = './summa.exe'
         ostrich_exe = './ostrich.exe'
