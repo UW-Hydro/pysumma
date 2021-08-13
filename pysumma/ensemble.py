@@ -3,6 +3,7 @@ from distributed import Client, get_client
 import os
 import pandas as pd
 import time
+from typing import List, Dict
 import xarray as xr
 
 from .simulation import Simulation
@@ -138,7 +139,7 @@ class Ensemble(object):
         return {n: s.output for n, s in self.simulations.items()}
 
 
-    def start(self, run_option: str, prerun_cmds: list=None):
+    def start(self, run_option: str='local', prerun_cmds: list=None):
         """
         Start running the ensemble members.
 
@@ -155,7 +156,7 @@ class Ensemble(object):
             self.submissions.append(self._client.submit(
                 _submit, s, n, run_option, prerun_cmds, config))
 
-    def run(self, run_option: str, prerun_cmds=None, monitor: bool=True):
+    def run(self, run_option: str='local', prerun_cmds=None, monitor: bool=True):
         """
         Run the ensemble
 
@@ -210,7 +211,7 @@ class Ensemble(object):
                 other.append(n)
         return {'Success': success, 'Error': error, 'Other': other}
 
-    def rerun_failed(self, run_option: str, prerun_cmds=None,
+    def rerun_failed(self, run_option: str='local', prerun_cmds=None,
                      monitor: bool=True):
         """
         Try to re-run failed simulations.
@@ -238,7 +239,8 @@ class Ensemble(object):
             return True
 
 
-def _submit(s: Simulation, name: str, run_option: str, prerun_cmds, config):
+def _submit(s: Simulation, name: str, run_option: str, prerun_cmds: List,
+            config: Dict, **kwargs):
     s.initialize()
     s.apply_config(config)
     s.run(run_option, run_suffix=name, prerun_cmds=prerun_cmds, freq_restart='e')

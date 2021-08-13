@@ -9,7 +9,7 @@ MM_PER_M = 1000
 WB_COMPONENTS = ['scalarTotalRunoff', 'scalarGroundEvaporation', 'pptrate',
                  'scalarCanopyEvaporation', 'scalarCanopyTranspiration',
                  'scalarSnowSublimation', 'scalarCanopySublimation',
-                 'scalarSWE', 'scalarTotalSoilWat', 'scalarCanopyWat']
+                 'scalarSWE', 'scalarTotalSoilWat', 'scalarCanopyWat', 'scalarAquiferBaseflow']
 WB_LONGNAMES = ['Evapotranspiration (ET)', 'Runoff', 'Precipitation',
                 'Soil & canopy moisture',
                 'Snow water equivalent (SWE)', 'Baseflow']
@@ -23,6 +23,11 @@ def _determine_suffix(ds):
                 return suffix
             else:
                 return var.replace(WB_COMPONENTS[0], '_')
+    else:
+        raise KeyError('Could not locate all variables necessary '
+                       'for calculating water balances! The '
+                       f'required variables are {", ".join(WB_COMPONENTS)}')
+
 
 
 def aggregate_wb_vars(ds):
@@ -44,8 +49,8 @@ def aggregate_wb_vars(ds):
     ds['swe'] = -ds['scalarSWE{}'.format(suffix)]
     ds['soil_moisture'] = -(ds['scalarTotalSoilLiq{}'.format(suffix)]
                             + ds['scalarTotalSoilIce{}'.format(suffix)]
-                            + ds['scalarCanopyIce{}'.format(suffix)]
-                            + ds['scalarCanopyLiq{}'.format(suffix)])
+                            + ds['scalarCanopyWat{}'.format(suffix)]
+                            )
     return ds[out_vars]
 
 

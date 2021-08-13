@@ -34,14 +34,16 @@ def gen_patches(da, geodf, robust=False):
     return patches
 
 
-def spatial(data_array, geodf, simplify_level=500, proj=ccrs.Mercator(),
+def spatial(data_array, geodf, ax=None, simplify_level=500, proj=ccrs.Mercator(),
             robust=False, colorbar=True, colormap='viridis'):
     '''Make a spatial plot'''
     # Preprocess the data
     geodf_crs = geodf.to_crs(crs=proj.proj4_params)
     patches = gen_patches(data_array, geodf_crs, robust)
     # Map plotting
-    fig, ax = plt.subplots(nrows=1, ncols=1, subplot_kw=dict(projection=proj))
+    if not ax:
+        fig, ax = plt.subplots(nrows=1, ncols=1, subplot_kw=dict(projection=proj))
+
     ax.add_collection(patches)
     add_map_features(ax)
     ax.autoscale_view()
@@ -57,8 +59,8 @@ def spatial(data_array, geodf, simplify_level=500, proj=ccrs.Mercator(),
     if colorbar:
         sm = plt.cm.ScalarMappable(norm=plt.Normalize(vmin=minval, vmax=maxval))
         sm._A = []
-        cax = fig.add_axes([0.92, 0.2, 0.015, 0.6])
+        cax = plt.gcf().add_axes([0.92, 0.2, 0.015, 0.6])
         cax.tick_params()
         cb = plt.colorbar(sm, cax=cax)
         cb.set_label(data_array.name)
-    return fig, ax
+    return ax

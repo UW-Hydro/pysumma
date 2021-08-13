@@ -7,7 +7,7 @@ from matplotlib import cm
 from .utils import justify
 
 
-def layers(var, depth, ax=None, colormap='viridis', plot_soil=False,
+def layers(var, depth, ax=None, colormap='viridis', plot_soil=True,
            plot_snow=True, variable_range=None, add_colorbar=True,
            line_kwargs={}, cbar_kwargs={}):
     # Preprocess the data
@@ -60,6 +60,10 @@ def layers(var, depth, ax=None, colormap='viridis', plot_soil=False,
         label = var.long_name
     except:
         label = var.name
+    if 'label' not in cbar_kwargs.keys():
+        cbar_kwargs['label'] = label
+    if 'ax' not in cbar_kwargs.keys():
+        cbar_kwargs['ax'] = ax
     if add_colorbar:
-        plt.gcf().colorbar(mappable, label=label, ax=ax, **cbar_kwargs)
+        plt.gcf().colorbar(mappable, **cbar_kwargs)
     return ax, mappable
