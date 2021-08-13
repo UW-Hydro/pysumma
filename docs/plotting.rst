@@ -64,6 +64,7 @@ with no other arguments.
     temp     = ds.isel(hru=0).sel(time=time_range)['mLayerTemp']
     psp.layers(temp, depth)
 
+
 .. image:: ./plotting_files/./plotting_4_1.png
 
 
