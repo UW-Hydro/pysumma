@@ -23,13 +23,12 @@ setup(name='pysumma',
           'matplotlib',
           'pandas',
           'hs_restclient'
-          ],
-       extras_require={'plotting': [
           'geopandas',
           'fiona',
           'cartopy',
           'shapely',
-          'seaborn'
-          ],},
+          'seaborn',
+          'nbsphinx'
+          ],
       include_package_data=True,
       test_suite='pysumma.tests')
