@@ -94,6 +94,7 @@ Sitemap
 .. toctree::
     :maxdepth: 3
 
-    api
-    plotting
+    basic_usage
     configuration
+    plotting
+    api

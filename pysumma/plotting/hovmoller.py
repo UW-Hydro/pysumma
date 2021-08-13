@@ -4,7 +4,51 @@ import matplotlib.pyplot as plt
 
 def hovmoller(data_array, xdim, ydim, how='mean', colormap='viridis',
         variable_range=None, add_colorbar=True, cbar_kwargs={}, ax=None):
-    '''Make a Hovmoller plot'''
+    """
+    Make a Hovmoller plot. Example usage:
+
+    ::
+
+        import pysumma.plotting as psp
+        time_range = slice('01-01-2001', '01-01-2002')
+        netrad = ds['scalarNetRadiation'].isel(hru=0).sel(time=time_range)
+        vrange = [-50, 500]
+        psp.hovmoller(netrad,  'month', 'hour', variable_range=vrange, colormap='turbo')
+
+    Parameters
+    ----------
+    data_array: xr.DataArray
+        A data array with the variable to be plotted
+    xdim: string
+        The dimension to aggregate on the x-axis
+        Can be a dimension on the ``data_array`` or
+        an aggregation of it. For time, valid aggregations
+        include: ``year``, ``month``, ``day``, ``hour``,
+        ``minute``, ``second``, ``dayofyear``, ``week``,
+        ``dayofweek``, ``weekday``, ``quarter``
+    ydim: string
+        The dimension to aggregate on the y-axis
+        Can be a dimension on the ``data_array`` or
+        an aggregation of it. For time, valid aggregations
+        include: ``year``, ``month``, ``day``, ``hour``,
+        ``minute``, ``second``, ``dayofyear``, ``week``,
+        ``dayofweek``, ``weekday``, ``quarter``
+    how: string, default='mean'
+        The aggregation measure to use. Options include
+        ``['min', 'max', 'mean', 'median', 'std']``
+    colormap: string, default='viridis'
+        The colormap to use
+    variable_range: List[float], default=variable range
+        The range of numerical values to use. Must be two numbers.
+    add_colorbar: boolean, default=True
+        Whether to add a colorbar
+    cbar_kwargs: Dict, default={}
+        Keyword arguments to draw the colorbar.
+        They are passed directly to plt.colorbar.
+    ax: Axes
+        The axis to plot on. If not provided, a new
+        axis will be created
+    """
     # Check if dimensions are valid
     time_groups = ['year', 'month', 'day', 'hour',
                    'minute', 'second', 'dayofyear',

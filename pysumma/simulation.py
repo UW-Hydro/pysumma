@@ -103,6 +103,7 @@ class Simulation():
             example might be:
 
             ::
+
             config = {
                 'file_manager': '/home/user/cool_setup/file_manager_new.txt',
                 'decisions': {'snowLayers': 'CLM_2010'},
