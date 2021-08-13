@@ -299,7 +299,7 @@ class Simulation():
                                         stderr=subprocess.PIPE, shell=True)
         self.status = 'Running'
 
-    def start(self, run_option,  run_suffix='pysumma_run', processes=1,
+    def start(self, run_option='local',  run_suffix='pysumma_run', processes=1,
               prerun_cmds=[], startGRU=None, countGRU=None, iHRU=None,
               freq_restart=None, progress=None, **kwargs):
         """
@@ -321,7 +321,7 @@ class Simulation():
             raise NotImplementedError('Invalid runtime given! '
                                       'Valid options: local, docker')
 
-    def run(self, run_option,  run_suffix='pysumma_run', processes=1,
+    def run(self, run_option='local',  run_suffix='pysumma_run', processes=1,
             prerun_cmds=None, startGRU=None, countGRU=None, iHRU=None,
             freq_restart=None, progress=None, **kwargs):
         """
@@ -392,7 +392,7 @@ class Simulation():
 
         return self.status
 
-    def spinup(self, run_option, period='1Y', niters=10, run_suffix='pysumma_spinup', **kwargs):
+    def spinup(self, run_option='local', period='1Y', niters=10, run_suffix='pysumma_spinup', **kwargs):
         # open forcings
         spinup_force_name = f'{run_suffix}.nc'
         with xr.open_mfdataset(self.force_file_list.forcing_paths) as ds:

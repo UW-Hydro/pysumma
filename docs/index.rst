@@ -22,7 +22,7 @@ it will also install a compatible version of SUMMA.
 
 To install via ``conda`` use:
 
-:: 
+::
 
     conda install -c conda-forge pysumma
 
@@ -95,4 +95,5 @@ Sitemap
     :maxdepth: 3
 
     api
+    plotting
     configuration
