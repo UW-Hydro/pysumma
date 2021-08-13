@@ -24,3 +24,4 @@ dependencies:
   - pysumma>=3.0.3
   - pip:
     - hs_restclient
+    - nbsphinx
