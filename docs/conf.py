@@ -163,6 +163,6 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     (master_doc, 'pysumma', 'pysumma Documentation',
-     author, 'pysumma ', 'One line description of project.',
-     'Miscellaneous'),
+     author, 'pysumma ', 'A python package for interfacing with SUMMA',
+     'Hydrology'),
 ]
