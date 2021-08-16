@@ -2,6 +2,7 @@
 
 | pysumma Links & Badges              |                                                                             |
 |------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| pysumma Tutorial          | [![Binder](https://notebooks.gesis.org/binder/badge_logo.svg)](https://notebooks.gesis.org/binder/v2/gh/UW-Hydro/pysumma/develop) |
 | pysumma Documentation      | [![Documentation Status](http://readthedocs.org/projects/pysumma/badge/?version=develop)](http://pysumma.readthedocs.io/en/develop/?badge=develop) |
 | Travis-CI Build           | [![Build Status](https://travis-ci.com/UW-Hydro/pysumma.svg?branch=master)](https://travis-ci.org/UW-Hydro/pysumma) |
 
