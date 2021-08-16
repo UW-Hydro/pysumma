@@ -21,6 +21,7 @@ import sphinx_rtd_theme
 
 sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('../'))
+sys.path.insert(0, os.path.abspath('../tutorial'))
 
 # -- General configuration ------------------------------------------------
 
@@ -37,7 +38,8 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.viewcode',
               'sphinx.ext.napoleon',
               'sphinx.ext.autosummary',
-              'nbsphinx'
+              'nbsphinx',
+              'nbsphinx_multilink'
               ]
 
 extlinks = {'issue': ('https://github.com/UW-Hydro/pysumma/issues/%s', 'GH'),
@@ -168,3 +170,6 @@ texinfo_documents = [
      author, 'pysumma ', 'A python package for interfacing with SUMMA',
      'Hydrology'),
 ]
+
+def setup(app):
+    app.add_css_file('wide_theme.css')
