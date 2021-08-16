@@ -78,23 +78,12 @@ Bugs
   will help you make the pull request if you are new to git
   (just ask on the issue).
 
-How to run pySUMMA on HydroShare
-================================
- (Link YouTube: https://www.youtube.com/watch?v=pL-LNd474Tw)
- 1) log in HydoShare(https://www.hydroshare.org)
- 2) Start CUAHSI JupyterHub from APPS menu on HydroShare(https://www.hydroshare.org/apps/)
- 3) Open "Welcome.ipynb" to download pySUMMA resources from HydroShare
-  - run the code "1.How to connect with HydroShare"
-  - change the code from "resid = os.environ['HS_RES_ID']" to "resid = 'c1bb4a12bff44bf08c5958cba7947348'".
- 4) You can see the list of Jupyter Notebooks and click one of Jupyter Notebook.
- 5) Run one of Jupyter Notebooks.
-
 Sitemap
 =======
 .. toctree::
     :maxdepth: 3
 
-    basic_usage
     configuration
+    tutorials
     plotting
     api

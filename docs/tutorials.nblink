@@ -1,0 +1,7 @@
+
+[
+  { "path": "../tutorial/1_introduction_to_pysumma.ipynb" },
+  { "path": "../tutorial/2_building_ensembles.ipynb" },
+  { "path": "../tutorial/3_parallelizing_distributed_simulations.ipynb" },
+  { "path": "../tutorial/4_simple_calibration.ipynb" }
+]
