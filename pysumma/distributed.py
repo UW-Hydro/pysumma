@@ -168,6 +168,20 @@ class Distributed(object):
         for s in simulations:
             self.simulations[s.run_suffix] = s
 
+    def summary(self):
+        """
+        Show the user information about ensemble status
+        """
+        success, error, other = [], [], []
+        for n, s in self.simulations.items():
+            if s.status == 'Success':
+                success.append(n)
+            elif s.status == 'Error':
+                error.append(n)
+            else:
+                other.append(n)
+        return {'Success': success, 'Error': error, 'Other': other}
+
     def merge_output(self):
         out_ds = [s.output for n, s in self.simulations.items()]
         hru_vars = [] # variables that have hru dimension
@@ -184,6 +198,13 @@ class Distributed(object):
 
         merged_ds = xr.merge([hru_merged, gru_merged])
         return merged_ds
+
+    def open_output(self):
+        """
+        Open all of the output datasets from the ensembe and
+        return as a dictionary of datasets
+        """
+        return {n: s.output for n, s in self.simulations.items()}
 
     def map(self, fun, args, include_sims=True, monitor=True):
         for i, (n, s) in enumerate(self.simulations.items()):
