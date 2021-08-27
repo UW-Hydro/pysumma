@@ -304,7 +304,7 @@ class Simulation():
 
     def start(self, run_option='local',  run_suffix='pysumma_run', processes=1,
               prerun_cmds=[], startGRU=None, countGRU=None, iHRU=None,
-              freq_restart=None, write_config=True,update_manager=False, progress=None, **kwargs):
+              freq_restart=None, write_config=True,write_manager=False, progress=None, **kwargs):
         """
         Run a SUMMA simulation without halting. Most likely this should
         not be used. Use the ``run`` method for most common use cases.
@@ -315,7 +315,7 @@ class Simulation():
         self.run_suffix = run_suffix
         if write_config:
             self._write_configuration(name=run_suffix)
-        if update_manager:
+        if write_manager:
             self._write_file_manager()
         if run_option == 'local':
             self._run_local(run_suffix, processes, prerun_cmds,
@@ -329,7 +329,7 @@ class Simulation():
 
     def run(self, run_option='local',  run_suffix='pysumma_run', processes=1,
             prerun_cmds=None, startGRU=None, countGRU=None, iHRU=None,
-            freq_restart=None, write_config=True,update_manager=False,progress=None, **kwargs):
+            freq_restart=None, write_config=True,write_manager=False,progress=None, **kwargs):
         """
         Run a SUMMA simulation and halt until completion or error.
 
@@ -365,7 +365,7 @@ class Simulation():
             hourly output.
         """
         self.start(run_option, run_suffix, processes, prerun_cmds,
-                   startGRU, countGRU, iHRU, freq_restart,write_config, update_manager, progress, **kwargs)
+                   startGRU, countGRU, iHRU, freq_restart,write_config, write_manager, progress, **kwargs)
         self.monitor()
 
     def monitor(self):
@@ -458,7 +458,6 @@ class Simulation():
             f.writelines(self.vegparm)
 
     def _write_file_manager(self, name=''):
-
         self.manager.write(path=self.config_path.parent)
 
     def get_forcing_data_list(self) -> List[xr.Dataset]:
