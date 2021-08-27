@@ -139,7 +139,9 @@ class Ensemble(object):
         return {n: s.output for n, s in self.simulations.items()}
 
 
-    def start(self, run_option: str='local', prerun_cmds: list=None):
+    def start(self, run_option: str='local',  run_suffix: str='',
+              prerun_cmds: list=None, freq_restart: str=None,
+              write_config: bool=True,update_manager: bool=False):
         """
         Start running the ensemble members.
 
@@ -154,9 +156,11 @@ class Ensemble(object):
             # Sleep calls are to ensure writeout happens
             config = self.configuration[n]
             self.submissions.append(self._client.submit(
-                _submit, s, n, run_option, prerun_cmds, config))
+                _submit, s, n, run_option, run_suffix, prerun_cmds, freq_restart,write_config,update_manager,config))
 
-    def run(self, run_option: str='local', prerun_cmds=None, monitor: bool=True):
+    def run(self, run_option: str='local', run_suffix: str='',
+              prerun_cmds: list=None, freq_restart: str=None, write_config: bool=True,
+              update_manager: bool=False, monitor: bool=True):
         """
         Run the ensemble
 
@@ -169,7 +173,7 @@ class Ensemble(object):
         monitor:
             Whether to halt operation until runs are complete
         """
-        self.start(run_option, prerun_cmds)
+        self.start(run_option, run_suffix, prerun_cmds, freq_restart, write_config, update_manager)
         if monitor:
             return self.monitor()
         else:
@@ -194,8 +198,10 @@ class Ensemble(object):
         Halt computation until submitted simulations are complete
         """
         simulations = self._client.gather(self.submissions)
-        for s in simulations:
-            self.simulations[s.run_suffix] = s
+        names = [n for n,s in self.simulations.items()]
+
+        for s,name in zip(simulations,names):
+            self.simulations[name] = s
 
     def summary(self):
         """
@@ -211,8 +217,9 @@ class Ensemble(object):
                 other.append(n)
         return {'Success': success, 'Error': error, 'Other': other}
 
-    def rerun_failed(self, run_option: str='local', prerun_cmds=None,
-                     monitor: bool=True):
+    def rerun_failed(self, run_option: str='local', run_suffix: str='',
+              prerun_cmds: list=None, freq_restart: str=None, write_config: bool=True,
+              update_manager: bool=False, monitor: bool=True):
         """
         Try to re-run failed simulations.
 
@@ -232,18 +239,19 @@ class Ensemble(object):
             s = self.simulations[n]
             s.reset()
             self.submissions.append(self._client.submit(
-                _submit, s, n, run_option, prerun_cmds, config))
+                _submit, s, n, run_option, run_suffix, prerun_cmds, freq_restart,write_config,update_manager, config))
         if monitor:
             return self.monitor()
         else:
             return True
 
-
-def _submit(s: Simulation, name: str, run_option: str, prerun_cmds: List,
-            config: Dict, **kwargs):
+def _submit(s: Simulation, name: str, run_option: str,  run_suffix: str,
+              prerun_cmds: list, freq_restart: str,write_config: bool, update_manager: bool,config: Dict, **kwargs):
     s.initialize()
     s.apply_config(config)
-    s.run(run_option, run_suffix=name, prerun_cmds=prerun_cmds, freq_restart='e')
+    s._write_file_manager()
+    s.run(run_option, run_suffix=run_suffix, freq_restart=freq_restart,
+          write_config=write_config,update_manager=update_manager)
     s.process = None
     return s
 
