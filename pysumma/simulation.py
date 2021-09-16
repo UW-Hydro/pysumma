@@ -304,7 +304,8 @@ class Simulation():
 
     def start(self, run_option='local',  run_suffix='pysumma_run', processes=1,
               prerun_cmds=[], startGRU=None, countGRU=None, iHRU=None,
-              freq_restart=None, write_config=True,write_manager=False, progress=None, **kwargs):
+              freq_restart=None, write_config=True,write_manager=False,
+              progress=None, **kwargs):
         """
         Run a SUMMA simulation without halting. Most likely this should
         not be used. Use the ``run`` method for most common use cases.
@@ -329,7 +330,8 @@ class Simulation():
 
     def run(self, run_option='local',  run_suffix='pysumma_run', processes=1,
             prerun_cmds=None, startGRU=None, countGRU=None, iHRU=None,
-            freq_restart=None, write_config=True,write_manager=False,progress=None, **kwargs):
+            freq_restart=None, write_config=True,write_manager=False,
+            progress=None, **kwargs):
         """
         Run a SUMMA simulation and halt until completion or error.
 
@@ -365,7 +367,8 @@ class Simulation():
             hourly output.
         """
         self.start(run_option, run_suffix, processes, prerun_cmds,
-                   startGRU, countGRU, iHRU, freq_restart,write_config, write_manager, progress, **kwargs)
+                   startGRU, countGRU, iHRU, freq_restart,write_config,
+                   write_manager, progress, **kwargs)
         self.monitor()
 
     def monitor(self):
