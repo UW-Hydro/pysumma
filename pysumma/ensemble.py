@@ -92,8 +92,8 @@ class Ensemble(object):
                 decision_dims[k] = v
             for k, v in conf.get('file_manager', {}).items():
                 manager_dims[k] = v
-            #for k, v in conf.get('parameters', {}).items():
-            #    parameter_dims[k] = v
+            for k, v in conf.get('parameters', {}).items():
+                parameter_dims[k] = v
             for k, v in conf.get('trial_parameters', {}).items():
                 parameter_dims[k] = v
         return {'decisions': decision_dims,
@@ -133,13 +133,15 @@ class Ensemble(object):
 
     def open_output(self):
         """
-        Open all of the output datasets from the ensembe and
+        Open all of the output datasets from the ensemble and
         return as a dictionary of datasets
         """
         return {n: s.output for n, s in self.simulations.items()}
 
 
-    def start(self, run_option: str='local', prerun_cmds: list=None):
+    def start(self, run_option: str='local',  run_suffix: str='',
+              prerun_cmds: list=None, freq_restart: str=None,
+              write_config: bool=True,write_manager: bool=False):
         """
         Start running the ensemble members.
 
@@ -154,9 +156,13 @@ class Ensemble(object):
             # Sleep calls are to ensure writeout happens
             config = self.configuration[n]
             self.submissions.append(self._client.submit(
-                _submit, s, n, run_option, prerun_cmds, config))
+                _submit, s, n, run_option,
+                run_suffix, prerun_cmds, freq_restart,
+                write_config,write_manager,config))
 
-    def run(self, run_option: str='local', prerun_cmds=None, monitor: bool=True):
+    def run(self, run_option: str='local', run_suffix: str='',
+            prerun_cmds: list=None, freq_restart: str=None, write_config: bool=True,
+            write_manager: bool=False, monitor: bool=True):
         """
         Run the ensemble
 
@@ -169,7 +175,8 @@ class Ensemble(object):
         monitor:
             Whether to halt operation until runs are complete
         """
-        self.start(run_option, prerun_cmds)
+        self.start(run_option, run_suffix, prerun_cmds,
+                   freq_restart, write_config, write_manager)
         if monitor:
             return self.monitor()
         else:
@@ -191,11 +198,15 @@ class Ensemble(object):
 
     def monitor(self):
         """
-        Halt computation until submitted simulations are complete
+        Halt computation until submitted simulations are complete.
+        Update submission name from config.
+
         """
         simulations = self._client.gather(self.submissions)
-        for s in simulations:
-            self.simulations[s.run_suffix] = s
+        names = self.simulations.keys()
+
+        for s,name in zip(simulations,names):
+            self.simulations[name] = s
 
     def summary(self):
         """
@@ -211,8 +222,9 @@ class Ensemble(object):
                 other.append(n)
         return {'Success': success, 'Error': error, 'Other': other}
 
-    def rerun_failed(self, run_option: str='local', prerun_cmds=None,
-                     monitor: bool=True):
+    def rerun_failed(self, run_option: str='local', run_suffix: str='',
+              prerun_cmds: list=None, freq_restart: str=None, write_config: bool=True,
+              write_manager: bool=False, monitor: bool=True):
         """
         Try to re-run failed simulations.
 
@@ -232,18 +244,27 @@ class Ensemble(object):
             s = self.simulations[n]
             s.reset()
             self.submissions.append(self._client.submit(
-                _submit, s, n, run_option, prerun_cmds, config))
+                _submit, s, n, run_option, run_suffix,
+                prerun_cmds, freq_restart,write_config,
+                write_manager, config))
+
         if monitor:
             return self.monitor()
         else:
             return True
 
+def _submit(s: Simulation, name: str, run_option: str,  run_suffix: str,
+            prerun_cmds: list, freq_restart: str,write_config: bool,
+            write_manager: bool,config: Dict, **kwargs):
+    """
+    Run simulation objects
+    """
 
-def _submit(s: Simulation, name: str, run_option: str, prerun_cmds: List,
-            config: Dict, **kwargs):
     s.initialize()
     s.apply_config(config)
-    s.run(run_option, run_suffix=name, prerun_cmds=prerun_cmds, freq_restart='e')
+
+    s.run(run_option, run_suffix=run_suffix, freq_restart=freq_restart,
+          write_config=write_config,write_manager=write_manager)
     s.process = None
     return s
 
