@@ -18,6 +18,9 @@ class BaseOption(object):
     def __str__(self):
         return "{} : {}".format(self.name, self.value)
 
+    def _repr_html_(self):
+        return '<code>' + str(self).replace("\n", "<br />") + '</code>'
+
     def __eq__(self, other):
         if isinstance(other, Number) or isinstance(other, str):
             return self.value[0] == other
@@ -223,3 +226,6 @@ class OptionContainer(object):
                 object.__setitem__(self, name, value)
         except AttributeError:
             object.__setitem__(self, name, value)
+
+    def _repr_html_(self):
+        return '<code>' + str(self).replace("\n", "<br />") + '</code>'

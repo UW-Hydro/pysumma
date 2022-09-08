@@ -22,9 +22,10 @@ setup(name='pysumma',
           'pytest',
           'matplotlib',
           'pandas',
-          'hs_restclient'
+          'hs_restclient',
+          'nbsphinx'
           ],
-       extras_require={'plotting': [
+      extras_require={'plotting': [
           'geopandas',
           'fiona',
           'cartopy',

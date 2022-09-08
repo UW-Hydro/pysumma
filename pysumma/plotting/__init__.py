@@ -4,5 +4,5 @@ from .plot import *
 from .spatial import *
 from .hovmoller import hovmoller
 from .timeseries import *
-from .waterbalance import *
-from .energybalance import *
+from .water_balance import *
+from .energy_balance import *

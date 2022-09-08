@@ -108,7 +108,10 @@ class FileManager(OptionContainer):
 
     @property
     def initial_conditions(self):
-        p1 = self.get_value('settingsPath')
+        if self.get_value('statePath'):
+            p1 = self.get_value('statePath')
+        else:
+            p1 = self.get_value('settingsPath')
         p2 = self.get_value('initConditionFile')
         with xr.open_dataset(p1 + p2) as self._init_cond:
         	self._init_cond.load()

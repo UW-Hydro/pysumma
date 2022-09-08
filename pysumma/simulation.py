@@ -103,6 +103,7 @@ class Simulation():
             example might be:
 
             ::
+
             config = {
                 'file_manager': '/home/user/cool_setup/file_manager_new.txt',
                 'decisions': {'snowLayers': 'CLM_2010'},
@@ -113,6 +114,8 @@ class Simulation():
         """
         if 'file_manager' in config:
             self.manager_path = Path(os.path.abspath(config['file_manager']))
+        for k, v in config.get('manager', {}).items():
+            self.manager.set_option(k, v)
         for k, v in config.get('decisions', {}).items():
             self.decisions.set_option(k, v)
         for k, v in config.get('parameters', {}).items():
@@ -150,7 +153,7 @@ class Simulation():
                            'io/en/latest/input_output/SUMMA_input/#attribute-and-',
                            'parameter-files for more information', e)
 
-    def assign_trial_params(self, name, data, dim='hru', create=True):
+    def assign_trial_params(self, name: str, data: np.array, dim='hru', create=True):
         """
         Assign new data to the ``spatial_params`` dataset.
 
@@ -177,7 +180,36 @@ class Simulation():
                            'io/en/latest/input_output/SUMMA_input/#attribute-and-',
                            'parameter-files for more information', e)
 
+    def assign_forcing_file(self, name: str, data: xr.Dataset):
+        """
+        Assign a new forcing dataset, writing out the data and updating
+        the forcing file list and file manager
 
+        Parameters
+        ----------
+        name: str
+            The name of the new forcing file dataset
+        data: xr.Dataset
+            The new forcing dataset
+        """
+        # Write out the new forcing data & update the force file list
+        if not name.endswith('.nc'):
+            name = f'{name}.nc'
+        current_ffile_dirpath = self.force_file_list.prefix
+        new_force_file =os.sep.join([current_ffile_dirpath, name])
+        data.to_netcdf(new_force_file)
+        new_force_file_list = f'{name[0:-3]}_force_list.txt'
+        # Update the file manager
+        new_file_manager = f'{str(self.manager_path)[0:-4]}_{name[0:-3]}.txt'
+        fm = self.manager
+        with open(f'{fm["settingsPath"].value}/{new_force_file_list}', 'w') as f:
+            f.write(f"'{name}'")
+        fm['forcingListFile'].value = new_force_file_list
+        fm.file_name = new_file_manager
+        fm.write()
+        # Update the simulation object with the new file manager
+        self.manager_path = Path(os.path.abspath(os.path.realpath(fm.file_name)))
+        self.initialize()
 
     def create_backup(self):
         self.backup = {}
@@ -270,9 +302,10 @@ class Simulation():
                                         stderr=subprocess.PIPE, shell=True)
         self.status = 'Running'
 
-    def start(self, run_option,  run_suffix='pysumma_run', processes=1,
+    def start(self, run_option='local',  run_suffix='pysumma_run', processes=1,
               prerun_cmds=[], startGRU=None, countGRU=None, iHRU=None,
-              freq_restart=None, progress=None, **kwargs):
+              freq_restart=None, write_config=True,write_manager=False,
+              progress=None, **kwargs):
         """
         Run a SUMMA simulation without halting. Most likely this should
         not be used. Use the ``run`` method for most common use cases.
@@ -281,7 +314,10 @@ class Simulation():
         if not prerun_cmds:
             prerun_cmds = []
         self.run_suffix = run_suffix
-        self._write_configuration(name=run_suffix)
+        if write_config:
+            self._write_configuration(name=run_suffix)
+        if write_manager:
+            self._write_file_manager()
         if run_option == 'local':
             self._run_local(run_suffix, processes, prerun_cmds,
                             startGRU, countGRU, iHRU, freq_restart, progress)
@@ -292,9 +328,10 @@ class Simulation():
             raise NotImplementedError('Invalid runtime given! '
                                       'Valid options: local, docker')
 
-    def run(self, run_option,  run_suffix='pysumma_run', processes=1,
+    def run(self, run_option='local',  run_suffix='pysumma_run', processes=1,
             prerun_cmds=None, startGRU=None, countGRU=None, iHRU=None,
-            freq_restart=None, progress=None, **kwargs):
+            freq_restart=None, write_config=True,write_manager=False,
+            progress=None, **kwargs):
         """
         Run a SUMMA simulation and halt until completion or error.
 
@@ -330,7 +367,8 @@ class Simulation():
             hourly output.
         """
         self.start(run_option, run_suffix, processes, prerun_cmds,
-                   startGRU, countGRU, iHRU, freq_restart, progress, **kwargs)
+                   startGRU, countGRU, iHRU, freq_restart,write_config,
+                   write_manager, progress, **kwargs)
         self.monitor()
 
     def monitor(self):
@@ -363,7 +401,7 @@ class Simulation():
 
         return self.status
 
-    def spinup(self, run_option, period='1Y', niters=10, run_suffix='pysumma_spinup', **kwargs):
+    def spinup(self, run_option='local', period='1Y', niters=10, run_suffix='pysumma_spinup', **kwargs):
         # open forcings
         spinup_force_name = f'{run_suffix}.nc'
         with xr.open_mfdataset(self.force_file_list.forcing_paths) as ds:
@@ -421,6 +459,12 @@ class Simulation():
             f.writelines(self.soilparm)
         with open(settings_path / self.manager['vegTableFile'].value, 'w+') as f:
             f.writelines(self.vegparm)
+
+    def _write_file_manager(self, name=''):
+        self.manager.write(path=self.config_path.parent)
+
+    def get_forcing_data_list(self) -> List[xr.Dataset]:
+        return self.force_file_list.open_forcing_data()
 
     def get_output_files(self) -> List[str]:
         """Find output files given the ``stdout`` generated from a run"""

@@ -1,0 +1,28 @@
+name: pysumma
+channels:
+  - conda-forge
+dependencies:
+  - python>=3.7
+  - xarray>=0.15.0
+  - pandas
+  - netcdf4>=1.2.5
+  - numpy>=1.11.2
+  - dask
+  - distributed
+  - toolz
+  - pytest
+  - fiona
+  - cartopy
+  - shapely
+  - seaborn
+  - matplotlib
+  - geopandas
+  - pandas
+  - jupyter
+  - pip
+  - summa>=3.0.3
+  - pysumma>=3.0.3
+  - mizuroute
+  - pip:
+    - hs_restclient
+    - nbsphinx

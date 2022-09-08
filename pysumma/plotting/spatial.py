@@ -1,5 +1,3 @@
-'''Spatial plotting for SUMMA output'''
-
 import shapely
 import numpy as np
 import cartopy.crs as ccrs
@@ -34,14 +32,49 @@ def gen_patches(da, geodf, robust=False):
     return patches
 
 
-def spatial(data_array, geodf, simplify_level=500, proj=ccrs.Mercator(),
-            robust=False, colorbar=True, colormap='viridis'):
-    '''Make a spatial plot'''
+def spatial(data_array, geodf, ax=None, simplify_level=500, proj=ccrs.Mercator(),
+            robust=False, add_colorbar=True, colormap='viridis'):
+    """Make a spatial plot. Example usage:
+
+    ::
+
+        import pysumma.plotting as psp
+        import geopandas as gpd
+
+        gdf = gpd.GeoDataFrame.from_file(shapefile)
+        psp.spatial(ds[scalarTotalSoilLiq'].mean(dim='time'), gdf)
+
+    Parameters
+    ----------
+    data_array: xr.DataArray
+        The variable to plot
+    geodf: gpd.GeoDataFrame
+        The GeoDataFrame containing the geometries to plot on
+    ax: Axes
+        The axis to draw on. If none are provided one will be
+        created
+    simplify_level: Int, default=500
+        The simplification level for the geometries. Higher values
+        will simplify further. This can help with speed for large domains
+        or overly complicated geometries.
+    proj: crs.Projection, default=ccrs.Mercator
+        The projection to draw onto
+    robust: boolean or List[float], default=False
+        If true, will clip to 2nd and 98th percentiles.
+        If given as a list of integers will clip to the range given.
+        This can help if you have outliers in your dataset
+    add_colorbar: boolean, default=True
+        Whether to add a colorbar
+    colormap: string, default='viridis'
+        The colormap to draw with
+    """
     # Preprocess the data
     geodf_crs = geodf.to_crs(crs=proj.proj4_params)
     patches = gen_patches(data_array, geodf_crs, robust)
     # Map plotting
-    fig, ax = plt.subplots(nrows=1, ncols=1, subplot_kw=dict(projection=proj))
+    if not ax:
+        fig, ax = plt.subplots(nrows=1, ncols=1, subplot_kw=dict(projection=proj))
+
     ax.add_collection(patches)
     add_map_features(ax)
     ax.autoscale_view()
@@ -54,11 +87,11 @@ def spatial(data_array, geodf, simplify_level=500, proj=ccrs.Mercator(),
     else:
         minval, maxval = np.min(data_array.values), np.max(data_array.values)
 
-    if colorbar:
+    if add_colorbar:
         sm = plt.cm.ScalarMappable(norm=plt.Normalize(vmin=minval, vmax=maxval))
         sm._A = []
-        cax = fig.add_axes([0.92, 0.2, 0.015, 0.6])
+        cax = plt.gcf().add_axes([0.92, 0.2, 0.015, 0.6])
         cax.tick_params()
         cb = plt.colorbar(sm, cax=cax)
         cb.set_label(data_array.name)
-    return fig, ax
+    return ax

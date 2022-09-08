@@ -19,6 +19,10 @@ def _determine_suffix(ds):
                 return suffix
             else:
                 return var.replace(EB_COMPONENTS[0], '_')
+    else:
+        raise KeyError('Could not locate all variables necessary '
+                       'for calculating energy balances! The '
+                       f'required variables are {", ".join(EB_COMPONENTS)}')
 
 
 def calc_monthly_sum(da: xr.DataArray, year: int) -> xr.DataArray:
@@ -86,7 +90,7 @@ def seasonal_energy_balance(ds: xr.Dataset, year: int,
             calc_seasonal_sum(ds[f'scalarNetRadiation{suffix}'], year))
     wb_seasonal[f'scalarLatHeatTotal{suffix}'].values = (
             calc_seasonal_sum(ds[f'scalarLatHeatTotal{suffix}'], year))
-    wb_seasonal[f'salarSenHeatTotal{suffix}'].values = (
+    wb_seasonal[f'scalarSenHeatTotal{suffix}'].values = (
             calc_seasonal_sum(ds[f'scalarSenHeatTotal{suffix}'], year))
     wb_seasonal[f'scalarCanairNetNrgFlux{suffix}'].values = (
             calc_seasonal_sum(-ds[f'scalarCanairNetNrgFlux{suffix}'], year))

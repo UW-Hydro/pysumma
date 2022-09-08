@@ -1,0 +1,54 @@
+! ---------
+! model variables
+! ---------
+! Format:
+! varname | timestep | instant | sum | mean | var | min | max | mode
+!
+hruId                                | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0
+pptrate                              | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+airtemp                              | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarRainPlusMelt                   | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarSWE                            | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarThroughfallSnow                | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarThroughfallRain                | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarSnowSublimation                | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarInfiltration                   | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarExfiltration                   | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarSurfaceRunoff                  | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarSurfaceTemp                    | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarSenHeatTotal                   | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarLatHeatTotal                   | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+averageInstantRunoff                 | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+averageRoutedRunoff                  | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarCanopySublimation              | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarGroundEvaporation              | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarCanopyEvaporation              | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarTotalRunoff                    | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarSoilBaseflow                   | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarAquiferBaseflow                | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarTotalSoilLiq                   | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarTotalSoilIce                   | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarCanopyIce                      | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarCanopyLiq                      | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarCanopyTemp                     | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarCanairTemp                     | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarCanopyTranspiration            | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarLatHeatGround                  | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarLatHeatCanopyEvap              | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarLatHeatCanopyTrans             | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarLWNetUbound                    | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+SWRadAtm                             | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+LWRadAtm                             | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarCanairNetNrgFlux               | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarCanopyNetNrgFlux               | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarGroundNetNrgFlux               | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarNetRadiation                   | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+scalarSnowDepth                      | 1 | 0 | 0 | 1 | 0 | 0 | 0 | 0
+scalarSnowAlbedo                     | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0
+mLayerTemp                           | 1 | 0 | 0 | 1 | 0 | 0 | 0 | 0
+mLayerHeight                         | 1 | 0 | 0 | 1 | 0 | 0 | 0 | 0
+iLayerHeight                         | 1 | 0 | 0 | 1 | 0 | 0 | 0 | 0
+mLayerDepth                          | 1 | 0 | 0 | 1 | 0 | 0 | 0 | 0
+scalarCanopyWat                      | 1 | 0 | 0 | 1 | 0 | 0 | 0 | 0
+scalarCanopySnowUnloading            | 1 | 0 | 0 | 1 | 0 | 0 | 0 | 0
+windspd                              | 1 | 0 | 0 | 1 | 0 | 0 | 0 | 0

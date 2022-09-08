@@ -125,7 +125,7 @@ class Distributed(object):
         return [{'startGRU': start, 'countGRU': stop - start}
                 for start, stop in chunks]
 
-    def start(self, run_option: str, prerun_cmds: List=None):
+    def start(self, run_option: str='local', prerun_cmds: List=None):
         """
         Start running the ensemble members.
 
@@ -141,7 +141,7 @@ class Distributed(object):
             self.submissions.append(self._client.submit(
                 _submit, sim, name, run_option, prerun_cmds, kwargs))
 
-    def run(self, run_option: str, prerun_cmds=None, monitor: bool=True):
+    def run(self, run_option: str='local', prerun_cmds=None, monitor: bool=True):
         """
         Run the ensemble
 
@@ -168,6 +168,20 @@ class Distributed(object):
         for s in simulations:
             self.simulations[s.run_suffix] = s
 
+    def summary(self):
+        """
+        Show the user information about ensemble status
+        """
+        success, error, other = [], [], []
+        for n, s in self.simulations.items():
+            if s.status == 'Success':
+                success.append(n)
+            elif s.status == 'Error':
+                error.append(n)
+            else:
+                other.append(n)
+        return {'Success': success, 'Error': error, 'Other': other}
+
     def merge_output(self):
         out_ds = [s.output for n, s in self.simulations.items()]
         hru_vars = [] # variables that have hru dimension
@@ -182,8 +196,15 @@ class Distributed(object):
         hru_merged = xr.concat(hru_ds, dim='hru')
         gru_merged = xr.concat(gru_ds, dim='gru')
 
-        merged_ds = xr.merge([hru_merged, hru_merged])
+        merged_ds = xr.merge([hru_merged, gru_merged])
         return merged_ds
+
+    def open_output(self):
+        """
+        Open all of the output datasets from the ensembe and
+        return as a dictionary of datasets
+        """
+        return {n: s.output for n, s in self.simulations.items()}
 
     def map(self, fun, args, include_sims=True, monitor=True):
         for i, (n, s) in enumerate(self.simulations.items()):
