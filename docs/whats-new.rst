@@ -1,9 +1,9 @@
 What's new
 ===========
 
-.. _whats_new_develop
+.. _whats_new_3_1_0
 
-Develop version
+v3.1.0
 ---------------
 
 Enhancements
